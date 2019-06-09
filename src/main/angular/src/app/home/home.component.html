@@ -1,0 +1,16 @@
+<div class="emerse-home">
+    <div class="emerse-home-header">
+        <img src="assets/image/logo.png">
+        <span class="flex-fill"></span>
+        <h2>EMERSE Import Tool</h2>
+        <span class="flex-fill"></span>
+        <span style="min-width: 100px">
+            <a *ngIf="loginService.isAuthenticated()" mat-button
+                (click)="loginService.logout()">Logout</a>
+        </span>
+    </div>
+    <div class="emerse-home-panel">
+        <emerse-login *ngIf="!loginService.isAuthenticated()"></emerse-login>
+        <emerse-import *ngIf="loginService.isAuthenticated()"></emerse-import>
+    </div>
+</div>

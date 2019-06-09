@@ -1,0 +1,16 @@
+<div class="emerse-import-batch">
+    <div class="form-group">
+        <label for="file">Choose File to Import:</label>
+        <input type="file" id="file"
+               (change)="handleFileInput($event)">
+    </div>
+    <div class="text-danger" style="min-height: 50px">{{message}}</div>
+    <button [disabled]="!file" mat-raised-button color="accent"
+            (click)="indexFile()">
+        Index Patients
+    </button>
+    <button [disabled]="!file" mat-raised-button color="warn"
+            (click)="clear()">
+        Clear Patients
+    </button>
+</div>

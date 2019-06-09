@@ -1,0 +1,26 @@
+emerse-login {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.emerse-login-spacing {
+    width: 6em;
+}
+
+.emerse-login-credentials {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.emerse-login-credentials > div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 10px;
+}
+
+.emerse-login-credentials .text-danger {
+    min-height: 30px;
+}

@@ -1,0 +1,48 @@
+<div class="emerse-import-single">
+    <div class="emerse-import-single-search">
+        <span>Enter MRN of patient:</span>
+        <input type="text" [(ngModel)]="mrn" autofocus>
+        <button mat-raised-button color="accent"
+                [disabled]="!mrn"
+                (click)="search()">Search</button>
+        <button mat-raised-button color="warn"
+                [disabled]="!patient"
+                (click)="clear()">Clear</button>
+        <button mat-raised-button color="primary"
+                [disabled]="!patient"
+                (click)="index()">Index</button>
+    </div>
+    <div class="emerse-import-single-demographics">
+        <span *ngIf="!patient">
+            <span>Search for a patient to index.</span>
+        </span>
+        <span *ngIf="patient">
+            <span>{{patient.name}}</span>
+            <span>{{patient.mrn ? '#' + patient.mrn : null}}</span>
+            <span>{{patient.dob}}</span>
+            <span>{{patient.gender}}</span>
+        </span>
+    </div>
+    <div class="emerse-import-single-documents">
+        <as-split direction="horizontal">
+            <as-split-area>
+                <mat-action-list>
+                    <button mat-list-item *ngFor="let document of documents"
+                        (click)="documentSelected($event, document)">
+                        <div class="emerse-import-single-document">
+                            <span>{{document.date}}</span>
+                            <span>{{document.title}}</span>
+                        </div>
+                        <mat-divider></mat-divider>
+                    </button>
+                </mat-action-list>
+            </as-split-area>
+            <as-split-area>
+                <div *ngIf="htmlBody" [innerHTML]="htmlBody">
+                </div>
+                <div *ngIf="!htmlBody" [textContent]="textBody">
+                </div>
+            </as-split-area>
+        </as-split>
+    </div>
+</div>

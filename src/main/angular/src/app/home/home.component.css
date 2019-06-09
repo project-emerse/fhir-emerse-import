@@ -1,0 +1,32 @@
+.emerse-home {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.emerse-home-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    border-bottom: 1px solid gray;
+    padding-left: 10px;
+    background-color: lightgray;
+}
+
+.emerse-home-header > img {
+    max-height: 75px;
+}
+
+.emerse-home-panel {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.emerse-home-panel > *:first-child {
+    flex: 1;
+}

@@ -1,0 +1,72 @@
+.emerse-import-single {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: absolute;
+    right: 0;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    overflow: hidden;
+}
+
+.emerse-import-single-documents {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+}
+
+.emerse-import-single-documents > * {
+    flex: 1;
+    border-top: 1px solid gray;
+}
+
+.emerse-import-single-documents > * {
+    max-height: 100%;
+    overflow: auto;
+}
+
+.emerse-import-single-documents button[selected] {
+    background: lightblue!important;
+}
+
+.emerse-import-single-document {
+    display: flex;
+    flex-direction: row;
+}
+
+.emerse-import-single-document > *:first-child {
+    width: 100px;
+}
+
+.emerse-import-single-document > *:last-child {
+    flex: 1;
+}
+
+.emerse-import-single-demographics {
+    min-height: 50px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background-color: lightyellow;
+    padding: 5px;
+    border-top: 1px solid gray;
+}
+
+.emerse-import-single-demographics > span > span {
+    padding-left: 10px;
+}
+
+.emerse-import-single-demographics > span > span:first-child {
+    font-weight: bold;
+}
+
+.emerse-import-single-search {
+    display: flex;
+    align-items: center;
+    padding: 5px;
+}
+
+.emerse-import-single-search > * {
+    margin-right: 10px;
+}

@@ -1,0 +1,31 @@
+<ng-container class="emerse-login">
+    <div class="emerse-login-credentials">
+        <div>
+            <span class="emerse-login-spacing"></span>
+            <h4>Please Login</h4>
+        </div>
+        <div>
+            <span class="emerse-login-spacing">Username:</span>
+            <input type="text" #usernameInput
+                   [(ngModel)]="username"
+                    (keyup.enter)="focus(passwordInput)">
+        </div>
+        <div>
+            <span class="emerse-login-spacing">Password:</span>
+            <input type="password" #passwordInput
+                   [(ngModel)]="password"
+                    (keyup.enter)="submit.disabled ? null : login()">
+        </div>
+        <div>
+            <span class="emerse-login-spacing"></span>
+            <button mat-raised-button color="accent" #submit
+                    [disabled]="!username || !password"
+                    (click)="login()">
+                Login
+            </button>
+        </div>
+        <div>
+            <span class="text-danger">{{message}}</span>
+        </div>
+    </div>
+</ng-container>
