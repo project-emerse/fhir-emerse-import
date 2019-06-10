@@ -1,4 +1,4 @@
-import { AppPage } from './app.po';
+import {AppPage} from './app.po';
 
 describe('disease-management-dashboard App', () => {
   let page: AppPage;

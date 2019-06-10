@@ -34,10 +34,13 @@
         <constructor-arg value="${fhir.server.root}" />
     </bean>
 
-    <bean id="solrClient"
-          class="edu.utah.kmm.emerse.SolrClientFactory"
-          factory-method="newSolrClient">
+    <bean id="solrService" class="edu.utah.kmm.emerse.solr.SolrService">
         <constructor-arg value="${solr.server.root}" />
     </bean>
 
+    <bean id="fhirService" class="edu.utah.kmm.emerse.fhir.FhirService" />
+
+    <bean id="databaseService" class="edu.utah.kmm.emerse.database.DatabaseService">
+        <constructor-arg ref="dataSource" />
+    </bean>
 </beans>
