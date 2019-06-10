@@ -1,8 +1,8 @@
 package edu.utah.kmm.emerse.database;
 
-import ca.uhn.fhir.model.dstu2.resource.Patient;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 

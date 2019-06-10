@@ -1,27 +1,11 @@
 import {Component, ViewEncapsulation} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
-import {Observable} from "rxjs";
-
-interface Document {
-
-    title: string;
-
-    body: string;
-
-    date: string;
-
-    isHtml: boolean;
-}
-
-interface Patient {
-    name: string;
-
-    mrn: string;
-
-    dob: string;
-
-    gender: string;
-}
+import {combineLatest, Observable} from "rxjs";
+import {FhirStu3Util, Identifier, Patient} from "@uukmm/ng-fhir-model/stu3";
+import {RestService} from "../../rest/rest.service";
+import {filter, switchMap} from "rxjs/operators";
+import {Document} from "../../model/document.model";
+import {PatientDemographics} from "../../model/patient-demographics.model";
 
 @Component({
     selector: 'emerse-import-single',
@@ -35,6 +19,8 @@ export class ImportSingleComponent {
 
     documents: Document[];
 
+    demographics: PatientDemographics;
+
     patient: Patient;
 
     htmlBody: string;
@@ -45,35 +31,45 @@ export class ImportSingleComponent {
 
     private target: any;
 
-    constructor(httpClient: HttpClient) {
+    constructor(
+        private readonly restService: RestService,
+        httpClient: HttpClient) {
         const result: Observable<string> = httpClient.get("assets/test/cda.html", {responseType: "text"});
         result.subscribe(html => this.fakeBody = html);
     }
 
     search(): void {
-        this.documents = [];
+        const patient: Observable<Patient> = this.restService.findPatient(this.mrn);
 
-        for (let i = 1; i < 20; i++) {
-            const title = `Clinical Summary #${i}`;
-            const date: string = new Date(new Date().getTime() - i * 10000000000).toLocaleDateString();
-            const body = this.fakeBody
-                .replace("@@title@@", title)
-                .replace("@@mrn@@", this.mrn)
-                .replace("@@date@@", date);
-            this.documents.push({
-                title,
-                date,
-                body,
-                isHtml: true
-            });
-        }
+        const documents: Observable<Document[]> = patient.pipe(
+            filter(patient => patient != null),
+            switchMap(patient => this.restService.getDocuments(patient.id))
+        );
 
-        this.patient = {
-            name: "EDWRUC Najnqm",
-            mrn: this.mrn,
-            dob: "11/14/1950",
-            gender: "Male"
+        combineLatest(patient, documents).subscribe(([patient, documents]) => {
+            this.extractDemographics(patient);
+            this.documents = documents;
+        });
+
+    }
+
+    private extractDemographics(patient: Patient): PatientDemographics {
+        const mrn: Identifier = FhirStu3Util.getIdentifier(patient, this.restService.getConfig("fhir.mrn.system"));
+
+        return {
+            name: FhirStu3Util.formatName(patient.name[0]),
+            mrn: mrn ? mrn.value : null,
+            dob: patient.birthDate.toString(),
+            gender: patient.gender
         }
+    }
+
+    private searchForPatient(mrn: string): Observable<Patient> {
+        return this.restService.findPatient(mrn);
+    }
+
+    private searchForDocuments(patient: Patient): any {
+
     }
 
     index(): void {
@@ -82,7 +78,7 @@ export class ImportSingleComponent {
 
     clear(): void {
         this.documents = null;
-        this.patient = null;
+        this.demographics = null;
         this.mrn = null;
     }
     documentSelected(event: any, document: Document): void {
@@ -96,4 +92,5 @@ export class ImportSingleComponent {
         this.target = event.currentTarget;
         this.target.setAttribute("selected", true)
     }
+
 }

@@ -1,6 +1,5 @@
 import {AfterViewInit, Component, ElementRef, ViewChild, ViewEncapsulation} from "@angular/core";
 import {LoginService} from "./login.service";
-import {element} from "protractor";
 
 @Component({
     selector: 'emerse-login',

@@ -1,14 +1,8 @@
 package edu.utah.kmm.emerse.fhir;
 
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu2.composite.AttachmentDt;
-import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu2.resource.Binary;
-import ca.uhn.fhir.model.dstu2.resource.Bundle;
-import ca.uhn.fhir.model.dstu2.resource.DocumentReference;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import edu.utah.kmm.emerse.model.DocumentContent;
+import org.hl7.fhir.dstu3.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -28,6 +22,10 @@ public class FhirService {
         this.mrnSystem = mrnSystem;
     }
 
+    public String getMrnSystem() {
+        return mrnSystem;
+    }
+
     public Patient getPatient(String mrn) {
         Bundle bundle = fhirClient.search()
             .forResource(Patient.class)
@@ -38,17 +36,20 @@ public class FhirService {
         return (Patient) bundle.getEntryFirstRep().getResource();
     }
 
-    public List<DocumentReference> getDocuments(Patient patient) {
-       List<DocumentReference> documents = new ArrayList<>();
-
-        Bundle bundle = fhirClient.search()
+    public Bundle getDocumentBundle(String patientId) {
+        return fhirClient.search()
                 .forResource(DocumentReference.class)
-                .where(DocumentReference.SUBJECT.hasId(patient.getId()))
+                .where(DocumentReference.SUBJECT.hasId(patientId))
                 .returnBundle(Bundle.class)
                 .execute();
+    }
 
-        for (Bundle.Entry entry: bundle.getEntry()) {
-            IResource resource = entry.getResource();
+    public List<DocumentReference> getDocuments(String patientId) {
+        List<DocumentReference> documents = new ArrayList<>();
+        Bundle bundle = getDocumentBundle(patientId);
+
+        for (Bundle.BundleEntryComponent entry: bundle.getEntry()) {
+            Resource resource = entry.getResource();
 
             if (resource instanceof DocumentReference) {
                 documents.add((DocumentReference) resource);
@@ -60,8 +61,8 @@ public class FhirService {
 
     public DocumentContent getDocumentContent(DocumentReference documentReference) {
         if (!documentReference.getContent().isEmpty()) {
-            DocumentReference.Content content = documentReference.getContentFirstRep();
-            AttachmentDt attachment = content.getAttachment();
+            DocumentReference.DocumentReferenceContentComponent content = documentReference.getContentFirstRep();
+            Attachment attachment = content.getAttachment();
 
             if (!attachment.getDataElement().isEmpty()) {
                 return new DocumentContent(attachment.getData(), attachment.getContentType());
@@ -77,7 +78,7 @@ public class FhirService {
     }
 
     public String getMRN(Patient patient) {
-        for (IdentifierDt identifier: patient.getIdentifier()) {
+        for (Identifier identifier: patient.getIdentifier()) {
             if (mrnSystem.equals(identifier.getSystem())) {
                 return identifier.getValue();
             }
@@ -86,7 +87,7 @@ public class FhirService {
         return null;
     }
 
-    public String serialize(IResource resource) {
+    public String serialize(Resource resource) {
         return resource == null ? null : fhirClient.getFhirContext().newJsonParser().encodeResourceToString(resource);
     }
 }

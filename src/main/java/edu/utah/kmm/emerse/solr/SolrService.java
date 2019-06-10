@@ -1,15 +1,16 @@
 package edu.utah.kmm.emerse.solr;
 
-import ca.uhn.fhir.model.dstu2.resource.DocumentReference;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
 import edu.utah.kmm.emerse.fhir.FhirService;
 import edu.utah.kmm.emerse.model.DocumentContent;
-import edu.utah.kmm.emerse.util.HTMLUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.impl.XMLResponseParser;
+import org.apache.solr.client.solrj.request.UpdateRequest;
+import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
+import org.hl7.fhir.dstu3.model.DocumentReference;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -23,10 +24,17 @@ public class SolrService {
 
     private final HttpSolrClient solrClient;
 
+    private final String username;
+
+    private final String password;
+
     @Autowired
     private FhirService fhirService;
 
-    public SolrService(String baseSolrUrl) {
+    public SolrService(String baseSolrUrl, String username, String password) {
+        this.username = username;
+        this.password = password;
+
         solrClient = new HttpSolrClient.Builder(baseSolrUrl)
                 .withResponseParser(new XMLResponseParser())
                 .allowCompression(true)
@@ -34,18 +42,19 @@ public class SolrService {
     }
 
     public void indexDocuments(Patient patient) {
-        List<DocumentReference> documents = fhirService.getDocuments(patient);
+        List<DocumentReference> documents = fhirService.getDocuments(patient.getId());
 
         for (DocumentReference document: documents) {
             indexDocument(patient, document);
          }
     }
 
-    public void indexDocument(Patient patient, DocumentReference documentReference) {
+    public UpdateResponse indexDocument(Patient patient, DocumentReference documentReference) {
         DocumentContent content = fhirService.getDocumentContent(documentReference);
 
         if (content == null) {
-            return;
+            log.warn("Document has no content: " + documentReference.getId());
+            return null;
         }
 
         SolrInputDocument document = new SolrInputDocument();
@@ -56,10 +65,13 @@ public class SolrService {
         document.addField("RPT_TEXT", content.getContent());
 
         try {
-            solrClient.add(document);
-            solrClient.commit();
+            UpdateRequest request = new UpdateRequest();
+            request.add(document);
+            request.setBasicAuthCredentials(username, password);
+            return request.process(solrClient);
         } catch (Exception e) {
-            log.error("Error indexing document", e);
+            log.error("Error indexing document: " + documentReference.getId(), e);
+            return null;
         }
     }
 

@@ -31,6 +31,8 @@
     "@angular/platform-server": "~7.2.0",
     "@angular/router": "~7.2.0",
     "@ngrx/entity": "~7.4.0",
+    "@uukmm/ng-fhir": "^1.0.0",
+    "@uukmm/ng-fhir-model": "^1.0.0",
     "angular-split": "^3.0.1",
     "bootstrap": "~4.3.0",
     "classlist.js": "^1.1.20150312",

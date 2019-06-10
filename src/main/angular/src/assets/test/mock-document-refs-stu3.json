@@ -1,0 +1,133 @@
+{
+  "resourceType": "Bundle",
+  "type": "searchset",
+  "total": 2,
+  "link": [
+    {
+      "relation": "self",
+      "url": "https://epiciccode1.med.utah.edu/Interconnect-KMM-CODE/api/FHIR/STU3/DocumentReference?patient=eTjzBZNCnRodfqMwwOxx6aw3"
+    }
+  ],
+  "entry": [
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://epiciccode1.med.utah.edu/Interconnect-KMM-CODE/api/FHIR/STU3/DocumentReference/eMstZpKV84VccHRQu7U5sZMDNuWXpOhqrGlw.saK46gA3"
+        }
+      ],
+      "fullUrl": "https://epiciccode1.med.utah.edu/Interconnect-KMM-CODE/api/FHIR/STU3/DocumentReference/eMstZpKV84VccHRQu7U5sZMDNuWXpOhqrGlw.saK46gA3",
+      "resource": {
+        "resourceType": "DocumentReference",
+        "id": "eMstZpKV84VccHRQu7U5sZMDNuWXpOhqrGlw.saK46gA3",
+        "status": "current",
+        "docStatus": "final",
+        "type": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "11506-3",
+              "display": "Progress Note"
+            },
+            {
+              "system": "urn:oid:1.2.840.114350.1.13.90.3.7.4.737880.5010",
+              "code": "1",
+              "display": "Progress Notes"
+            }
+          ],
+          "text": "Progress Notes"
+        },
+        "subject": {
+          "reference": "https://epiciccode1.med.utah.edu/Interconnect-KMM-CODE/api/FHIR/STU3/Patient/eTjzBZNCnRodfqMwwOxx6aw3",
+          "display": "EDWRUC X Najnqm"
+        },
+        "created": "2019-05-26T01:59:00Z",
+        "indexed": "2019-05-26T01:59:00Z",
+        "author": [
+          {
+            "reference": "https://epiciccode1.med.utah.edu/Interconnect-KMM-CODE/api/FHIR/STU3/Practitioner/egmz1PfSfC0iWcwow26Uco4TAn1qQVn.2Ec-jsTSGOt03",
+            "display": "Sakaguchi, Farrant Hiroshi, MD"
+          }
+        ],
+        "content": [
+          {
+            "attachment": {
+              "url": "https://epiciccode1.med.utah.edu/Interconnect-KMM-CODE/api/FHIR/STU3/Binary/eTWGf4XxNPPM35rQ95I71P57AemYc5tAdLFmM1v69WKc3"
+            }
+          }
+        ],
+        "context": {
+          "encounter": {
+            "reference": "https://epiciccode1.med.utah.edu/Interconnect-KMM-CODE/api/FHIR/STU3/Encounter/eaSzTAUbxKzxn8GKBXc0KzA3"
+          },
+          "period": {
+            "start": "2019-01-18T17:00:00Z"
+          }
+        }
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://epiciccode1.med.utah.edu/Interconnect-KMM-CODE/api/FHIR/STU3/DocumentReference/emvHr7HqiqDk5jImLHpHcxgEwxJCrOjv37JHo0sp6MSI3"
+        }
+      ],
+      "fullUrl": "https://epiciccode1.med.utah.edu/Interconnect-KMM-CODE/api/FHIR/STU3/DocumentReference/emvHr7HqiqDk5jImLHpHcxgEwxJCrOjv37JHo0sp6MSI3",
+      "resource": {
+        "resourceType": "DocumentReference",
+        "id": "emvHr7HqiqDk5jImLHpHcxgEwxJCrOjv37JHo0sp6MSI3",
+        "status": "current",
+        "docStatus": "final",
+        "type": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "34109-9",
+              "display": "Note"
+            },
+            {
+              "system": "urn:oid:1.2.840.114350.1.13.90.3.7.4.737880.5010",
+              "code": "100084",
+              "display": "Nursing Notes"
+            }
+          ],
+          "text": "Nursing Notes"
+        },
+        "subject": {
+          "reference": "https://epiciccode1.med.utah.edu/Interconnect-KMM-CODE/api/FHIR/STU3/Patient/eTjzBZNCnRodfqMwwOxx6aw3",
+          "display": "EDWRUC X Najnqm"
+        },
+        "created": "2019-05-26T01:57:25Z",
+        "indexed": "2019-05-26T01:57:25Z",
+        "author": [
+          {
+            "reference": "https://epiciccode1.med.utah.edu/Interconnect-KMM-CODE/api/FHIR/STU3/Practitioner/egmz1PfSfC0iWcwow26Uco4TAn1qQVn.2Ec-jsTSGOt03",
+            "display": "Sakaguchi, Farrant Hiroshi, MD"
+          }
+        ],
+        "content": [
+          {
+            "attachment": {
+              "url": "https://epiciccode1.med.utah.edu/Interconnect-KMM-CODE/api/FHIR/STU3/Binary/efmhpXRvA-p8L-ZY3-lUKGbv-TbdDxdjUOrW7v0SXCSw3"
+            }
+          }
+        ],
+        "context": {
+          "encounter": {
+            "reference": "https://epiciccode1.med.utah.edu/Interconnect-KMM-CODE/api/FHIR/STU3/Encounter/eaSzTAUbxKzxn8GKBXc0KzA3"
+          },
+          "period": {
+            "start": "2019-01-18T17:00:00Z"
+          }
+        }
+      },
+      "search": {
+        "mode": "match"
+      }
+    }
+  ]
+}

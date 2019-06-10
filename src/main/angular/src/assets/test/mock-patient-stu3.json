@@ -1,0 +1,112 @@
+{
+  "resourceType": "Patient",
+  "id": "eTjzBZNCnRodfqMwwOxx6aw3",
+  "identifier": [
+    {
+      "use": "usual",
+      "system": "urn:oid:1.2.840.114350.1.13.90.3.7.5.737384.0",
+      "value": "3290"
+    },
+    {
+      "use": "usual",
+      "system": "urn:oid:1.2.840.114350.1.13.90.3.7.5.737384.2",
+      "value": "3291"
+    },
+    {
+      "use": "usual",
+      "system": "urn:oid:1.2.840.114350.1.13.90.3.7.5.737384.1",
+      "value": "3292"
+    },
+    {
+      "use": "usual",
+      "system": "urn:oid:1.2.840.114350.1.13.90.3.7.5.737384.3",
+      "value": "3293"
+    },
+    {
+      "use": "usual",
+      "system": "urn:oid:1.2.840.114350.1.13.90.3.7.5.737384.36",
+      "value": "3294"
+    },
+    {
+      "use": "usual",
+      "system": "urn:oid:1.2.840.114350.1.13.90.3.7.5.737384.11",
+      "value": "3295"
+    },
+    {
+      "extension": [
+        {
+          "valueString": "xxx-xx-0368",
+          "url": "http://hl7.org/fhir/StructureDefinition/rendered-value"
+        }
+      ],
+      "use": "usual",
+      "system": "urn:oid:2.16.840.1.113883.4.1"
+    }
+  ],
+  "active": true,
+  "name": [
+    {
+      "extension": [
+        {
+          "valueString": "Najnqm",
+          "url": "http://hl7.org/fhir/StructureDefinition/humanname-partner-name"
+        }
+      ],
+      "use": "usual",
+      "text": "EDWRUC X Najnqm",
+      "family": "Najnqm",
+      "given": [
+        "EDWRUC",
+        "X"
+      ]
+    }
+  ],
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "325-768-2913",
+      "use": "home"
+    },
+    {
+      "system": "phone",
+      "value": "325-768-2913",
+      "use": "mobile"
+    },
+    {
+      "system": "email",
+      "value": "scramble@scramble.epic.invalid"
+    },
+    {
+      "system": "email",
+      "value": "scramble@scramble.epic.invalid"
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1950-11-14",
+  "address": [
+    {
+      "use": "home",
+      "line": [
+        "100 Any Street"
+      ],
+      "city": "Anytown",
+      "district": "BEAVER",
+      "state": "AL",
+      "postalCode": "33768",
+      "country": "USA"
+    }
+  ],
+  "maritalStatus": {
+    "text": "Divorced"
+  },
+  "generalPractitioner": [
+    {
+      "reference": "https://epiciccode1.med.utah.edu/Interconnect-KMM-CODE/api/FHIR/STU3/Practitioner/ee27xzBMk.VXBOvQhc1Y8fw3",
+      "display": "Martin Lambert Abbinanti, MD"
+    }
+  ],
+  "managingOrganization": {
+    "reference": "https://epiciccode1.med.utah.edu/Interconnect-KMM-CODE/api/FHIR/STU3/Organization/eJ-quiuHDZT45mdJZr0jSgQ3",
+    "display": "University of Utah Health"
+  }
+}

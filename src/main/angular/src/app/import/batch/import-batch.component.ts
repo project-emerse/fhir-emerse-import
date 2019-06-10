@@ -1,7 +1,6 @@
 import {Component, ViewEncapsulation} from "@angular/core";
 import {HttpClient, HttpErrorResponse} from "@angular/common/http";
-import {catchError, tap} from 'rxjs/operators';
-import {of, Subscription} from "rxjs";
+import {tap} from 'rxjs/operators';
 
 @Component({
     selector: 'emerse-import-batch',

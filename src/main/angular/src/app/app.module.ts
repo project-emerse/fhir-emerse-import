@@ -15,38 +15,46 @@ import {ImportComponent} from "./import/import.component";
 import {ImportSingleComponent} from "./import/single/import-single.component";
 import {ImportBatchComponent} from "./import/batch/import-batch.component";
 import {AngularSplitModule} from 'angular-split';
+import {RestService} from "./rest/rest.service";
+import {MockRestService} from "./rest/rest.service.mock";
 
 // Import plugin modules here:
 
 @NgModule({
-  declarations: [
-      AppComponent,
-      HomeComponent,
-      LoginComponent,
-      ImportComponent,
-      ImportSingleComponent,
-      ImportBatchComponent
-  ],
-  entryComponents: [
-      HomeComponent,
-      LoginComponent,
-      ImportComponent,
-      ImportSingleComponent,
-      ImportBatchComponent
-  ],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  imports: [
-      LoggerModule.forRoot(environment.loggerConfig),
-      AngularSplitModule.forRoot(),
-      BrowserAnimationsModule,
-      BrowserModule,
-      FormsModule,
-      HttpClientModule,
-      ReactiveFormsModule,
-      MaterialModule,
-      routing
-  ],
-  bootstrap: [AppComponent]
+    declarations: [
+        AppComponent,
+        HomeComponent,
+        LoginComponent,
+        ImportComponent,
+        ImportSingleComponent,
+        ImportBatchComponent
+    ],
+    entryComponents: [
+        HomeComponent,
+        LoginComponent,
+        ImportComponent,
+        ImportSingleComponent,
+        ImportBatchComponent
+    ],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA],
+    imports: [
+        LoggerModule.forRoot(environment.loggerConfig),
+        AngularSplitModule.forRoot(),
+        BrowserAnimationsModule,
+        BrowserModule,
+        FormsModule,
+        HttpClientModule,
+        ReactiveFormsModule,
+        MaterialModule,
+        routing
+    ],
+    providers: [
+        {
+            provide: RestService,
+            useClass: environment.production ? RestService : MockRestService
+        }
+    ],
+    bootstrap: [AppComponent]
 })
 export class AppModule {
 }

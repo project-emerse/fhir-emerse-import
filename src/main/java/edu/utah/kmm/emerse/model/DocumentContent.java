@@ -1,8 +1,7 @@
 package edu.utah.kmm.emerse.model;
 
-import edu.utah.kmm.emerse.util.HTMLUtil;
-import edu.utah.kmm.emerse.util.XMLUtil;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.solr.common.StringUtils;
 
 public class DocumentContent {
 
@@ -12,22 +11,18 @@ public class DocumentContent {
 
     public DocumentContent(String content, String contentType) {
         this.content = content;
-        this.contentType = contentType;
+        this.contentType = StringUtils.isEmpty(contentType) ? "text/html" : contentType;
     }
 
     public DocumentContent(byte[] content, String contentType) {
         this(new String(Base64.decodeBase64(content)), contentType);
     }
 
+    public String getContentType() {
+        return contentType;
+    }
+
     public String getContent() {
-        if ("application/xml".equals(contentType)) {
-            return HTMLUtil.stripTags(XMLUtil.transformXml(content, "cds2html.xsl"));
-        }
-
-        if ("text/html".equals(contentType)) {
-            return HTMLUtil.stripTags(content);
-        }
-
         return content;
     }
 }

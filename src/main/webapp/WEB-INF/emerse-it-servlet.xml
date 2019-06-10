@@ -36,6 +36,8 @@
 
     <bean id="solrService" class="edu.utah.kmm.emerse.solr.SolrService">
         <constructor-arg value="${solr.server.root}" />
+        <constructor-arg value="${solr.server.username}" />
+        <constructor-arg value="${solr.server.password}" />
     </bean>
 
     <bean id="fhirService" class="edu.utah.kmm.emerse.fhir.FhirService">

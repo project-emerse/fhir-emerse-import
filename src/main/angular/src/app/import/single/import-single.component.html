@@ -6,21 +6,21 @@
                 [disabled]="!mrn"
                 (click)="search()">Search</button>
         <button mat-raised-button color="warn"
-                [disabled]="!patient"
+                [disabled]="!demographics"
                 (click)="clear()">Clear</button>
         <button mat-raised-button color="primary"
-                [disabled]="!patient"
+                [disabled]="!demographics"
                 (click)="index()">Index</button>
     </div>
     <div class="emerse-import-single-demographics">
-        <span *ngIf="!patient">
+        <span *ngIf="!demographics">
             <span>Search for a patient to index.</span>
         </span>
-        <span *ngIf="patient">
-            <span>{{patient.name}}</span>
-            <span>{{patient.mrn ? '#' + patient.mrn : null}}</span>
-            <span>{{patient.dob}}</span>
-            <span>{{patient.gender}}</span>
+        <span *ngIf="demographics">
+            <span>{{demographics.name}}</span>
+            <span>{{demographics.mrn ? '#' + demographics.mrn : null}}</span>
+            <span>{{demographics.dob}}</span>
+            <span>{{demographics.gender}}</span>
         </span>
     </div>
     <div class="emerse-import-single-documents">
