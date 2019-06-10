@@ -38,7 +38,9 @@
         <constructor-arg value="${solr.server.root}" />
     </bean>
 
-    <bean id="fhirService" class="edu.utah.kmm.emerse.fhir.FhirService" />
+    <bean id="fhirService" class="edu.utah.kmm.emerse.fhir.FhirService">
+        <constructor-arg value="${fhir.mrn.system}" />
+    </bean>
 
     <bean id="databaseService" class="edu.utah.kmm.emerse.database.DatabaseService">
         <constructor-arg ref="dataSource" />

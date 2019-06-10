@@ -30,4 +30,8 @@ public class DatabaseService {
     public void updatePatient(Patient patient) {
 
     }
+
+    public boolean authenticate(String username, String password) {
+        return true;
+    }
 }

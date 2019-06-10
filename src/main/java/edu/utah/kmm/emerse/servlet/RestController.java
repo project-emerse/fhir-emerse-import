@@ -10,9 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Controller for all REST services.
@@ -22,6 +20,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class RestController {
 
     private static final Log log = LogFactory.getLog(RestController.class);
+
+    private class Credentials {
+        String username;
+        String password;
+    }
 
     @Autowired
     private FhirService fhirService;
@@ -33,14 +36,30 @@ public class RestController {
     private DatabaseService databaseService;
 
     /**
+     * Authenticate user.
+     *
+     * @param credentials The user's credentials.
+     * @return OK if success; UNAUTHORIZED otherwise.
+     */
+    @RequestMapping(path = "/authenticate", method = RequestMethod.POST)
+    public ResponseEntity authenticate(@RequestBody Credentials credentials) {
+        if (databaseService.authenticate(credentials.username, credentials.password)) {
+            return new ResponseEntity(HttpStatus.OK);
+        }
+
+        return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+    }
+
+    /**
      * Fetch patient from FHIR service.
      *
-     * @param payload
+     * @param mrn
      * @return
      */
-    @RequestMapping(path = "/patient", method = RequestMethod.GET)
-    public ResponseEntity getPatient(@RequestBody String payload) {
-        return new ResponseEntity(HttpStatus.OK);
+    @RequestMapping(path = "/patient/{mrn}", method = RequestMethod.GET)
+    @ResponseBody
+    public String getPatient(@PathVariable("mrn") String mrn) {
+        return fhirService.serialize(fhirService.getPatient(mrn));
     }
 
     /**

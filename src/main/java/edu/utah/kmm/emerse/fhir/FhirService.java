@@ -7,7 +7,6 @@ import ca.uhn.fhir.model.dstu2.resource.Binary;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.DocumentReference;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.dstu2.valueset.IdentifierTypeCodesEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import edu.utah.kmm.emerse.model.DocumentContent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +21,22 @@ public class FhirService {
 
     @Autowired
     private IGenericClient fhirClient;
+
+    private final String mrnSystem;
+
+    public FhirService(String mrnSystem) {
+        this.mrnSystem = mrnSystem;
+    }
+
+    public Patient getPatient(String mrn) {
+        Bundle bundle = fhirClient.search()
+            .forResource(Patient.class)
+            .where(Patient.IDENTIFIER.exactly().systemAndCode(mrnSystem, mrn))
+            .returnBundle(Bundle.class)
+            .execute();
+
+        return (Patient) bundle.getEntryFirstRep().getResource();
+    }
 
     public List<DocumentReference> getDocuments(Patient patient) {
        List<DocumentReference> documents = new ArrayList<>();
@@ -63,11 +78,15 @@ public class FhirService {
 
     public String getMRN(Patient patient) {
         for (IdentifierDt identifier: patient.getIdentifier()) {
-            if (identifier.getType().getValueAsEnum().contains(IdentifierTypeCodesEnum.MR)) {
+            if (mrnSystem.equals(identifier.getSystem())) {
                 return identifier.getValue();
             }
         }
 
         return null;
+    }
+
+    public String serialize(IResource resource) {
+        return resource == null ? null : fhirClient.getFhirContext().newJsonParser().encodeResourceToString(resource);
     }
 }
