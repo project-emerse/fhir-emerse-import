@@ -2,10 +2,12 @@ package edu.utah.kmm.emerse.fhir;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.AttachmentDt;
+import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.DocumentReference;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.valueset.IdentifierTypeCodesEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import edu.utah.kmm.emerse.model.DocumentContent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,4 +61,13 @@ public class FhirService {
         return null;
     }
 
+    public String getMRN(Patient patient) {
+        for (IdentifierDt identifier: patient.getIdentifier()) {
+            if (identifier.getType().getValueAsEnum().contains(IdentifierTypeCodesEnum.MR)) {
+                return identifier.getValue();
+            }
+        }
+
+        return null;
+    }
 }

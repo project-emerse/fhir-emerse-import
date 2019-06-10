@@ -50,10 +50,10 @@ public class SolrService {
 
         SolrInputDocument document = new SolrInputDocument();
         document.addField("RPT_ID", documentReference.getId());
-        document.addField("MRN", patient.getId()); // TODO: Need MRN here
+        document.addField("MRN", fhirService.getMRN(patient));
         document.addField("RPT_DATE", documentReference.getCreated());
         document.addField("SOURCE", "source1");
-        document.addField("RPT_TEXT", HTMLUtil.stripTags(content.content));
+        document.addField("RPT_TEXT", content.getContent());
 
         try {
             solrClient.add(document);
