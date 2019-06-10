@@ -15,5 +15,6 @@ const loggerConfig: Logger.LoggerConfig = {
 
 export const environment = {
   production: false,
+  mock: true,
   loggerConfig
 };

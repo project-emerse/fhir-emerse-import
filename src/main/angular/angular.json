@@ -46,7 +46,7 @@
                 }
               ]
             },
-            "dev": {
+            "mock": {
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
@@ -86,6 +86,9 @@
           "configurations": {
             "production": {
               "browserTarget": "emerse-it:build:production"
+            },
+            "mock": {
+              "browserTarget": "emerse-it:build:mock"
             },
             "debug": {
               "browserTarget": "emerse-it:build:debug"
