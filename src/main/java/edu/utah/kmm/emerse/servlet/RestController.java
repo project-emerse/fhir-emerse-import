@@ -56,7 +56,7 @@ public class RestController {
      * Return the user.
      *
      * @param user The user (null if not authenticated).
-     * @return The user.
+     * @return The authenticated user, or null if not authenticated.
      */
     @GetMapping("/api/user")
     public Principal user(Principal user) {

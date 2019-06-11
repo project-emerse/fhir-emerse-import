@@ -29,8 +29,9 @@
             <sec:frame-options policy="SAMEORIGIN" />
         </sec:headers>
         <sec:csrf disabled="true" />
+        <sec:http-basic />
         <sec:form-login
-            login-page="/"
+            login-page="/index.html"
             login-processing-url="/api/login" />
         <sec:logout
              logout-url="/api/logout"
