@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,11 +30,6 @@ public class RestController {
 
     private static final Log log = LogFactory.getLog(RestController.class);
 
-    private class Credentials {
-        String username;
-        String password;
-    }
-
     @Autowired
     private FhirService fhirService;
 
@@ -43,7 +39,13 @@ public class RestController {
     @Autowired
     private DatabaseService databaseService;
 
-    @GetMapping(path = "/config")
+    @GetMapping("/")
+    public String getDefault() {
+        return "index.html";
+    }
+
+    @GetMapping("/api/config")
+    @ResponseBody
     public Map<String, String> getConfiguration() {
         Map<String, String> config = new HashMap<>();
         config.put("fhir.mrn.system", fhirService.getMrnSystem());
@@ -51,18 +53,14 @@ public class RestController {
     }
 
     /**
-     * Authenticate user.
+     * Return the user.
      *
-     * @param credentials The user's credentials.
-     * @return OK if success; UNAUTHORIZED otherwise.
+     * @param user The user (null if not authenticated).
+     * @return The user.
      */
-    @PostMapping(path = "/authenticate")
-    public ResponseEntity authenticate(@RequestBody Credentials credentials) {
-        if (databaseService.authenticate(credentials.username, credentials.password)) {
-            return new ResponseEntity(HttpStatus.OK);
-        }
-
-        return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+    @GetMapping("/api/user")
+    public Principal user(Principal user) {
+        return user;
     }
 
     /**
@@ -71,7 +69,7 @@ public class RestController {
      * @param mrn
      * @return
      */
-    @GetMapping(path = "/patient/{mrn}")
+    @GetMapping("/api/patient/{mrn}")
     @ResponseBody
     public String getPatient(@PathVariable("mrn") String mrn) {
         return fhirService.serialize(fhirService.getPatient(mrn));
@@ -83,7 +81,7 @@ public class RestController {
      * @param patient
      * @return
      */
-    @PostMapping(path = "/patient")
+    @PostMapping("/api/patient")
     public ResponseEntity updatePatient(@RequestBody Patient patient) {
         databaseService.updatePatient(patient);
         return new ResponseEntity(HttpStatus.OK);
@@ -95,7 +93,7 @@ public class RestController {
      * @param patientId
      * @return
      */
-    @GetMapping(path = "/documents/{patientId}")
+    @GetMapping("/api/documents/{patientId}")
     @ResponseBody
     public List<?> getDocuments(@PathVariable("patientId") String patientId) {
         List<Map<String, Object>> docs = new ArrayList<>();
@@ -124,7 +122,7 @@ public class RestController {
      * @param payload
      * @return
      */
-    @PostMapping(path = "/index")
+    @PostMapping("/api/index")
     public ResponseEntity index(@RequestBody String payload) {
         return new ResponseEntity(HttpStatus.OK);
     }

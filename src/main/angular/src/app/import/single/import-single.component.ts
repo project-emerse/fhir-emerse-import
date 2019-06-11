@@ -1,9 +1,8 @@
 import {Component, ViewEncapsulation} from "@angular/core";
-import {HttpClient} from "@angular/common/http";
-import {combineLatest, Observable} from "rxjs";
+import {combineLatest, Observable, of} from "rxjs";
 import {FhirStu3Util, Identifier, Patient} from "@uukmm/ng-fhir-model/stu3";
 import {RestService} from "../../rest/rest.service";
-import {filter, switchMap} from "rxjs/operators";
+import {catchError, filter, switchMap, tap} from "rxjs/operators";
 import {Document} from "../../model/document.model";
 import {PatientDemographics} from "../../model/patient-demographics.model";
 
@@ -27,21 +26,21 @@ export class ImportSingleComponent {
 
     textBody: string;
 
-    private fakeBody: string;
+    message: string;
 
     private target: any;
 
     constructor(
-        private readonly restService: RestService,
-        httpClient: HttpClient) {
-        const result: Observable<string> = httpClient.get("assets/test/cda.html", {responseType: "text"});
-        result.subscribe(html => this.fakeBody = html);
+        private readonly restService: RestService) {
     }
 
     search(): void {
+        this.message = null;
         const patient: Observable<Patient> = this.restService.findPatient(this.mrn);
 
         const documents: Observable<Document[]> = patient.pipe(
+            catchError(() => of(null)),
+            tap(patient => this.message = patient ? null : "No patient found.  Please try again."),
             filter(patient => patient != null),
             switchMap(patient => this.restService.getDocuments(patient.id))
         );

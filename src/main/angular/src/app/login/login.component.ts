@@ -1,5 +1,7 @@
 import {AfterViewInit, Component, ElementRef, ViewChild, ViewEncapsulation} from "@angular/core";
 import {LoginService} from "./login.service";
+import {catchError} from "rxjs/operators";
+import {of} from "rxjs";
 
 @Component({
     selector: 'emerse-login',
@@ -26,15 +28,21 @@ export class LoginComponent implements AfterViewInit {
         this.focus(this.usernameInput);
     }
 
-    login() {
-        if (!this.loginService.authenticate(this.username, this.password)) {
-            this.message = "Invalid username or password.  Please try again.";
-            this.password = "";
-            this.focus(this.usernameInput);
-        }
+    login(): void {
+        this.message = null;
+
+        this.loginService.authenticate(this.username, this.password).pipe(
+            catchError(() => of(false))
+        ).subscribe(success => {
+            if (!success) {
+                this.message = "Invalid username or password.  Please try again.";
+                this.password = "";
+                this.focus(this.usernameInput);
+            }
+        })
     }
 
-    focus(element: ElementRef | HTMLInputElement) {
+    focus(element: ElementRef | HTMLInputElement): void {
         const input = element instanceof ElementRef ? element.nativeElement : element;
         input.focus();
         input.select();

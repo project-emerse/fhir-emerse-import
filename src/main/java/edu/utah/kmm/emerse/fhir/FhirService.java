@@ -1,6 +1,8 @@
 package edu.utah.kmm.emerse.fhir;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import edu.utah.kmm.emerse.model.DocumentContent;
 import org.hl7.fhir.dstu3.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,12 +15,18 @@ import java.util.List;
  */
 public class FhirService {
 
-    @Autowired
-    private IGenericClient fhirClient;
+    private final IGenericClient fhirClient;
 
     private final String mrnSystem;
 
-    public FhirService(String mrnSystem) {
+    public FhirService(
+            FhirContext fhirContext,
+            String fhirRoot,
+            String username,
+            String password,
+            String mrnSystem) {
+        this.fhirClient = fhirContext.newRestfulGenericClient(fhirRoot);
+        this.fhirClient.registerInterceptor(new BasicAuthInterceptor(username, password));
         this.mrnSystem = mrnSystem;
     }
 

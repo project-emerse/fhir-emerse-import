@@ -32,6 +32,6 @@ public class DatabaseService {
     }
 
     public boolean authenticate(String username, String password) {
-        return true;
+        return !"bad".equals(username);
     }
 }

@@ -3,35 +3,50 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:mvc="http://www.springframework.org/schema/mvc"
        xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:sec="http://www.springframework.org/schema/security"
        xsi:schemaLocation="
         http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/mvc
         http://www.springframework.org/schema/mvc/spring-mvc.xsd
         http://www.springframework.org/schema/context
-        http://www.springframework.org/schema/context/spring-context.xsd">
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/security
+	    http://www.springframework.org/schema/security/spring-security-4.2.xsd">
 
     <context:component-scan base-package="edu.utah.kmm.emerse"/>
     <mvc:annotation-driven />
+
+    <mvc:resources mapping="/*" location="/" />
+    <mvc:resources mapping="/assets/**" location="/assets/" />
+
+    <sec:http use-expressions="true">
+        <sec:intercept-url pattern="/assets/**" access="isAnonymous()" />
+        <sec:intercept-url pattern="/api/login" access="isAnonymous()" />
+        <sec:intercept-url pattern="/*" access="isAnonymous()" />
+        <sec:intercept-url pattern="/**" access="isAuthenticated()" />
+        <sec:headers>
+            <sec:frame-options policy="SAMEORIGIN" />
+        </sec:headers>
+        <sec:csrf disabled="true" />
+        <sec:form-login
+            login-page="/"
+            login-processing-url="/api/login" />
+        <sec:logout
+             logout-url="/api/logout"
+             delete-cookies="JSESSIONID" />
+    </sec:http>
+
+    <sec:authentication-manager>
+        <sec:authentication-provider ref="authenticationProvider" />
+    </sec:authentication-manager>
+
+    <bean id="authenticationProvider" class="edu.utah.kmm.emerse.security.AuthenticationProvider" />
 
     <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="location">
             <value>classpath:emerse-it.properties</value>
         </property>
-    </bean>
-
-    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-        <property name="driverClassName" value="${datasource.driver.class}" />
-        <property name="url" value="${datasource.url}" />
-        <property name="username" value="${datasource.username}" />
-        <property name="password" value="${datasource.password}" />
-    </bean>
-
-    <bean id="fhirContext" class="ca.uhn.fhir.context.FhirContext" factory-method="forDstu2" />
-
-    <bean id="fhirClient" class="ca.uhn.fhir.rest.client.api.IGenericClient"
-          factory-bean="fhirContext" factory-method="newRestfulGenericClient">
-        <constructor-arg value="${fhir.server.root}" />
     </bean>
 
     <bean id="solrService" class="edu.utah.kmm.emerse.solr.SolrService">
@@ -40,8 +55,21 @@
         <constructor-arg value="${solr.server.password}" />
     </bean>
 
+    <bean id="fhirContext" class="ca.uhn.fhir.context.FhirContext" factory-method="forDstu3" />
+
     <bean id="fhirService" class="edu.utah.kmm.emerse.fhir.FhirService">
+        <constructor-arg ref="fhirContext" />
+        <constructor-arg value="${fhir.server.root}" />
+        <constructor-arg value="${fhir.server.username}" />
+        <constructor-arg value="${fhir.server.password}" />
         <constructor-arg value="${fhir.mrn.system}" />
+    </bean>
+
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${datasource.driver.class}" />
+        <property name="url" value="${datasource.url}" />
+        <property name="username" value="${datasource.username}" />
+        <property name="password" value="${datasource.password}" />
     </bean>
 
     <bean id="databaseService" class="edu.utah.kmm.emerse.database.DatabaseService">
