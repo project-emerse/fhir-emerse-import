@@ -5,7 +5,6 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import edu.utah.kmm.emerse.model.DocumentContent;
 import org.hl7.fhir.dstu3.model.*;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;

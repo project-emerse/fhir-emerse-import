@@ -1,7 +1,5 @@
 import {AfterViewInit, Component, ElementRef, ViewChild, ViewEncapsulation} from "@angular/core";
 import {LoginService} from "./login.service";
-import {catchError} from "rxjs/operators";
-import {of} from "rxjs";
 
 @Component({
     selector: 'emerse-login',
@@ -21,6 +19,8 @@ export class LoginComponent implements AfterViewInit {
 
     message: string;
 
+    busy: boolean;
+
     constructor(public readonly loginService: LoginService) {
     }
 
@@ -29,11 +29,13 @@ export class LoginComponent implements AfterViewInit {
     }
 
     login(): void {
-        this.message = null;
+        this.message = "Authenticating, please wait...";
+        this.busy = true;
 
-        this.loginService.authenticate(this.username, this.password).pipe(
-            catchError(() => of(false))
-        ).subscribe(success => {
+        this.loginService.login(this.username, this.password).subscribe(success => {
+            this.busy = false;
+            this.message = null;
+
             if (!success) {
                 this.message = "Invalid username or password.  Please try again.";
                 this.password = "";

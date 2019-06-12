@@ -15,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +26,7 @@ import java.util.Map;
  *
  */
 @Controller
+@RequestMapping("/api")
 public class RestController {
 
     private static final Log log = LogFactory.getLog(RestController.class);
@@ -39,12 +40,7 @@ public class RestController {
     @Autowired
     private DatabaseService databaseService;
 
-    @GetMapping("/")
-    public String getDefault() {
-        return "index.html";
-    }
-
-    @GetMapping("/api/config")
+    @GetMapping("/config")
     @ResponseBody
     public Map<String, String> getConfiguration() {
         Map<String, String> config = new HashMap<>();
@@ -53,23 +49,12 @@ public class RestController {
     }
 
     /**
-     * Return the user.
-     *
-     * @param user The user (null if not authenticated).
-     * @return The authenticated user, or null if not authenticated.
-     */
-    @GetMapping("/api/user")
-    public Principal user(Principal user) {
-        return user;
-    }
-
-    /**
      * Fetch patient from FHIR service.
      *
      * @param mrn
      * @return
      */
-    @GetMapping("/api/patient/{mrn}")
+    @GetMapping("/patient/{mrn}")
     @ResponseBody
     public String getPatient(@PathVariable("mrn") String mrn) {
         return fhirService.serialize(fhirService.getPatient(mrn));
@@ -81,7 +66,7 @@ public class RestController {
      * @param patient
      * @return
      */
-    @PostMapping("/api/patient")
+    @PostMapping("/patient")
     public ResponseEntity updatePatient(@RequestBody Patient patient) {
         databaseService.updatePatient(patient);
         return new ResponseEntity(HttpStatus.OK);
@@ -93,7 +78,7 @@ public class RestController {
      * @param patientId
      * @return
      */
-    @GetMapping("/api/documents/{patientId}")
+    @GetMapping("/documents/{patientId}")
     @ResponseBody
     public List<?> getDocuments(@PathVariable("patientId") String patientId) {
         List<Map<String, Object>> docs = new ArrayList<>();
@@ -122,7 +107,7 @@ public class RestController {
      * @param payload
      * @return
      */
-    @PostMapping("/api/index")
+    @PostMapping("/index")
     public ResponseEntity index(@RequestBody String payload) {
         return new ResponseEntity(HttpStatus.OK);
     }

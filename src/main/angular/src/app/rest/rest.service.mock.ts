@@ -9,8 +9,14 @@ import {map, switchMap} from "rxjs/operators";
 })
 export class MockRestService {
 
-    constructor(private readonly httpClient: HttpClient) {
+    constructor(private readonly httpClient: HttpClient) {}
 
+    login(username: string, password: string): Observable<boolean> {
+        return of(username !== "bad");
+    }
+
+    logout(): Observable<boolean> {
+        return of(true);
     }
 
     getConfig(): Observable<any> {

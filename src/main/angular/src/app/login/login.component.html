@@ -1,36 +1,31 @@
 <ng-container class="emerse-login">
-    <form role="form" (submit)="login()">
-        <div class="emerse-login-credentials">
-            <div>
-                <span class="emerse-login-spacing"></span>
-                <h4>Please Login</h4>
-            </div>
-            <div>
-                <span class="emerse-login-spacing">Username:</span>
-                <input id="username" name="username"
-                        type="text" #usernameInput
-                        [(ngModel)]="username"
-                        (keyup.enter)="focus(passwordInput)">
-            </div>
-            <div>
-                <span class="emerse-login-spacing">Password:</span>
-                <input id="password" name="password"
-                        type="password" #passwordInput
-                        [(ngModel)]="password"
-                        (keyup.enter)="submit.disabled ? null : login()">
-            </div>
-            <div>
-                <span class="emerse-login-spacing"></span>
-                <button mat-raised-button color="accent"
-                        type="submit" #submit
-                        [disabled]="!username || !password"
-                        (click)="login()">
-                    Login
-                </button>
-            </div>
-            <div>
-                <span class="text-danger">{{message}}</span>
-            </div>
+    <div class="emerse-login-credentials">
+        <div>
+            <span class="emerse-login-spacing"></span>
+            <h4>Please Login</h4>
         </div>
-    </form>
+        <div>
+            <span class="emerse-login-spacing">Username:</span>
+            <input #usernameInput type="text"
+                    [(ngModel)]="username"
+                    (keyup.enter)="focus(passwordInput)">
+        </div>
+        <div>
+            <span class="emerse-login-spacing">Password:</span>
+            <input #passwordInput type="password"
+                    [(ngModel)]="password"
+                    (keyup.enter)="submit.disabled ? null : login()">
+        </div>
+        <div>
+            <span class="emerse-login-spacing"></span>
+            <button #submit mat-raised-button color="accent"
+                    [disabled]="!username || !password || busy"
+                    (click)="login()">
+                Login
+            </button>
+        </div>
+        <div>
+            <span class="text-danger">{{message}}</span>
+        </div>
+    </div>
 </ng-container>

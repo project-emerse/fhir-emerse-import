@@ -1,7 +1,7 @@
 import {Injectable} from "@angular/core";
-import {HttpClient, HttpHeaders} from "@angular/common/http";
-import {Observable, of} from "rxjs";
-import {map, switchMap} from "rxjs/operators";
+import {Observable} from "rxjs";
+import {filter, tap} from "rxjs/operators";
+import {RestService} from "../rest/rest.service";
 
 @Injectable({
     providedIn: 'root'
@@ -10,24 +10,24 @@ export class LoginService {
 
     private authenticated: boolean;
 
-    constructor(private readonly httpClient: HttpClient) {}
+    constructor(
+        private readonly restService: RestService) {}
 
     isAuthenticated(): boolean {
         return this.authenticated;
     }
 
-    authenticate(username: string, password: string): Observable<boolean> {
-        const headers = new HttpHeaders({
-            authorization: 'Basic ' + btoa(username + ':' + password)
-        } );
-
-        return this.httpClient.get("api/user", {headers}).pipe(
-            switchMap(response => of(this.authenticated = response['name'] !== null))
+    login(username: string, password: string): Observable<boolean> {
+        return this.restService.login(username, password).pipe(
+            tap(success => this.authenticated = success)
         );
     }
 
     logout(): void {
-        this.httpClient.post("api/logout", {})
-            .subscribe(() => this.authenticated = false);
+        this.restService.logout().pipe(
+            filter(success => success))
+            .subscribe(() => {
+                this.authenticated = false;
+            });
     }
 }

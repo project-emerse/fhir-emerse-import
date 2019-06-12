@@ -1,5 +1,5 @@
 import {Injectable} from "@angular/core";
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpParams} from "@angular/common/http";
 import {Patient} from "@uukmm/ng-fhir-model/stu3";
 import {Observable, of} from "rxjs";
 import {Document} from "../model/document.model";
@@ -20,8 +20,18 @@ export class RestService {
         return this.config[key];
     }
 
-    authenticate(username: string, password: string): Observable<boolean> {
-        return this.invoke("api/login", {username, password}).pipe(
+    login(username: string, password: string): Observable<boolean> {
+        const payload = new HttpParams()
+            .set('username', username)
+            .set('password', password);
+        return this.invoke("api/login", payload).pipe(
+            switchMap(() => of(true)),
+            catchError(() => of(false))
+        );
+    }
+
+    logout(): Observable<boolean> {
+        return this.invoke("api/logout", {}).pipe(
             switchMap(() => of(true)),
             catchError(() => of(false))
         )
@@ -36,7 +46,7 @@ export class RestService {
     }
 
     private invoke<T>(url: string, payload?: any): Observable<T> {
-        const result = payload ? this.httpClient.post(url, payload) : this.httpClient.get(url);
+        const result = payload ? this.httpClient.post(url, payload, {}) : this.httpClient.get(url);
         return <Observable<T>> result.pipe(take(1));
     }
 }

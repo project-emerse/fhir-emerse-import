@@ -11,7 +11,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 
-import java.util.*;
+import java.util.Collections;
 
 /**
  * Provides authentication support for the framework. Takes provided authentication credentials and
