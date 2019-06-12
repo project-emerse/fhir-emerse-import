@@ -1,8 +1,11 @@
 <div class="emerse-home">
     <div class="emerse-home-header">
-        <img src="assets/image/logo.png">
+        <img class="emerse-home-logo1" src="assets/image/logo.png">
         <span class="flex-fill"></span>
-        <h2>EMERSE Import Tool</h2>
+        <a href="{{emerseUrl | async}}" target="emerse" matTooltip="Go to EMERSE home page.">
+            <img class="emerse-home-logo2" src="assets/image/emerse.png">
+        </a>
+        <h2>Import Tool</h2>
         <span class="flex-fill"></span>
         <span style="min-width: 100px">
             <a *ngIf="loginService.isAuthenticated()" mat-button

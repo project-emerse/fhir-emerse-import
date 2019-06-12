@@ -17,8 +17,14 @@
     background-color: lightgray;
 }
 
-.emerse-home-header > img {
+.emerse-home-logo1 {
     max-height: 75px;
+}
+
+.emerse-home-logo2 {
+    max-height: 40px;
+    margin-top: 2px;
+    margin-right: 10px;
 }
 
 .emerse-home-panel {

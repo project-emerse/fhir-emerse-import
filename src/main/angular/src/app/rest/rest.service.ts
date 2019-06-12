@@ -3,21 +3,17 @@ import {HttpClient, HttpHeaders, HttpParams} from "@angular/common/http";
 import {Patient} from "@uukmm/ng-fhir-model/stu3";
 import {Observable, of} from "rxjs";
 import {Document} from "../model/document.model";
-import {catchError, map, switchMap, take} from "rxjs/operators";
+import {catchError, map, shareReplay, switchMap, take} from "rxjs/operators";
 
 @Injectable({
     providedIn: "root"
 })
 export class RestService {
 
-    private config: any;
+    constructor(private readonly httpClient: HttpClient) {}
 
-    constructor(private readonly httpClient: HttpClient) {
-        this.invoke("api/config").subscribe(config => this.config = config);
-    }
-
-    getConfig(key: string): string {
-        return this.config[key];
+    getConfig(): Observable<any> {
+        return this.invoke("api/config").pipe(shareReplay(1));
     }
 
     login(username: string, password: string): Observable<boolean> {

@@ -5,6 +5,7 @@ import {RestService} from "../../rest/rest.service";
 import {catchError, filter, switchMap, tap} from "rxjs/operators";
 import {Document} from "../../model/document.model";
 import {PatientDemographics} from "../../model/patient-demographics.model";
+import {ConfigService} from "../../config/config.service";
 
 @Component({
     selector: 'emerse-import-single',
@@ -31,7 +32,8 @@ export class ImportSingleComponent {
     private target: any;
 
     constructor(
-        private readonly restService: RestService) {
+        private readonly restService: RestService,
+        private readonly configService: ConfigService) {
     }
 
     search(): void {
@@ -53,7 +55,7 @@ export class ImportSingleComponent {
     }
 
     private extractDemographics(patient: Patient): PatientDemographics {
-        const mrn: Identifier = FhirStu3Util.getIdentifier(patient, this.restService.getConfig("fhir.mrn.system"));
+        const mrn: Identifier = FhirStu3Util.getIdentifier(patient, this.configService.getSetting("fhir.mrn.system"));
 
         return {
             name: FhirStu3Util.formatName(patient.name[0]),
