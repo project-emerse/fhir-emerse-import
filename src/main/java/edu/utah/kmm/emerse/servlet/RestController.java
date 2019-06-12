@@ -12,10 +12,12 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +41,12 @@ public class RestController {
 
     @Autowired
     private DatabaseService databaseService;
+
+    @GetMapping("/login")
+    @ResponseBody
+    public boolean login(Principal user) {
+        return user != null;
+    }
 
     @GetMapping("/config")
     @ResponseBody

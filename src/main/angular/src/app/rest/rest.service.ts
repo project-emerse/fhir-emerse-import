@@ -1,9 +1,9 @@
 import {Injectable} from "@angular/core";
-import {HttpClient, HttpParams} from "@angular/common/http";
+import {HttpClient, HttpHeaders, HttpParams} from "@angular/common/http";
 import {Patient} from "@uukmm/ng-fhir-model/stu3";
 import {Observable, of} from "rxjs";
 import {Document} from "../model/document.model";
-import {catchError, switchMap, take} from "rxjs/operators";
+import {catchError, map, switchMap, take} from "rxjs/operators";
 
 @Injectable({
     providedIn: "root"
@@ -21,11 +21,11 @@ export class RestService {
     }
 
     login(username: string, password: string): Observable<boolean> {
-        const payload = new HttpParams()
-            .set('username', username)
-            .set('password', password);
-        return this.invoke("api/login", payload).pipe(
-            switchMap(() => of(true)),
+        const headers = new HttpHeaders({
+            authorization: 'Basic ' + btoa(username + ':' + password)
+        });
+        return this.invoke("api/login", null, {headers}).pipe(
+            map(response => !!response),
             catchError(() => of(false))
         );
     }
@@ -45,8 +45,8 @@ export class RestService {
         return this.invoke(`api/documents/${patientId}`);
     }
 
-    private invoke<T>(url: string, payload?: any): Observable<T> {
-        const result = payload ? this.httpClient.post(url, payload, {}) : this.httpClient.get(url);
+    private invoke<T>(url: string, body?: any, options: any = {}): Observable<T> {
+        const result = body ? this.httpClient.post(url, body, options) : this.httpClient.get(url, options);
         return <Observable<T>> result.pipe(take(1));
     }
 }
