@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * Returns selected configuration data to provide to client.
  */
-public class ConfigService {
+public class ClientConfigService {
 
     @Value("${fhir.mrn.system}")
     private String s1;

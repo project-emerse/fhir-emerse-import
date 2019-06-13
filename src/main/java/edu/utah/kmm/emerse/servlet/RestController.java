@@ -1,6 +1,6 @@
 package edu.utah.kmm.emerse.servlet;
 
-import edu.utah.kmm.emerse.config.ConfigService;
+import edu.utah.kmm.emerse.config.ClientConfigService;
 import edu.utah.kmm.emerse.database.DatabaseService;
 import edu.utah.kmm.emerse.fhir.FhirService;
 import edu.utah.kmm.emerse.model.DocumentContent;
@@ -43,7 +43,7 @@ public class RestController {
     private DatabaseService databaseService;
 
     @Autowired
-    private ConfigService configService;
+    private ClientConfigService clientConfigService;
 
     @GetMapping("/login")
     @ResponseBody
@@ -54,7 +54,7 @@ public class RestController {
     @GetMapping("/config")
     @ResponseBody
     public Map<String, String> getConfiguration() {
-        return configService.getConfig();
+        return clientConfigService.getConfig();
     }
 
     /**

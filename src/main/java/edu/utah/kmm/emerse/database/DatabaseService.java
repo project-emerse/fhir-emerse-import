@@ -1,6 +1,7 @@
 package edu.utah.kmm.emerse.database;
 
 import edu.utah.kmm.emerse.fhir.FhirService;
+import edu.utah.kmm.emerse.security.Credentials;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hl7.fhir.dstu3.model.HumanName;
@@ -35,8 +36,10 @@ public class DatabaseService {
     @Autowired
     private FhirService fhirService;
 
-    public DatabaseService(DriverManagerDataSource dataSource) {
+    public DatabaseService(DriverManagerDataSource dataSource, Credentials credentials) {
         this.dataSource = dataSource;
+        dataSource.setUsername(credentials.getUsername());
+        dataSource.setPassword(credentials.getPassword());
         jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
     }
 

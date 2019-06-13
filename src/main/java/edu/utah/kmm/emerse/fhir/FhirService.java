@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import edu.utah.kmm.emerse.model.DocumentContent;
+import edu.utah.kmm.emerse.security.Credentials;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -23,11 +24,10 @@ public class FhirService {
     public FhirService(
             FhirContext fhirContext,
             String fhirRoot,
-            String username,
-            String password,
+            Credentials credentials,
             String mrnSystem) {
         this.fhirClient = fhirContext.newRestfulGenericClient(fhirRoot);
-        this.fhirClient.registerInterceptor(new BasicAuthInterceptor(username, password));
+        this.fhirClient.registerInterceptor(new BasicAuthInterceptor(credentials.getUsername(), credentials.getPassword()));
         this.fhirClient.setEncoding(EncodingEnum.JSON);
         this.mrnSystem = mrnSystem;
     }

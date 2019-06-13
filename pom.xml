@@ -209,6 +209,17 @@
       <artifactId>spring-security-web</artifactId>
       <version>${spring.security.version}</version>
     </dependency>
+    <!-- General security -->
+    <dependency>
+      <groupId>org.jasypt</groupId>
+      <artifactId>jasypt</artifactId>
+      <version>1.9.2</version>
+    </dependency>
+      <dependency>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcprov-jdk15on</artifactId>
+          <version>1.60</version>
+      </dependency>
     <!-- Oracle -->
     <dependency>
       <groupId>com.oracle.jdbc</groupId>

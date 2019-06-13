@@ -15,11 +15,20 @@
 	    http://www.springframework.org/schema/security/spring-security-4.2.xsd">
 
     <context:component-scan base-package="edu.utah.kmm.emerse" />
+
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="location" value="classpath:emerse-it.properties" />
+    </bean>
+
+    <!-- Servlet Configuration -->
+
     <mvc:annotation-driven />
 
     <mvc:resources mapping="/*" location="/" />
     <mvc:resources mapping="/assets/**" location="/assets/" />
     <mvc:view-controller path="/" view-name="index.html" />
+
+    <!-- Spring Security -->
 
     <sec:http use-expressions="true">
         <sec:intercept-url pattern="/api/config" access="isAnonymous()" />
@@ -48,18 +57,25 @@
     <bean id="logoutSuccessHandler"
           class="org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler" />
 
-    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-        <property name="location">
-            <value>classpath:emerse-it.properties</value>
-        </property>
-    </bean>
+    <bean id="configService" class="edu.utah.kmm.emerse.config.ClientConfigService" />
 
-    <bean id="configService" class="edu.utah.kmm.emerse.config.ConfigService" />
+    <!-- SOLR Configuration -->
+
+    <bean id="solrServiceCredentials" class="edu.utah.kmm.emerse.security.Credentials">
+        <constructor-arg value="${solr.server.username}" />
+        <constructor-arg value="${solr.server.password}" />
+    </bean>
 
     <bean id="solrService" class="edu.utah.kmm.emerse.solr.SolrService">
         <constructor-arg value="${solr.server.root}" />
-        <constructor-arg value="${solr.server.username}" />
-        <constructor-arg value="${solr.server.password}" />
+        <constructor-arg ref="solrServiceCredentials" />
+    </bean>
+
+    <!-- FHIR Configuration -->
+
+    <bean id="fhirServiceCredentials" class="edu.utah.kmm.emerse.security.Credentials">
+        <constructor-arg value="${fhir.server.username}" />
+        <constructor-arg value="${fhir.server.password}" />
     </bean>
 
     <bean id="fhirContext" class="ca.uhn.fhir.context.FhirContext" factory-method="forDstu3" />
@@ -67,23 +83,34 @@
     <bean id="fhirService" class="edu.utah.kmm.emerse.fhir.FhirService">
         <constructor-arg ref="fhirContext" />
         <constructor-arg value="${fhir.server.root}" />
-        <constructor-arg value="${fhir.server.username}" />
-        <constructor-arg value="${fhir.server.password}" />
+        <constructor-arg ref="fhirServiceCredentials" />
         <constructor-arg value="${fhir.mrn.system}" />
+    </bean>
+
+    <!-- Datasource Configuration -->
+
+    <bean id="dataSourceCredentials" class="edu.utah.kmm.emerse.security.Credentials">
+        <constructor-arg value="${datasource.username}" />
+        <constructor-arg value="${datasource.password}" />
     </bean>
 
     <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="${datasource.driver.class}" />
         <property name="url" value="${datasource.url}" />
-        <property name="username" value="${datasource.username}" />
-        <property name="password" value="${datasource.password}" />
     </bean>
 
     <bean id="databaseService" class="edu.utah.kmm.emerse.database.DatabaseService">
         <constructor-arg ref="dataSource" />
+        <constructor-arg ref="dataSourceCredentials" />
     </bean>
+
+    <!-- Other Configuration -->
 
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
         <property name="maxUploadSize" value="${file.upload.max.size:100000}" />
+    </bean>
+
+    <bean id="decryptor" class="edu.utah.kmm.emerse.security.Decryptor">
+        <constructor-arg value="EMERSE_MASTER" />
     </bean>
 </beans>

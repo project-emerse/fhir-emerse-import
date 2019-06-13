@@ -2,6 +2,7 @@ package edu.utah.kmm.emerse.solr;
 
 import edu.utah.kmm.emerse.fhir.FhirService;
 import edu.utah.kmm.emerse.model.DocumentContent;
+import edu.utah.kmm.emerse.security.Credentials;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,9 +35,9 @@ public class SolrService {
     @Autowired
     private FhirService fhirService;
 
-    public SolrService(String baseSolrUrl, String username, String password) {
-        this.username = username;
-        this.password = password;
+    public SolrService(String baseSolrUrl, Credentials credentials) {
+        this.username = credentials.getUsername();
+        this.password = credentials.getPassword();
 
         solrClient = new HttpSolrClient.Builder(baseSolrUrl)
                 .withResponseParser(new XMLResponseParser())
