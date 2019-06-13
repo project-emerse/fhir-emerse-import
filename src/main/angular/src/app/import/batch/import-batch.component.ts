@@ -1,6 +1,6 @@
 import {Component, ViewEncapsulation} from "@angular/core";
-import {HttpClient, HttpErrorResponse} from "@angular/common/http";
-import {tap} from 'rxjs/operators';
+import {HttpErrorResponse} from "@angular/common/http";
+import {RestService} from "../../rest/rest.service";
 
 @Component({
     selector: 'emerse-import-batch',
@@ -16,7 +16,7 @@ export class ImportBatchComponent {
 
     private target: any;
 
-    constructor(private readonly httpClient: HttpClient) {
+    constructor(private readonly restService: RestService) {
     }
 
     handleFileInput(event: any): void {
@@ -27,20 +27,23 @@ export class ImportBatchComponent {
 
     indexFile(): void {
         const formData: FormData = new FormData();
-        formData.append('fileKey', this.file, this.file.name);
-        const subscription = this.httpClient
-            .post("batch", formData, { headers: null })
-            .pipe(
-                tap(() => this.clear(), e => this.handleError(e))
-            ).subscribe(() => subscription.unsubscribe());
+        formData.append('file', this.file, this.file.name);
+        this.restService
+            .batchIndex(formData)
+            .subscribe({
+                next: count => this.clear(`Indexed ${count} patient(s).`),
+                error: err => this.handleError(err)
+            });
     }
 
-    clear(): void {
+    clear(message?: string): void {
         if (this.target) {
             this.target.value = "";
             this.target = null;
             this.file = null;
         }
+
+        this.message = message;
     }
 
     handleError(e: HttpErrorResponse): void {

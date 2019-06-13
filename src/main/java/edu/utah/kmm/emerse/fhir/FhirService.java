@@ -1,10 +1,12 @@
 package edu.utah.kmm.emerse.fhir;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import edu.utah.kmm.emerse.model.DocumentContent;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +28,7 @@ public class FhirService {
             String mrnSystem) {
         this.fhirClient = fhirContext.newRestfulGenericClient(fhirRoot);
         this.fhirClient.registerInterceptor(new BasicAuthInterceptor(username, password));
+        this.fhirClient.setEncoding(EncodingEnum.JSON);
         this.mrnSystem = mrnSystem;
     }
 
@@ -33,7 +36,7 @@ public class FhirService {
         return mrnSystem;
     }
 
-    public Patient getPatient(String mrn) {
+    public Patient getPatientByMrn(String mrn) {
         Bundle bundle = fhirClient.search()
             .forResource(Patient.class)
             .where(Patient.IDENTIFIER.exactly().systemAndCode(mrnSystem, mrn))
@@ -41,6 +44,13 @@ public class FhirService {
             .execute();
 
         return (Patient) bundle.getEntryFirstRep().getResource();
+    }
+
+    public Patient getPatientById(String id) {
+        return fhirClient.read()
+                .resource(Patient.class)
+                .withId(id)
+                .execute();
     }
 
     public Bundle getDocumentBundle(String patientId) {
@@ -96,5 +106,9 @@ public class FhirService {
 
     public String serialize(Resource resource) {
         return resource == null ? null : fhirClient.getFhirContext().newJsonParser().encodeResourceToString(resource);
+    }
+
+    public <T extends IBaseResource> T deserialize(String data, Class<T> resourceType) {
+        return data == null ? null : (T) fhirClient.getFhirContext().newJsonParser().parseResource(data);
     }
 }

@@ -1,32 +1,38 @@
 package edu.utah.kmm.emerse.config;
 
-import org.springframework.context.EnvironmentAware;
-import org.springframework.core.env.Environment;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.ReflectionUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class ConfigService implements EnvironmentAware {
+/**
+ * Returns selected configuration data to provide to client.
+ */
+public class ConfigService {
 
-    private static final String[] CONFIG_SETTINGS = {
-        "fhir.mrn.system",
-        "emerse.home.url"
-    };
+    @Value("${fhir.mrn.system}")
+    private String s1;
 
-    private Environment environment;
+    @Value("${emerse.home.url}")
+    private String s2;
+
+    @Value("${app.timeout.seconds}")
+    private String s3;
 
     public Map<String, String> getConfig() {
         Map<String, String> config = new HashMap<>();
+        ReflectionUtils.doWithLocalFields(getClass(), field -> {
+            Value annot = field.getAnnotation(Value.class);
 
-        for (String name: CONFIG_SETTINGS) {
-            config.put(name, environment.getProperty(name));
-        }
+            if (annot != null) {
+                String key = StringUtils.substringBetween(annot.value(), "{", "}");
+                config.put(key, (String) field.get(this));
+            }
+        });
 
         return config;
     }
 
-    @Override
-    public void setEnvironment(Environment environment) {
-        this.environment = environment;
-    }
 }

@@ -1,5 +1,5 @@
 import {Injectable} from "@angular/core";
-import {HttpClient, HttpHeaders, HttpParams} from "@angular/common/http";
+import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {Patient} from "@uukmm/ng-fhir-model/stu3";
 import {Observable, of} from "rxjs";
 import {Document} from "../model/document.model";
@@ -39,6 +39,10 @@ export class RestService {
 
     getDocuments(patientId: string): Observable<Document[]> {
         return this.invoke(`api/documents/${patientId}`);
+    }
+
+    batchIndex(formData): Observable<any> {
+        return this.invoke("api/batch", formData);
     }
 
     private invoke<T>(url: string, body?: any, options: any = {}): Observable<T> {

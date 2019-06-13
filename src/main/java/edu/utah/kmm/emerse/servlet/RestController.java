@@ -13,11 +13,10 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpSession;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,19 +65,20 @@ public class RestController {
      */
     @GetMapping("/patient/{mrn}")
     @ResponseBody
-    public String getPatient(@PathVariable("mrn") String mrn) {
-        return fhirService.serialize(fhirService.getPatient(mrn));
+    public String getPatientByMrn(@PathVariable("mrn") String mrn) {
+        return fhirService.serialize(fhirService.getPatientByMrn(mrn));
     }
 
     /**
      * Create/update entry in EMERSE patient table.
      *
-     * @param patient
+     * @param payload Serialized form of patient.
      * @return
      */
     @PostMapping("/patient")
-    public ResponseEntity updatePatient(@RequestBody Patient patient) {
-        databaseService.updatePatient(patient);
+    public ResponseEntity updatePatient(@RequestBody String payload) {
+        Patient patient = fhirService.deserialize(payload, Patient.class);
+        databaseService.createOrUpdatePatient(patient, true);
         return new ResponseEntity(HttpStatus.OK);
     }
 
@@ -112,14 +112,15 @@ public class RestController {
     }
 
     /**
-     * Index one or more documents.
+     * Batch index.
      *
-     * @param payload
-     * @return
+     * @param file
+     * @return Count of patients indexed.
      */
-    @PostMapping("/index")
-    public ResponseEntity index(@RequestBody String payload) {
-        return new ResponseEntity(HttpStatus.OK);
+    @PostMapping("/batch")
+    @ResponseBody
+    public int batch(@RequestParam("file") MultipartFile file) {
+        return solrService.batchIndex(file.getResource());
     }
 
 }

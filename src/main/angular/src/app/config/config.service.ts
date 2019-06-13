@@ -8,22 +8,25 @@ import {switchMap} from "rxjs/operators";
 })
 export class ConfigService {
 
-    private readonly configObservable: Observable<any>;
-
     private config: any;
 
+    private readonly config$: Observable<any>;
+
     constructor(restService: RestService) {
-        this.configObservable = restService.getConfig();
-        this.configObservable.subscribe(config => this.config = config);
+        this.config$ = restService.getConfig();
+        this.config$.subscribe(config => this.config = config);
+    }
+
+    isLoaded(): boolean {
+        return this.config != null;
+    }
+
+    getSettingAsync(name: string): Observable<string> {
+        return this.config$.pipe(switchMap(config => of(config[name])));
     }
 
     getSetting(name: string): string {
         return this.config[name];
     }
 
-    getSettingAsync(name: string): Observable<string> {
-        return this.configObservable.pipe(
-            switchMap(config => of(config[name]))
-        );
-    }
 }

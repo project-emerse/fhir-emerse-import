@@ -1,19 +1,19 @@
-<div class="emerse-home">
-    <div class="emerse-home-header">
+<div class="emerse-home" *ngIf="configService.isLoaded()">
+    <div class="emerse-home-header" #timeoutTooltip="matTooltip" matTooltip="" matTooltipClass="emerse-home-timeout">
         <img class="emerse-home-logo1" src="assets/image/logo.png">
         <span class="flex-fill"></span>
-        <a href="{{emerseUrl | async}}" target="emerse" matTooltip="Go to EMERSE home page.">
+        <a href="{{emerseUrl()}}" target="emerse" matTooltip="Go to EMERSE home page.">
             <img class="emerse-home-logo2" src="assets/image/emerse.png">
         </a>
         <h2>Import Tool</h2>
         <span class="flex-fill"></span>
-        <span style="min-width: 100px">
+       <span style="min-width: 100px">
             <a *ngIf="loginService.isAuthenticated()" mat-button
                 (click)="loginService.logout()">Logout</a>
         </span>
     </div>
     <div class="emerse-home-panel">
         <emerse-login *ngIf="!loginService.isAuthenticated()"></emerse-login>
-        <emerse-import *ngIf="loginService.isAuthenticated()"></emerse-import>
+        <emerse-import *ngIf="loginService.isAuthenticated()"></emerse-import>``
     </div>
 </div>

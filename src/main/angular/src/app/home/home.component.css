@@ -36,3 +36,9 @@
 .emerse-home-panel > *:first-child {
     flex: 1;
 }
+
+.emerse-home-timeout {
+    background-color: red!important;
+    font-size: 1em;
+    max-width: 100%!important;
+}

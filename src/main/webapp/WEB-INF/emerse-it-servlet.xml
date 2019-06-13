@@ -82,4 +82,8 @@
     <bean id="databaseService" class="edu.utah.kmm.emerse.database.DatabaseService">
         <constructor-arg ref="dataSource" />
     </bean>
+
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="${file.upload.max.size:100000}" />
+    </bean>
 </beans>

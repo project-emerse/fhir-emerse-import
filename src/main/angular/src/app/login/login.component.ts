@@ -21,8 +21,7 @@ export class LoginComponent implements AfterViewInit {
 
     busy: boolean;
 
-    constructor(public readonly loginService: LoginService) {
-    }
+    constructor(public readonly loginService: LoginService) {}
 
     ngAfterViewInit(): void {
         this.focus(this.usernameInput);
