@@ -17,9 +17,15 @@ import java.util.List;
  */
 public class FhirService {
 
+    private static final String OAUTH_EXTENSION = "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris";
+
     private final IGenericClient fhirClient;
 
     private final String mrnSystem;
+
+    private String authorizeEndpoint;
+
+    private String tokenEndpoint;
 
     public FhirService(
             FhirContext fhirContext,
@@ -30,10 +36,28 @@ public class FhirService {
         this.fhirClient.registerInterceptor(new BasicAuthInterceptor(credentials.getUsername(), credentials.getPassword()));
         this.fhirClient.setEncoding(EncodingEnum.JSON);
         this.mrnSystem = mrnSystem;
-        getOAuthEndpoint();
+        getOAuthEndpoints();
     }
 
-    private void getOAuthEndpoint() {
+    private void getOAuthEndpoints() {
+        CapabilityStatement cp = fhirClient.capabilities().ofType(CapabilityStatement.class).execute();
+
+        for (Extension ext: cp.getRest().get(0).getSecurity().getExtension()) {
+            if (OAUTH_EXTENSION.equals(ext.getUrl())) {
+                for (Extension ext2: ext.getExtension()) {
+                    String url = ext2.getUrl();
+
+                    if ("authorize".equals(url)) {
+                        authorizeEndpoint = ((UriType)ext2.getValue()).getValue();
+                    } else if ("token".equals(url)) {
+                        tokenEndpoint = ((UriType)ext2.getValue()).getValue();
+                    }
+                }
+
+                break;
+            }
+        }
+
     }
 
     public String getMrnSystem() {
