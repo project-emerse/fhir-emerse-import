@@ -111,6 +111,7 @@
     </bean>
 
     <bean id="decryptor" class="edu.utah.kmm.emerse.security.Decryptor">
-        <constructor-arg value="EMERSE_MASTER" />
+        <constructor-arg value="${decryptor.master:EMERSE_MASTER}" />
+        <constructor-arg value="${decryptor.algorithm:PBEWITHSHA256AND128BITAES-CBC-BC}" />
     </bean>
 </beans>

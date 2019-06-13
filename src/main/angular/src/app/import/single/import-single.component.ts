@@ -57,7 +57,7 @@ export class ImportSingleComponent {
     private extractDemographics(patient: Patient): PatientDemographics {
         const mrn: Identifier = FhirStu3Util.getIdentifier(patient, this.configService.getSetting("fhir.mrn.system"));
 
-        return {
+        return this.demographics = {
             name: FhirStu3Util.formatName(patient.name[0]),
             mrn: mrn ? mrn.value : null,
             dob: patient.birthDate.toString(),

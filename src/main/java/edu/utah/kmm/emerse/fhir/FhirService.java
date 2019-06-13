@@ -30,6 +30,10 @@ public class FhirService {
         this.fhirClient.registerInterceptor(new BasicAuthInterceptor(credentials.getUsername(), credentials.getPassword()));
         this.fhirClient.setEncoding(EncodingEnum.JSON);
         this.mrnSystem = mrnSystem;
+        getOAuthEndpoint();
+    }
+
+    private void getOAuthEndpoint() {
     }
 
     public String getMrnSystem() {
