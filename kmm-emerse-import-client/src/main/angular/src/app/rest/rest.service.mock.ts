@@ -38,7 +38,7 @@ export class MockRestService {
     }
 
     private getMockResource(file: string): Observable<string> {
-        return this.httpClient.get(`assets/mock/${file}`, {responseType: "text"})
+        return this.httpClient.get(`mock/${file}`, {responseType: "text"})
             .pipe(switchMap(text => this.handleImport(text)));
     }
 

@@ -12,9 +12,11 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "debug": "ng build --configuration=debug --base-href \"/emerse-it/\"",
-    "mock": "ng build --configuration=mock --base-href \"/emerse-it/\"",
-    "prod": "ng build --prod --base-href \"/emerse-it/\""
+    "debug": "ng build --configuration=debug --base-href \"/emerse-it-client/\"",
+    "mock": "ng build --configuration=mock --base-href \"/emerse-it-client/\"",
+    "prod": "ng build --prod --base-href \"/emerse-it-client/\"",
+    "war-debug": "mvn -Ddmd-build=debug clean package",
+    "war-prod": "mvn -Ddmd-build=prod clean package"
   },
   "private": true,
   "dependencies": {

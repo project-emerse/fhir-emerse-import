@@ -24,16 +24,11 @@
 
     <mvc:annotation-driven />
 
-    <mvc:resources mapping="/*" location="/" />
-    <mvc:resources mapping="/assets/**" location="/assets/" />
-    <mvc:view-controller path="/" view-name="index.html" />
-
     <!-- Spring Security -->
 
     <sec:http use-expressions="true">
         <sec:intercept-url pattern="/api/config" access="isAnonymous()" />
         <sec:intercept-url pattern="/api/**" access="isAuthenticated()" />
-        <sec:intercept-url pattern="/**" access="isAnonymous()" />
         <sec:headers>
             <sec:frame-options policy="SAMEORIGIN" />
         </sec:headers>
