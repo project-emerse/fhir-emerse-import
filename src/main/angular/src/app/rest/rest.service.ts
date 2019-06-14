@@ -13,40 +13,43 @@ export class RestService {
     constructor(private readonly httpClient: HttpClient) {}
 
     getConfig(): Observable<any> {
-        return this.invoke("api/config").pipe(shareReplay(1));
+        return this.get("api/config").pipe(shareReplay(1));
     }
 
     login(username: string, password: string): Observable<boolean> {
         const headers = new HttpHeaders({
             authorization: 'Basic ' + btoa(username + ':' + password)
         });
-        return this.invoke("api/login", null, {headers}).pipe(
+        return this.get("api/login", headers).pipe(
             map(response => !!response),
             catchError(() => of(false))
         );
     }
 
     logout(): Observable<boolean> {
-        return this.invoke("api/logout", {}).pipe(
+        return this.post("api/logout", null).pipe(
             switchMap(() => of(true)),
             catchError(() => of(false))
         )
     }
 
     findPatient(mrn: string): Observable<Patient> {
-        return this.invoke(`api/patient/${mrn}`);
+        return this.get(`api/patient/${mrn}`);
     }
 
     getDocuments(patientId: string): Observable<Document[]> {
-        return this.invoke(`api/documents/${patientId}`);
+        return this.get(`api/documents/${patientId}`);
     }
 
     batchIndex(formData): Observable<any> {
-        return this.invoke("api/batch", formData);
+        return this.post("api/batch", formData);
     }
 
-    private invoke<T>(url: string, body?: any, options: any = {}): Observable<T> {
-        const result = body ? this.httpClient.post(url, body, options) : this.httpClient.get(url, options);
-        return <Observable<T>> result.pipe(take(1));
+    private get<T>(url: string, headers?: HttpHeaders): Observable<T> {
+        return this.httpClient.get<T>(url, {headers, responseType: "json"}).pipe(take(1));
+    }
+
+    private post<T>(url: string, body: any, headers?: HttpHeaders): Observable<T> {
+        return this.httpClient.post<T>(url, body, {headers, responseType: "json"}).pipe(take(1));
     }
 }

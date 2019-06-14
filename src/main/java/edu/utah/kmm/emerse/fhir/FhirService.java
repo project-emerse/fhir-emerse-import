@@ -132,11 +132,12 @@ public class FhirService {
         return null;
     }
 
-    public String serialize(Resource resource) {
+    public String serialize(IBaseResource resource) {
         return resource == null ? null : fhirClient.getFhirContext().newJsonParser().encodeResourceToString(resource);
     }
 
     public <T extends IBaseResource> T deserialize(String data, Class<T> resourceType) {
         return data == null ? null : (T) fhirClient.getFhirContext().newJsonParser().parseResource(data);
     }
+
 }
