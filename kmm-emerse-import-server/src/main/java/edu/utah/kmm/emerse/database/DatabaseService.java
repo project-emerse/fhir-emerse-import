@@ -116,15 +116,12 @@ public class DatabaseService {
     }
 
     public boolean authenticate(String username, String password) {
-        if (true) return !"bad".equals(username); //TEMPORARY
         try {
             MapSqlParameterSource params = new MapSqlParameterSource();
             params.addValue("USERNAME", username);
-            params.addValue("PASSWORD", passwordEncoder.encode(password));
-            int result = jdbcTemplate.queryForObject(
-                    "SELECT COUNT(*) FROM LOGIN_ACCOUNT WHERE USER_ID = :USERNAME AND PASSWORD = :PASSWORD",
-                    params, Integer.class);
-            return result == 1;
+            String encodedPassword = jdbcTemplate.queryForObject(
+                    "SELECT PASSWORD FROM LOGIN_ACCOUNT WHERE USER_ID = :USERNAME", params, String.class);
+            return encodedPassword != null && passwordEncoder.matches(password, encodedPassword);
         } catch (Exception e) {
             log.error("Error while attempting user authentication.", e);
             return false;

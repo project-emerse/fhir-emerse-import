@@ -15,6 +15,6 @@ const loggerConfig: Logger.LoggerConfig = {
 
 export const environment = {
   production: false,
-  serverEndpoint: "./",
+  serverEndpoint: "/emerse-it-server",
   loggerConfig
 };
