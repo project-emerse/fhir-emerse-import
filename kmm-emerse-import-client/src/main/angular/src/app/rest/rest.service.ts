@@ -4,15 +4,21 @@ import {Patient} from "@uukmm/ng-fhir-model/stu3";
 import {Observable, of} from "rxjs";
 import {Document} from "../model/document.model";
 import {catchError, map, shareReplay, switchMap, take} from "rxjs/operators";
+import {environment} from "../../environments/environment";
 
 @Injectable({
     providedIn: "root"
 })
 export class RestService {
 
-    constructor(private readonly httpClient: HttpClient) {}
+    private readonly serverEndpoint: string;
 
-    getConfig(): Observable<any> {
+    constructor(private readonly httpClient: HttpClient) {
+        this.serverEndpoint = environment.serverEndpoint;
+        this.serverEndpoint = this.serverEndpoint.endsWith("/") ? this.serverEndpoint : this.serverEndpoint + "/";
+    }
+
+    getServerConfig(): Observable<any> {
         return this.get("api/config").pipe(shareReplay(1));
     }
 
@@ -46,10 +52,24 @@ export class RestService {
     }
 
     private get<T>(url: string, headers?: HttpHeaders): Observable<T> {
-        return this.httpClient.get<T>(url, {headers, responseType: "json"}).pipe(take(1));
+        return this.httpClient.get<T>(this.serverEndpoint + url, {headers, responseType: "json"})
+            .pipe(
+                catchError(error => this.catchError(error)),
+                take(1)
+            );
     }
 
     private post<T>(url: string, body: any, headers?: HttpHeaders): Observable<T> {
-        return this.httpClient.post<T>(url, body, {headers, responseType: "json"}).pipe(take(1));
+        return this.httpClient.post<T>(this.serverEndpoint + url, body, {headers, responseType: "json"})
+            .pipe(
+                catchError(error => this.catchError(error)),
+                take(1)
+            );
     }
+
+    private catchError(error): Observable<any> {
+        console.log(error);
+        return of(null);
+    }
+
 }

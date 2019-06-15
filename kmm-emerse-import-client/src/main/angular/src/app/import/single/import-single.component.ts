@@ -41,8 +41,7 @@ export class ImportSingleComponent {
         const patient: Observable<Patient> = this.restService.findPatient(this.mrn);
 
         const documents: Observable<Document[]> = patient.pipe(
-            catchError(() => of(null)),
-            tap(() => this.message = "No patient found.  Please try again."),
+            tap(patient => this.message = patient == null ? "No patient found.  Please try again." : null),
             filter(patient => patient != null),
             switchMap(patient => this.restService.getDocuments(patient.id))
         );

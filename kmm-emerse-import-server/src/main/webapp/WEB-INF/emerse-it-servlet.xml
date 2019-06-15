@@ -28,6 +28,7 @@
 
     <sec:http use-expressions="true">
         <sec:intercept-url pattern="/api/config" access="isAnonymous()" />
+        <sec:intercept-url pattern="/api/login" method="OPTIONS" access="isAnonymous()" />
         <sec:intercept-url pattern="/api/**" access="isAuthenticated()" />
         <sec:headers>
             <sec:frame-options policy="SAMEORIGIN" />

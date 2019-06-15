@@ -37,7 +37,7 @@
         <artifactId>maven-war-plugin</artifactId>
         <version>3.2.2</version>
         <configuration>
-          <warName>emerse-it-server</warName>
+          <warName>emerse-it-server-${emerse-build}</warName>
         </configuration>
       </plugin>
     </plugins>

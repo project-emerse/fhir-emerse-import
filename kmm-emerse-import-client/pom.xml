@@ -17,10 +17,6 @@
   <name>EMERSE Import Tool Client</name>
   <description>Client portion of EMERSE import tool.</description>
 
-  <properties>
-    <emerse-build>prod</emerse-build>
-  </properties>
-
   <build>
     <plugins>
       <plugin>
@@ -93,4 +89,5 @@
       </plugin>
     </plugins>
   </build>
+
 </project>

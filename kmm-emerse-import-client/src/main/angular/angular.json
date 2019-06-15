@@ -56,10 +56,14 @@
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": false,
+              "assets": [
+                "src/assets",
+                "src/mock"
+              ],
               "fileReplacements": [
               ]
             },
-            "debug": {
+            "dev": {
               "optimization": false,
               "outputHashing": "all",
               "sourceMap": true,
@@ -72,7 +76,7 @@
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.debug.ts"
+                  "with": "src/environments/environment.dev.ts"
                 }
               ]
             }
@@ -90,8 +94,8 @@
             "mock": {
               "browserTarget": "emerse-it:build:mock"
             },
-            "debug": {
-              "browserTarget": "emerse-it:build:debug"
+            "dev": {
+              "browserTarget": "emerse-it:build:dev"
             }
           }
         },
@@ -118,7 +122,6 @@
             ],
             "assets": [
               "src/assets",
-              "src/launch",
               "src/favicon.ico"
             ]
           }

@@ -51,7 +51,7 @@ import {MockRestService} from "./rest/rest.service.mock";
     providers: [
         {
             provide: RestService,
-            useClass: environment.mock ? MockRestService : RestService
+            useClass: environment.serverEndpoint ? RestService : MockRestService
         }
     ],
     bootstrap: [AppComponent]

@@ -13,7 +13,7 @@ export class ConfigService {
     private readonly config$: Observable<any>;
 
     constructor(restService: RestService) {
-        this.config$ = restService.getConfig();
+        this.config$ = restService.getServerConfig();
         this.config$.subscribe(config => this.config = config);
     }
 
