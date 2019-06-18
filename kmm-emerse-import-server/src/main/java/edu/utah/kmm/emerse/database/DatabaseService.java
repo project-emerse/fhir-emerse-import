@@ -7,6 +7,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -21,11 +22,15 @@ public class DatabaseService {
 
     private static final Log log = LogFactory.getLog(DatabaseService.class);
 
+    private static final String QUEUE_TABLE = "INDEXING_QUEUE";
+
     private static final String[] PATIENT_FIELDS = {
             "EXTERNAL_ID","FIRST_NAME","MIDDLE_NAME","LAST_NAME","BIRTH_DATE","SEX_CD","DECEASED_FLAG",
             "LANGUAGE_CD","RACE_CD","ETHNICITY_CD","MARITAL_STATUS_CD","RELIGION_CD","ZIP_CD",
             "UPDATE_DATE","UPDATED_BY","CREATE_DATE","CREATED_BY"
     };
+
+    private static final String QUEUE_CHECK = "SELECT * FROM INDEXING_QUEUE WHERE COMPLETED IS NULL ORDER BY ID ASC";
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
@@ -126,5 +131,9 @@ public class DatabaseService {
             log.error("Error while attempting user authentication.", e);
             return false;
         }
+    }
+
+    public void refreshQueue(RowMapper<?> rowMapper) {
+        jdbcTemplate.query(QUEUE_CHECK, rowMapper);
     }
 }

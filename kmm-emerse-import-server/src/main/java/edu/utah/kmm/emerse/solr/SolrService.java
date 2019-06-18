@@ -1,5 +1,6 @@
 package edu.utah.kmm.emerse.solr;
 
+import edu.utah.kmm.emerse.database.DatabaseService;
 import edu.utah.kmm.emerse.fhir.FhirService;
 import edu.utah.kmm.emerse.model.DocumentContent;
 import edu.utah.kmm.emerse.security.Credentials;
@@ -28,17 +29,16 @@ public class SolrService {
 
     private final HttpSolrClient solrClient;
 
-    private final String username;
-
-    private final String password;
+    private final Credentials credentials;
 
     @Autowired
     private FhirService fhirService;
 
-    public SolrService(String baseSolrUrl, Credentials credentials) {
-        this.username = credentials.getUsername();
-        this.password = credentials.getPassword();
+    @Autowired
+    private DatabaseService databaseService;
 
+    public SolrService(String baseSolrUrl, Credentials credentials) {
+        this.credentials = credentials;
         solrClient = new HttpSolrClient.Builder(baseSolrUrl)
                 .withResponseParser(new XMLResponseParser())
                 .allowCompression(true)
@@ -58,6 +58,7 @@ public class SolrService {
     }
 
     public void indexDocuments(Patient patient) {
+        databaseService.createOrUpdatePatient(patient, true);
         List<DocumentReference> documents = fhirService.getDocuments(patient.getId());
         String mrn = fhirService.getMRN(patient);
 
@@ -84,7 +85,7 @@ public class SolrService {
         try {
             UpdateRequest request = new UpdateRequest();
             request.add(document);
-            request.setBasicAuthCredentials(username, password);
+            request.setBasicAuthCredentials(credentials.getUsername(), credentials.getPassword());
             return request.process(solrClient);
         } catch (Exception e) {
             log.error("Error indexing document: " + documentReference.getId(), e);
@@ -92,4 +93,12 @@ public class SolrService {
         }
     }
 
+    public void index(IndexRequest request) {
+        boolean isMRN = request.identifierType == IndexRequest.IdentifierType.MRN;
+
+        for (String id: request.patientList) {
+            Patient patient = isMRN ? fhirService.getPatientByMrn(id) : fhirService.getPatientById(id);
+            indexDocuments(patient);
+        }
+    }
 }

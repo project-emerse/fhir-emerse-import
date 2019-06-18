@@ -3,14 +3,24 @@ package edu.utah.kmm.emerse.fhir;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import edu.utah.kmm.emerse.model.DocumentContent;
 import edu.utah.kmm.emerse.security.Credentials;
+import org.apache.commons.codec.binary.Base64;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.RequestEntity;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * FHIR-related services.
@@ -19,27 +29,50 @@ public class FhirService {
 
     private static final String OAUTH_EXTENSION = "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris";
 
+    private static final String SCOPES = "patient/*.read";
+
     private final IGenericClient fhirClient;
 
     private final String mrnSystem;
 
-    private String authorizeEndpoint;
+    private URI authorizeEndpoint;
 
-    private String tokenEndpoint;
+    private URI tokenEndpoint;
+
+    private Credentials authorizationCredentials;
+
+    private TokenResponse tokenResponse;
 
     public FhirService(
             FhirContext fhirContext,
             String fhirRoot,
-            Credentials credentials,
-            String mrnSystem) {
+            Credentials authorizationCredentials,
+            String mrnSystem) throws Exception {
         this.fhirClient = fhirContext.newRestfulGenericClient(fhirRoot);
-        this.fhirClient.registerInterceptor(new BasicAuthInterceptor(credentials.getUsername(), credentials.getPassword()));
         this.fhirClient.setEncoding(EncodingEnum.JSON);
+        this.authorizationCredentials = authorizationCredentials;
         this.mrnSystem = mrnSystem;
         getOAuthEndpoints();
+        authenticate();
     }
 
-    private void getOAuthEndpoints() {
+    private void authenticate() {
+        if (tokenResponse == null || tokenResponse.isExpired()) {
+            tokenResponse = null;
+            RestTemplate restTemplate = new RestTemplate();
+            MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+            params.set("grant_type", "client_credentials");
+            params.set("scope", SCOPES);
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Basic "
+                    + Base64.encodeBase64String((authorizationCredentials.getUsername() + ":" + authorizationCredentials.getPassword()).getBytes()));
+            RequestEntity<?> request = new RequestEntity<>(params, headers, HttpMethod.POST, tokenEndpoint, null);
+            ResponseEntity<TokenResponse> response = restTemplate.exchange(request, TokenResponse.class);
+            tokenResponse = response.getBody();
+        }
+    }
+
+    private void getOAuthEndpoints() throws URISyntaxException {
         CapabilityStatement cp = fhirClient.capabilities().ofType(CapabilityStatement.class).execute();
 
         for (Extension ext: cp.getRest().get(0).getSecurity().getExtension()) {
@@ -48,9 +81,9 @@ public class FhirService {
                     String url = ext2.getUrl();
 
                     if ("authorize".equals(url)) {
-                        authorizeEndpoint = ((UriType)ext2.getValue()).getValue();
+                        authorizeEndpoint = new URI(((UriType)ext2.getValue()).getValue());
                     } else if ("token".equals(url)) {
-                        tokenEndpoint = ((UriType)ext2.getValue()).getValue();
+                        tokenEndpoint = new URI(((UriType)ext2.getValue()).getValue());
                     }
                 }
 
@@ -58,6 +91,9 @@ public class FhirService {
             }
         }
 
+        if (authorizeEndpoint == null) {
+            throw new RuntimeException("Could not determine authorization endpoint");
+        }
     }
 
     public String getMrnSystem() {
@@ -65,6 +101,8 @@ public class FhirService {
     }
 
     public Patient getPatientByMrn(String mrn) {
+        authenticate();
+
         Bundle bundle = fhirClient.search()
             .forResource(Patient.class)
             .where(Patient.IDENTIFIER.exactly().systemAndCode(mrnSystem, mrn))
@@ -75,6 +113,8 @@ public class FhirService {
     }
 
     public Patient getPatientById(String id) {
+        authenticate();
+
         return fhirClient.read()
                 .resource(Patient.class)
                 .withId(id)
@@ -82,6 +122,8 @@ public class FhirService {
     }
 
     public Bundle getDocumentBundle(String patientId) {
+        authenticate();
+
         return fhirClient.search()
                 .forResource(DocumentReference.class)
                 .where(DocumentReference.SUBJECT.hasId(patientId))
@@ -114,6 +156,7 @@ public class FhirService {
             }
 
             if (!attachment.getUrlElement().isEmpty()) {
+                authenticate();
                 Binary data = fhirClient.read().resource(Binary.class).withUrl(attachment.getUrl()).execute();
                 return new DocumentContent(data.getContent(), data.getContentType());
             }
