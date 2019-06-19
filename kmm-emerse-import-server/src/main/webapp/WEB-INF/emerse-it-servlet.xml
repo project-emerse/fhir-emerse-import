@@ -85,7 +85,9 @@
     <bean id="fhirService" class="edu.utah.kmm.emerse.fhir.FhirService">
         <constructor-arg ref="fhirContext" />
         <constructor-arg value="${fhir.server.root}" />
+        <constructor-arg value="${fhir.server.authorization}" />
         <constructor-arg ref="fhirServiceCredentials" />
+        <constructor-arg value="${fhir.server.headers:}" />
         <constructor-arg value="${fhir.mrn.system}" />
     </bean>
 

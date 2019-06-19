@@ -17,6 +17,7 @@ import {ImportBatchComponent} from "./import/batch/import-batch.component";
 import {AngularSplitModule} from 'angular-split';
 import {RestService} from "./rest/rest.service";
 import {MockRestService} from "./rest/rest.service.mock";
+import {ImportManagerComponent} from "./import/manager/import-manager.component";
 
 // Import plugin modules here:
 
@@ -27,14 +28,16 @@ import {MockRestService} from "./rest/rest.service.mock";
         LoginComponent,
         ImportComponent,
         ImportSingleComponent,
-        ImportBatchComponent
+        ImportBatchComponent,
+        ImportManagerComponent
     ],
     entryComponents: [
         HomeComponent,
         LoginComponent,
         ImportComponent,
         ImportSingleComponent,
-        ImportBatchComponent
+        ImportBatchComponent,
+        ImportManagerComponent
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
     imports: [
