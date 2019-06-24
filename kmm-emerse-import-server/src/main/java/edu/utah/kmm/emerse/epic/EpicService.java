@@ -75,7 +75,7 @@ public class EpicService {
 
         RequestEntity request = addHeaders(RequestEntity
                 .post(createURI(url, null)))
-                .contentType(asJSON ? MediaType.APPLICATION_JSON : MediaType.MULTIPART_FORM_DATA)
+                .contentType(asJSON ? MediaType.APPLICATION_JSON : MediaType.APPLICATION_FORM_URLENCODED)
                 .body(body);
 
         return restTemplate.exchange(request, returnType);
