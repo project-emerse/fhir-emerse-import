@@ -13,6 +13,8 @@ export class RestService {
 
     private readonly serverEndpoint: string;
 
+    private authorization: string;
+
     constructor(private readonly httpClient: HttpClient) {
         this.serverEndpoint = environment.serverEndpoint;
         this.serverEndpoint = this.serverEndpoint.endsWith("/") ? this.serverEndpoint : this.serverEndpoint + "/";
@@ -23,10 +25,8 @@ export class RestService {
     }
 
     login(username: string, password: string): Observable<boolean> {
-        const headers = new HttpHeaders({
-            authorization: 'Basic ' + btoa(username + ':' + password)
-        });
-        return this.get("api/login", headers).pipe(
+        this.authorization = "Basic " + btoa(username + ":" + password);
+        return this.get("api/login").pipe(
             map(response => !!response),
             catchError(() => of(false))
         );
@@ -37,6 +37,8 @@ export class RestService {
             switchMap(() => of(true)),
             catchError(() => of(false))
         )
+
+        this.authorization = null;
     }
 
     findPatient(mrn: string): Observable<Patient> {
@@ -52,19 +54,30 @@ export class RestService {
     }
 
     private get<T>(url: string, headers?: HttpHeaders): Observable<T> {
+        headers = this.addHeaders(headers);
         return this.httpClient.get<T>(this.serverEndpoint + url, {headers, responseType: "json"})
             .pipe(
                 catchError(error => this.catchError(error)),
-                take(1)
+                shareReplay(1)
             );
     }
 
     private post<T>(url: string, body: any, headers?: HttpHeaders): Observable<T> {
+        headers = this.addHeaders(headers);
         return this.httpClient.post<T>(this.serverEndpoint + url, body, {headers, responseType: "json"})
             .pipe(
                 catchError(error => this.catchError(error)),
-                take(1)
+                shareReplay(1)
             );
+    }
+
+    private addHeaders(headers?: HttpHeaders): HttpHeaders {
+        if (this.authorization) {
+            headers = headers || new HttpHeaders();
+            headers = headers.set("authorization", this.authorization);
+        }
+
+        return headers;
     }
 
     private catchError(error): Observable<any> {

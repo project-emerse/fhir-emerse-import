@@ -1,6 +1,6 @@
 package edu.utah.kmm.emerse.database;
 
-import edu.utah.kmm.emerse.fhir.FhirService;
+import edu.utah.kmm.emerse.fhir.FhirClient;
 import edu.utah.kmm.emerse.security.Credentials;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,7 +39,7 @@ public class DatabaseService {
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Autowired
-    private FhirService fhirService;
+    private FhirClient fhirClient;
 
     public DatabaseService(DriverManagerDataSource dataSource, Credentials credentials) {
         this.dataSource = dataSource;
@@ -54,7 +54,7 @@ public class DatabaseService {
      * @param patient Patient resource.
      */
     public void createOrUpdatePatient(Patient patient, boolean update) {
-        String mrn = fhirService.getMRN(patient);
+        String mrn = fhirClient.extractMRN(patient);
         Integer recno = getPatientRecNum(mrn);
 
         if (recno != null && !update) {

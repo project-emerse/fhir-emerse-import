@@ -1,6 +1,6 @@
 import {Component, ViewEncapsulation} from "@angular/core";
 import {combineLatest, Observable, of} from "rxjs";
-import {FhirStu3Util, Identifier, Patient} from "@uukmm/ng-fhir-model/stu3";
+import {FhirStu3Util, HumanName, Identifier, Patient} from "@uukmm/ng-fhir-model/stu3";
 import {RestService} from "../../rest/rest.service";
 import {catchError, filter, switchMap, tap} from "rxjs/operators";
 import {Document} from "../../model/document.model";
@@ -29,6 +29,8 @@ export class ImportSingleComponent {
 
     message: string;
 
+    searching: boolean;
+
     private target: any;
 
     constructor(
@@ -37,11 +39,15 @@ export class ImportSingleComponent {
     }
 
     search(): void {
-        this.message = null;
+        this.message = "Searching...";
+        this.searching = true;
         const patient: Observable<Patient> = this.restService.findPatient(this.mrn);
 
         const documents: Observable<Document[]> = patient.pipe(
-            tap(patient => this.message = patient == null ? "No patient found.  Please try again." : null),
+            tap(patient => {
+                this.message = patient == null ? "No patient found.  Please try again." : null;
+                this.searching = false;
+            }),
             filter(patient => patient != null),
             switchMap(patient => this.restService.getDocuments(patient.id))
         );
@@ -55,11 +61,12 @@ export class ImportSingleComponent {
 
     private extractDemographics(patient: Patient): PatientDemographics {
         const mrn: Identifier = FhirStu3Util.getIdentifier(patient, this.configService.getSetting("fhir.mrn.system"));
-
+        const name: HumanName[] = patient.name;
+        const dob: string = patient.birthDate;
         return this.demographics = {
-            name: FhirStu3Util.formatName(patient.name[0]),
+            name: name ? FhirStu3Util.formatName(patient.name[0]): null,
             mrn: mrn ? mrn.value : null,
-            dob: patient.birthDate.toString(),
+            dob: dob,
             gender: patient.gender
         }
     }
@@ -81,6 +88,7 @@ export class ImportSingleComponent {
         this.demographics = null;
         this.mrn = null;
     }
+
     documentSelected(event: any, document: Document): void {
         this.htmlBody = document.isHtml ? document.body : null;
         this.textBody = !document.isHtml ? document.body : null;

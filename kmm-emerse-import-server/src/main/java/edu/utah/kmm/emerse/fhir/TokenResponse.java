@@ -5,13 +5,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class TokenResponse {
 
-    String access_token;
+    public String access_token;
 
-    String token_type;
+    public String token_type;
 
-    long expires_in;
+    public long expires_in;
 
-    String scope;
+    public String scope;
 
     long expirationTime;
 
@@ -38,7 +38,7 @@ public class TokenResponse {
         expirationTime = System.currentTimeMillis() + expires_in * 1000;
     }
 
-    boolean isExpired() {
+    public boolean isExpired() {
         return System.currentTimeMillis() >= expirationTime;
     }
 }

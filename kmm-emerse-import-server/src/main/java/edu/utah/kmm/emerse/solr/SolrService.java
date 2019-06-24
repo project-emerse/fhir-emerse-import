@@ -1,7 +1,7 @@
 package edu.utah.kmm.emerse.solr;
 
 import edu.utah.kmm.emerse.database.DatabaseService;
-import edu.utah.kmm.emerse.fhir.FhirService;
+import edu.utah.kmm.emerse.fhir.FhirClient;
 import edu.utah.kmm.emerse.model.DocumentContent;
 import edu.utah.kmm.emerse.security.Credentials;
 import org.apache.commons.io.IOUtils;
@@ -32,7 +32,7 @@ public class SolrService {
     private final Credentials credentials;
 
     @Autowired
-    private FhirService fhirService;
+    private FhirClient fhirClient;
 
     @Autowired
     private DatabaseService databaseService;
@@ -59,8 +59,8 @@ public class SolrService {
 
     public void indexDocuments(Patient patient) {
         databaseService.createOrUpdatePatient(patient, true);
-        List<DocumentReference> documents = fhirService.getDocuments(patient.getId());
-        String mrn = fhirService.getMRN(patient);
+        List<DocumentReference> documents = fhirClient.getDocuments(patient.getId());
+        String mrn = fhirClient.extractMRN(patient);
 
         for (DocumentReference document: documents) {
             indexDocument(mrn, document);
@@ -68,7 +68,7 @@ public class SolrService {
     }
 
     public UpdateResponse indexDocument(String mrn, DocumentReference documentReference) {
-        DocumentContent content = fhirService.getDocumentContent(documentReference);
+        DocumentContent content = fhirClient.getDocumentContent(documentReference);
 
         if (content == null) {
             log.warn("Document has no content: " + documentReference.getId());
@@ -97,7 +97,7 @@ public class SolrService {
         boolean isMRN = request.identifierType == IndexRequest.IdentifierType.MRN;
 
         for (String id: request.patientList) {
-            Patient patient = isMRN ? fhirService.getPatientByMrn(id) : fhirService.getPatientById(id);
+            Patient patient = isMRN ? fhirClient.getPatientByMrn(id) : fhirClient.getPatientById(id);
             indexDocuments(patient);
         }
     }

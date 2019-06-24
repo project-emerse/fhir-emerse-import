@@ -1,9 +1,10 @@
 <div class="emerse-import-single">
     <div class="emerse-import-single-search">
         <span>Enter MRN of patient:</span>
-        <input type="text" [(ngModel)]="mrn" autofocus>
-        <button mat-raised-button color="accent"
-                [disabled]="!mrn"
+        <input type="text" [(ngModel)]="mrn" autofocus
+               (keyup.enter)="srch.disabled ? null : search()">
+        <button mat-raised-button color="accent" #srch
+                [disabled]="!mrn || searching"
                 (click)="search()">Search</button>
         <button mat-raised-button color="warn"
                 [disabled]="!demographics"

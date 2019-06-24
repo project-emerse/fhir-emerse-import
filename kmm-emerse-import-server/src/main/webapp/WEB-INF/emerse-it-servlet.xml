@@ -24,6 +24,10 @@
 
     <mvc:annotation-driven />
 
+    <mvc:cors>
+        <mvc:mapping path="/**" />
+    </mvc:cors>
+
     <!-- Spring Security -->
 
     <sec:http use-expressions="true">
@@ -32,7 +36,7 @@
         <sec:headers>
             <sec:frame-options policy="SAMEORIGIN" />
         </sec:headers>
-        <sec:csrf disabled="true" />
+        <sec:cors />
         <sec:http-basic entry-point-ref="authenticationEntryPoint" />
         <sec:logout
              logout-url="/api/logout"
@@ -75,6 +79,26 @@
 
     <!-- FHIR Configuration -->
 
+    <bean id="authenticatorRegistry" class="edu.utah.kmm.emerse.fhir.AuthenticatorRegistry">
+        <constructor-arg>
+            <list>
+                <bean class="edu.utah.kmm.emerse.fhir.BasicAuthenticator" />
+                <bean class="edu.utah.kmm.emerse.fhir.OAuth2Authenticator" />
+                <bean class="edu.utah.kmm.emerse.epic.EpicAuthenticator" />
+            </list>
+        </constructor-arg>
+    </bean>
+
+
+    <bean id="patientLookupRegistry" class="edu.utah.kmm.emerse.fhir.PatientLookupRegistry">
+        <constructor-arg>
+            <list>
+                <bean class="edu.utah.kmm.emerse.fhir.DefaultPatientLookup" />
+                <bean class="edu.utah.kmm.emerse.epic.EpicPatientLookup" />
+            </list>
+        </constructor-arg>
+    </bean>
+
     <bean id="fhirServiceCredentials" class="edu.utah.kmm.emerse.security.Credentials">
         <constructor-arg value="${fhir.server.username}" />
         <constructor-arg value="${fhir.server.password}" />
@@ -82,14 +106,9 @@
 
     <bean id="fhirContext" class="ca.uhn.fhir.context.FhirContext" factory-method="forDstu3" />
 
-    <bean id="fhirService" class="edu.utah.kmm.emerse.fhir.FhirService">
-        <constructor-arg ref="fhirContext" />
-        <constructor-arg value="${fhir.server.root}" />
-        <constructor-arg value="${fhir.server.authorization}" />
-        <constructor-arg ref="fhirServiceCredentials" />
-        <constructor-arg value="${fhir.server.headers:}" />
-        <constructor-arg value="${fhir.mrn.system}" />
-    </bean>
+    <bean id="fhirClientFactory" class="edu.utah.kmm.emerse.fhir.FhirClientFactory" init-method="init" />
+
+    <bean id="fhirClient" factory-bean="fhirClientFactory" factory-method="newFhirClient" scope="prototype" />
 
     <!-- Datasource Configuration -->
 

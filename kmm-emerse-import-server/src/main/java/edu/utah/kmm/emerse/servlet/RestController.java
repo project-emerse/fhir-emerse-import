@@ -2,7 +2,7 @@ package edu.utah.kmm.emerse.servlet;
 
 import edu.utah.kmm.emerse.config.ClientConfigService;
 import edu.utah.kmm.emerse.database.DatabaseService;
-import edu.utah.kmm.emerse.fhir.FhirService;
+import edu.utah.kmm.emerse.fhir.FhirClient;
 import edu.utah.kmm.emerse.model.DocumentContent;
 import edu.utah.kmm.emerse.solr.SolrService;
 import org.apache.commons.logging.Log;
@@ -34,7 +34,7 @@ public class RestController {
     private static final Log log = LogFactory.getLog(RestController.class);
 
     @Autowired
-    private FhirService fhirService;
+    private FhirClient fhirClient;
 
     @Autowired
     private SolrService solrService;
@@ -66,7 +66,7 @@ public class RestController {
     @GetMapping("/patient/{mrn}")
     @ResponseBody
     public String getPatientByMrn(@PathVariable("mrn") String mrn) {
-        return fhirService.serialize(fhirService.getPatientByMrn(mrn));
+        return fhirClient.serialize(fhirClient.getPatientByMrn(mrn));
     }
 
     /**
@@ -77,7 +77,7 @@ public class RestController {
      */
     @PostMapping("/patient")
     public ResponseEntity updatePatient(@RequestBody String payload) {
-        Patient patient = fhirService.deserialize(payload, Patient.class);
+        Patient patient = fhirClient.deserialize(payload, Patient.class);
         databaseService.createOrUpdatePatient(patient, true);
         return new ResponseEntity(HttpStatus.OK);
     }
@@ -92,11 +92,11 @@ public class RestController {
     @ResponseBody
     public List<?> getDocuments(@PathVariable("patientId") String patientId) {
         List<Map<String, Object>> docs = new ArrayList<>();
-        Bundle bundle = fhirService.getDocumentBundle(patientId);
+        Bundle bundle = fhirClient.getDocumentBundle(patientId);
 
         for (Bundle.BundleEntryComponent entry: bundle.getEntry()) {
             DocumentReference documentReference = (DocumentReference) entry.getResource();
-            DocumentContent documentContent = fhirService.getDocumentContent(documentReference);
+            DocumentContent documentContent = fhirClient.getDocumentContent(documentReference);
 
             if (documentContent != null) {
                 Map<String, Object> map = new HashMap<>();
