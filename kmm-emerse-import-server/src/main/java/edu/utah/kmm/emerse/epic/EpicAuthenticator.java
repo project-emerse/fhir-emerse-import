@@ -5,16 +5,22 @@ import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
 import edu.utah.kmm.emerse.fhir.BaseOAuth2Authenticator;
 import edu.utah.kmm.emerse.fhir.TokenResponse;
 import edu.utah.kmm.emerse.security.Credentials;
-import org.apache.commons.lang.StringUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class EpicAuthenticator extends BaseOAuth2Authenticator {
 
@@ -85,20 +91,22 @@ public class EpicAuthenticator extends BaseOAuth2Authenticator {
         MultiValueMap<String, String> params = newRequestParams();
         params.set("launch", launchToken);
         params.set("state", UUID.randomUUID().toString());
-        params.set("scope", "launch patient/*.* openid user/*.* profile");
+        params.set("scope", "launch patient/*.read openid user/*.read profile");
         params.set("response_type", "code");
-        String result = epicService.get(authorizeEndpoint, params, String.class);
-        result = StringUtils.substringBetween(result, "href=\"", "\"");
-        params = UriComponentsBuilder.fromHttpUrl(result).build().getQueryParams();
-        String code = params == null ? null : params.getFirst("code");
-        Assert.notNull(params, "Failed to fetch an authorization code.");
-        return code;
+        ResponseEntity<?> response = epicService.getResponse(authorizeEndpoint, params, null);
+        URI location = response.getHeaders().getLocation();
+        Assert.notNull(location, "Failed to fetch an authorization code.");
+        List<NameValuePair> qs = URLEncodedUtils.parse(location, StandardCharsets.UTF_8);
+        qs = qs.stream().filter(param -> "code".equals(param.getName())).collect(Collectors.toList());
+        Assert.isTrue(!qs.isEmpty(), "Failed to fetch an authorization code.");
+        return qs.get(0).getValue();
     }
 
     private TokenResponse fetchAccessToken(String authorizationCode) {
-        MultiValueMap<String, String> body = newRequestParams();
-        body.set("code", authorizationCode);
-        body.set("grant_type", "authorization_code");
+        MultiValueMap<String, String> params = newRequestParams();
+        params.set("code", authorizationCode);
+        params.set("grant_type", "authorization_code");
+        String body = UriComponentsBuilder.newInstance().queryParams(params).build().getQuery();
         return epicService.post(tokenEndpoint, body, false, TokenResponse.class);
     }
 

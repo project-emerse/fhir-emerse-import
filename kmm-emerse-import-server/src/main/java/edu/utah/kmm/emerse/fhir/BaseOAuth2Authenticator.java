@@ -19,10 +19,14 @@ public abstract class BaseOAuth2Authenticator implements IAuthenticator {
 
     protected IGenericClient client;
 
+    private String fhirEndpoint;
+
     @Override
     public void initialize(IGenericClient client, Credentials credentials) {
         this.client = client;
         this.credentials = credentials;
+        fhirEndpoint = client.getServerBase();
+        fhirEndpoint = fhirEndpoint.endsWith("/") ? fhirEndpoint : fhirEndpoint + "/";
         getOAuthEndpoints();
     }
 
@@ -50,7 +54,11 @@ public abstract class BaseOAuth2Authenticator implements IAuthenticator {
     }
 
     private String getUri(Extension extension) {
-        return ((UriType) extension.getValue()).getValue();
+        return normalizeUri(((UriType) extension.getValue()).getValue());
+    }
+
+    private String normalizeUri(String uri) {
+        return uri.startsWith("http") ? uri : fhirEndpoint + uri;
     }
 
 
