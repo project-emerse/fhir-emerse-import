@@ -3,14 +3,15 @@
 // `ng build --env=prod` then `environment.prod.ts` will be used instead.
 // The list of which env maps to which file can be found in `.angular-cli.json`.
 
-import * as Logger from "ngx-logger";
 import {NgxLoggerLevel} from "ngx-logger";
+import {LoggerConfig} from "@uukmm/ng-logger";
 
-const loggerConfig: Logger.LoggerConfig = {
+const loggerConfig: LoggerConfig = {
   level: NgxLoggerLevel.DEBUG,
   serverLogLevel: NgxLoggerLevel.OFF,
   serverLoggingUrl: "https://edmopencdsdev.med.utah.edu:8443/kmm-client-logger/log",
-  disableConsoleLogging: true
+  disableConsoleLogging: true,
+  monitorEnabled: true
 };
 
 export const environment = {

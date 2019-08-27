@@ -7,13 +7,20 @@
         </a>
         <h2>Import Tool</h2>
         <span class="flex-fill"></span>
-       <span style="min-width: 100px">
+        <span>
+            <a *ngIf="logMonitorService.enabled"
+                (click)="logMonitorService.show()">
+                <mat-icon>bug_report</mat-icon>
+            </a>
+        </span>
+        <span style="min-width: 100px">
             <a *ngIf="loginService.isAuthenticated()" mat-button
-                (click)="loginService.logout()">Logout</a>
+               (click)="loginService.logout()">Logout</a>
         </span>
     </div>
     <div class="emerse-home-panel">
         <emerse-login *ngIf="!loginService.isAuthenticated()"></emerse-login>
-        <emerse-import *ngIf="loginService.isAuthenticated()"></emerse-import>``
+        <emerse-import *ngIf="loginService.isAuthenticated()"></emerse-import>
+        ``
     </div>
 </div>

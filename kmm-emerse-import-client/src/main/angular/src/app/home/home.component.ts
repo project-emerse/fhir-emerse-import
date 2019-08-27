@@ -2,6 +2,8 @@ import {AfterViewInit, Component, HostListener, ViewChild, ViewEncapsulation} fr
 import {LoginService} from "../login/login.service";
 import {ConfigService} from "../config/config.service";
 import {MatTooltip} from "@angular/material";
+import {NGXLogger} from 'ngx-logger';
+import {LoggerService, LogMonitorDialogService} from "@uukmm/ng-logger";
 
 @Component({
     selector: 'emerse-home',
@@ -11,12 +13,13 @@ import {MatTooltip} from "@angular/material";
 })
 export class HomeComponent {
 
-    @ViewChild("timeoutTooltip")
+    @ViewChild("timeoutTooltip", {static: false})
     timeoutTooltip: MatTooltip;
 
     constructor(
         public readonly loginService: LoginService,
-        public readonly configService: ConfigService) {
+        public readonly configService: ConfigService,
+        public readonly logMonitorService: LogMonitorDialogService) {
         this.loginService.onTimer().subscribe(value => {
             if (this.timeoutTooltip != null) {
                 if (value < 30 && value > 0) {

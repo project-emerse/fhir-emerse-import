@@ -10,7 +10,6 @@ import {LoggerModule} from "ngx-logger";
 import {environment} from "../environments/environment";
 import {HomeComponent} from "./home/home.component";
 import {LoginComponent} from "./login/login.component";
-import {MaterialModule} from "./material/material.module";
 import {ImportComponent} from "./import/import.component";
 import {ImportSingleComponent} from "./import/single/import-single.component";
 import {ImportBatchComponent} from "./import/batch/import-batch.component";
@@ -18,6 +17,7 @@ import {AngularSplitModule} from 'angular-split';
 import {RestService} from "./rest/rest.service";
 import {MockRestService} from "./rest/rest.service.mock";
 import {ImportManagerComponent} from "./import/manager/import-manager.component";
+import {MaterialModule} from '@uukmm/ng-widget-toolkit';
 
 // Import plugin modules here:
 
