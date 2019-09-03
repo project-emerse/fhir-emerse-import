@@ -1,11 +1,17 @@
 package edu.utah.kmm.emerse.fhir;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import edu.utah.kmm.emerse.model.DocumentContent;
+import edu.utah.kmm.emerse.security.Credentials;
 import org.apache.commons.lang.StringUtils;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,19 +24,74 @@ public class FhirClient {
     @Value("${fhir.mrn.system}")
     private String mrnSystem;
 
-    private final IGenericClient fhirClient;
+    @Value("${fhir.server.root}")
+    private String fhirRoot;
 
-    private final IAuthenticator authenticator;
+    @Value("${fhir.server.authtype}")
+    private String authenticationType;
 
-    private final IPatientLookup patientLookup;
+    @Value("${fhir.server.patientlookup:DEFAULT}")
+    private String patientLookupType;
 
-    public FhirClient(IGenericClient fhirClient, IAuthenticator authenticator, IPatientLookup patientLookup) {
-        this.fhirClient = fhirClient;
-        this.authenticator = authenticator;
-        this.patientLookup = patientLookup;
-        // patientLookup.initialize(fhirClient, fhirServiceCredentials);
+    @Value("${fhir.server.headers:}")
+    private String extraHeaders;
+
+    @Autowired
+    private FhirContext fhirContext;
+
+    @Autowired
+    private Credentials fhirServiceCredentials;
+
+    @Autowired
+    private AuthenticatorRegistry authenticatorRegistry;
+
+    @Autowired
+    private PatientLookupRegistry patientLookupRegistry;
+
+    private IGenericClient genericClient;
+
+    private IAuthenticator authenticator;
+
+    private IPatientLookup patientLookup;
+
+    public FhirClient() {
     }
-    
+
+    private void init() {
+        initGenericClient();
+        authenticator = authenticatorRegistry.get(authenticationType);
+        Assert.notNull(authenticator, "Unrecognized authentication scheme: " + authenticationType);
+        initialize(authenticator);
+        patientLookup = patientLookupRegistry.get(patientLookupType);
+        Assert.notNull(patientLookup, "Unknown patient lookup plugin: " + patientLookupType);
+        initialize(patientLookup);
+    }
+
+    public void initialize(IInitializable initializable) {
+        initGenericClient();
+        initializable.initialize(genericClient, fhirServiceCredentials);
+    }
+
+    private void initGenericClient() {
+        if (genericClient != null) {
+            return;
+        }
+
+        genericClient = fhirContext.newRestfulGenericClient(fhirRoot);
+        genericClient.setEncoding(EncodingEnum.JSON);
+
+        if (!extraHeaders.isEmpty()) {
+            AdditionalRequestHeadersInterceptor interceptor = new AdditionalRequestHeadersInterceptor();
+
+            for(String header: extraHeaders.split("\\n")) {
+                String[] pcs = header.split("\\:", 2);
+                interceptor.addHeaderValue(pcs[0].trim(), pcs.length == 2 ? pcs[1].trim() : "");
+            }
+
+            genericClient.registerInterceptor(interceptor);
+        }
+    }
+
     public Patient getPatientByMrn(String mrn) {
         return patientLookup.lookupByIdentifier(mrnSystem, mrn);
     }
@@ -38,7 +99,7 @@ public class FhirClient {
     public Patient getPatientById(String patientId) {
         authenticator.authenticate(patientId);
 
-        return fhirClient.read()
+        return genericClient.read()
                 .resource(Patient.class)
                 .withId(patientId)
                 .execute();
@@ -47,7 +108,7 @@ public class FhirClient {
     public Bundle getDocumentBundle(String patientId) {
         authenticator.authenticate(patientId);
 
-        return fhirClient.search()
+        return genericClient.search()
                 .forResource(DocumentReference.class)
                 .where(DocumentReference.SUBJECT.hasId(patientId))
                 .returnBundle(Bundle.class)
@@ -97,7 +158,7 @@ public class FhirClient {
 
             if (!attachment.getUrlElement().isEmpty()) {
                 authenticator.authenticate(getPatientId(documentReference));
-                Binary data = fhirClient.read().resource(Binary.class).withUrl(attachment.getUrl()).execute();
+                Binary data = genericClient.read().resource(Binary.class).withUrl(attachment.getUrl()).execute();
                 return new DocumentContent(data.getContent(), data.getContentType());
             }
         }
@@ -116,11 +177,11 @@ public class FhirClient {
     }
 
     public String serialize(IBaseResource resource) {
-        return resource == null ? null : fhirClient.getFhirContext().newJsonParser().encodeResourceToString(resource);
+        return resource == null ? null : genericClient.getFhirContext().newJsonParser().encodeResourceToString(resource);
     }
 
     public <T extends IBaseResource> T deserialize(String data, Class<T> resourceType) {
-        return data == null ? null : (T) fhirClient.getFhirContext().newJsonParser().parseResource(data);
+        return data == null ? null : (T) genericClient.getFhirContext().newJsonParser().parseResource(data);
     }
 
 }

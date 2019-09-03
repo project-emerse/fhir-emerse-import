@@ -3,8 +3,9 @@ import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {Patient} from "@uukmm/ng-fhir-model/stu3";
 import {Observable, of} from "rxjs";
 import {Document} from "../model/document.model";
-import {catchError, map, shareReplay, switchMap, take} from "rxjs/operators";
+import {catchError, map, shareReplay, switchMap} from "rxjs/operators";
 import {environment} from "../../environments/environment";
+import {v4 as uuid} from "uuid";
 
 @Injectable({
     providedIn: "root"
@@ -12,6 +13,8 @@ import {environment} from "../../environments/environment";
 export class RestService {
 
     private readonly serverEndpoint: string;
+
+    private readonly emerseId = uuid();
 
     private authorization: string;
 
@@ -72,8 +75,10 @@ export class RestService {
     }
 
     private addHeaders(headers?: HttpHeaders): HttpHeaders {
+        headers = headers || new HttpHeaders();
+        headers = headers.set("emerse_id", this.emerseId);
+
         if (this.authorization) {
-            headers = headers || new HttpHeaders();
             headers = headers.set("authorization", this.authorization);
         }
 

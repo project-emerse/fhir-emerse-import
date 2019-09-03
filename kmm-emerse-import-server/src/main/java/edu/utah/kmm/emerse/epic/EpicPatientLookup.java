@@ -9,6 +9,7 @@ import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -81,6 +82,7 @@ public class EpicPatientLookup implements IPatientLookup {
 
     private Credentials credentials;
 
+    @Autowired
     private EpicService epicService;
 
     @Override
@@ -91,7 +93,6 @@ public class EpicPatientLookup implements IPatientLookup {
     @Override
     public void initialize(IGenericClient client, Credentials credentials) {
         this.credentials = credentials;
-        epicService = new EpicService(client, credentials);
         initMappings();
     }
 

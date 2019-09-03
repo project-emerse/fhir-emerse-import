@@ -1,6 +1,8 @@
 package edu.utah.kmm.emerse.epic;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import edu.utah.kmm.emerse.fhir.FhirClient;
+import edu.utah.kmm.emerse.fhir.IInitializable;
 import edu.utah.kmm.emerse.security.Credentials;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
@@ -12,6 +14,8 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.protocol.HttpContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -23,13 +27,20 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 
-public class EpicService {
+public class EpicService implements IInitializable {
 
-    private final String apiRoot;
+    @Value("${app.client_id}")
+    private String clientId;
 
-    private final RestTemplate restTemplate;
+    private String apiRoot;
 
-    public EpicService(IGenericClient client, Credentials credentials) {
+    private RestTemplate restTemplate;
+
+    private EpicService(FhirClient fhirClient) {
+        fhirClient.initialize(this);
+    }
+
+    public void initialize(IGenericClient client, Credentials credentials) {
         restTemplate = buildRestTemplate();
         BasicAuthenticationInterceptor interceptor = new BasicAuthenticationInterceptor(credentials.getUsername(), credentials.getPassword());
         restTemplate.getInterceptors().add(interceptor);
@@ -86,6 +97,7 @@ public class EpicService {
                 .header("Cache-Control", "no-cache")
                 .header("Pragma", "no-cache")
                 .header("Accept-Encoding")
+                .header("Epic-Client-ID", clientId)
                 .acceptCharset();
     }
 

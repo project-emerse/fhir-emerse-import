@@ -7,6 +7,7 @@ import edu.utah.kmm.emerse.fhir.TokenResponse;
 import edu.utah.kmm.emerse.security.Credentials;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
@@ -16,7 +17,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -24,16 +24,23 @@ import java.util.stream.Collectors;
 
 public class EpicAuthenticator extends BaseOAuth2Authenticator {
 
-    private static final ThreadLocal<BearerTokenAuthInterceptor> oauthInterceptor = new ThreadLocal<BearerTokenAuthInterceptor>() {
+    private static class OAuthInterceptor extends BearerTokenAuthInterceptor {
 
-        @Override
-        protected BearerTokenAuthInterceptor initialValue() {
-            return new BearerTokenAuthInterceptor();
+        private TokenResponse accessToken;
+
+        public TokenResponse getAccessToken() {
+            return accessToken;
         }
-    };
 
-    private final Map<String, TokenResponse> accessTokens = new HashMap<>();
+        public void setAccessToken(TokenResponse accessToken) {
+            this.accessToken = accessToken;
+            setToken(accessToken.access_token);
+        }
+    }
 
+    private final OAuthInterceptor oauthInterceptor = new OAuthInterceptor();
+
+    @Autowired
     private EpicService epicService;
 
     @Value("${app.client_id}")
@@ -50,25 +57,19 @@ public class EpicAuthenticator extends BaseOAuth2Authenticator {
     @Override
     public void initialize(IGenericClient client, Credentials credentials) {
         super.initialize(client, credentials);
-        client.registerInterceptor(oauthInterceptor.get());
-        epicService = new EpicService(client, credentials);
+        client.registerInterceptor(oauthInterceptor);
     }
 
     @Override
     public void authenticate(String patientId) {
-        TokenResponse accessToken = getAccessToken(patientId);
-        oauthInterceptor.get().setToken(accessToken.access_token);
-    }
+        synchronized (oauthInterceptor) {
+            TokenResponse accessToken = oauthInterceptor.getAccessToken();
 
-    private TokenResponse getAccessToken(String patientId) {
-        TokenResponse accessToken = accessTokens.get(patientId);
-
-        if (accessToken == null || accessToken.isExpired()) {
-            accessToken = generateAccessToken(patientId);
-            accessTokens.put(patientId, accessToken);
+            if (accessToken == null || accessToken.isExpired()) {
+                accessToken = generateAccessToken(patientId);
+                oauthInterceptor.setAccessToken(accessToken);
+            }
         }
-
-        return accessToken;
     }
 
     private TokenResponse generateAccessToken(String patientId) {
@@ -79,11 +80,10 @@ public class EpicAuthenticator extends BaseOAuth2Authenticator {
 
     private String fetchLaunchToken(String patientId) {
         MultiValueMap<String, String> body = newRequestParams();
-        body.set("patient", patientId);
-        body.set("user", "104341");
+        body.set("client_id", clientId);
         Map<String, String> result = epicService.post("UU/2017/Security/OAuth2/IssueLaunchToken", body, true, Map.class);
         String launchToken = result == null ? null : result.get("launchToken");
-        Assert.notNull(launchToken, "Failed to fetch a launch token.");
+        Assert.isTrue(launchToken != null && !launchToken.isEmpty(), "Failed to fetch a launch token.");
         return launchToken;
     }
 

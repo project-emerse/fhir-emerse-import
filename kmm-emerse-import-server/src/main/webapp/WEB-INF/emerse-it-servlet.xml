@@ -106,9 +106,7 @@
 
     <bean id="fhirContext" class="ca.uhn.fhir.context.FhirContext" factory-method="forDstu3" />
 
-    <bean id="fhirClientFactory" class="edu.utah.kmm.emerse.fhir.FhirClientFactory" init-method="init" />
-
-    <bean id="fhirClient" factory-bean="fhirClientFactory" factory-method="newFhirClient" scope="prototype" />
+    <bean id="fhirClient" class="edu.utah.kmm.emerse.fhir.FhirClient" init-method="init"/>
 
     <!-- Datasource Configuration -->
 
@@ -125,6 +123,12 @@
     <bean id="databaseService" class="edu.utah.kmm.emerse.database.DatabaseService">
         <constructor-arg ref="dataSource" />
         <constructor-arg ref="dataSourceCredentials" />
+    </bean>
+
+    <!-- Epic Configuration -->
+
+    <bean id="epicService" class="edu.utah.kmm.emerse.epic.EpicService">
+        <constructor-arg ref="fhirClient" />
     </bean>
 
     <!-- Other Configuration -->
