@@ -1,8 +1,8 @@
 import {Component, ViewEncapsulation} from "@angular/core";
-import {combineLatest, Observable, of} from "rxjs";
+import {combineLatest, Observable} from "rxjs";
 import {FhirStu3Util, HumanName, Identifier, Patient} from "@uukmm/ng-fhir-model/stu3";
 import {RestService} from "../../rest/rest.service";
-import {catchError, filter, switchMap, tap} from "rxjs/operators";
+import {filter, switchMap, tap} from "rxjs/operators";
 import {Document} from "../../model/document.model";
 import {PatientDemographics} from "../../model/patient-demographics.model";
 import {ConfigService} from "../../config/config.service";
@@ -52,7 +52,7 @@ export class ImportSingleComponent {
             switchMap(patient => this.restService.getDocuments(patient.id))
         );
 
-        combineLatest(patient, documents).subscribe(([patient, documents]) => {
+        combineLatest([patient, documents]).subscribe(([patient, documents]) => {
             this.extractDemographics(patient);
             this.documents = documents;
         });
@@ -73,10 +73,6 @@ export class ImportSingleComponent {
 
     private searchForPatient(mrn: string): Observable<Patient> {
         return this.restService.findPatient(mrn);
-    }
-
-    private searchForDocuments(patient: Patient): any {
-
     }
 
     index(): void {

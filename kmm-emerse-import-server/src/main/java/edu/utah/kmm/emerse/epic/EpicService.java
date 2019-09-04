@@ -1,11 +1,6 @@
 package edu.utah.kmm.emerse.epic;
 
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import edu.utah.kmm.emerse.fhir.FhirClient;
-import edu.utah.kmm.emerse.fhir.IInitializable;
 import edu.utah.kmm.emerse.security.Credentials;
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.Header;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolException;
@@ -27,25 +22,26 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 
-public class EpicService implements IInitializable {
+public class EpicService {
 
     @Value("${app.client_id}")
     private String clientId;
 
+    @Value("${epic.api.root}/")
     private String apiRoot;
 
-    private RestTemplate restTemplate;
+    @Autowired
+    private Credentials fhirServiceCredentials;
 
-    private EpicService(FhirClient fhirClient) {
-        fhirClient.initialize(this);
-    }
+    private RestTemplate restTemplateBasic;
 
-    public void initialize(IGenericClient client, Credentials credentials) {
-        restTemplate = buildRestTemplate();
-        BasicAuthenticationInterceptor interceptor = new BasicAuthenticationInterceptor(credentials.getUsername(), credentials.getPassword());
-        restTemplate.getInterceptors().add(interceptor);
-        String fhirRoot = client.getServerBase();
-        apiRoot = StringUtils.substringBeforeLast(fhirRoot, "/api/") + "/api/";
+    private RestTemplate restTemplateNone;
+
+    public void init() {
+        restTemplateNone = buildRestTemplate();
+        restTemplateBasic = buildRestTemplate();
+        BasicAuthenticationInterceptor interceptor = new BasicAuthenticationInterceptor(fhirServiceCredentials.getUsername(), fhirServiceCredentials.getPassword());
+        restTemplateBasic.getInterceptors().add(interceptor);
     }
 
     private RestTemplate buildRestTemplate() {
@@ -69,40 +65,42 @@ public class EpicService implements IInitializable {
         return new RestTemplate(factory);
     }
 
-    public <T> ResponseEntity<T> getResponse(String url, MultiValueMap<String, String> params, Class<T> returnType) {
+    public <T> ResponseEntity<T> getResponse(String url, MultiValueMap<String, String> params, Class<T> returnType, boolean authenticate) {
         RequestEntity request = addHeaders(RequestEntity
                 .get(createURI(url, params)))
                 .build();
 
-        return restTemplate.exchange(request, returnType);
+        return getRestTemplate(authenticate).exchange(request, returnType);
     }
 
-    public <T> T get(String url, MultiValueMap<String, String> params, Class<T> returnType) {
-        return getResponse(url, params, returnType).getBody();
+    public <T> T get(String url, MultiValueMap<String, String> params, Class<T> returnType, boolean authenticate) {
+        return getResponse(url, params, returnType, authenticate).getBody();
     }
 
-    public <T> ResponseEntity<T> postResponse(String url, Object body, boolean asJSON, Class<T> returnType) {
-        body = asJSON && body instanceof MultiValueMap ? ((MultiValueMap<?, ?>) body).toSingleValueMap() : body;
+    public <T> ResponseEntity<T> postResponse(String url, Object body, boolean asJSON, Class<T> returnType, boolean authenticate) {
+        body = body instanceof MultiValueMap ? ((MultiValueMap<?, ?>) body).toSingleValueMap() : body;
 
         RequestEntity request = addHeaders(RequestEntity
                 .post(createURI(url, null)))
                 .contentType(asJSON ? MediaType.APPLICATION_JSON : MediaType.APPLICATION_FORM_URLENCODED)
                 .body(body);
 
-        return restTemplate.exchange(request, returnType);
+        return getRestTemplate(authenticate).exchange(request, returnType);
+    }
+
+    public <T> T post(String url, Object body, boolean asJSON, Class<T> returnType, boolean authenticate) {
+        return postResponse(url, body, asJSON, returnType, authenticate).getBody();
+    }
+
+    private RestTemplate getRestTemplate(boolean authenticate) {
+        return authenticate ? restTemplateBasic : restTemplateNone;
     }
 
     private <T extends RequestEntity.HeadersBuilder<T>> T addHeaders(RequestEntity.HeadersBuilder<T> builder) {
         return builder.accept(MediaType.APPLICATION_JSON)
                 .header("Cache-Control", "no-cache")
                 .header("Pragma", "no-cache")
-                .header("Accept-Encoding")
-                .header("Epic-Client-ID", clientId)
-                .acceptCharset();
-    }
-
-    public <T> T post(String url, Object body, boolean asJSON, Class<T> returnType) {
-        return postResponse(url, body, asJSON, returnType).getBody();
+                .header("Epic-Client-ID", clientId);
     }
 
     private URI createURI(String url, MultiValueMap<String, String> params) {

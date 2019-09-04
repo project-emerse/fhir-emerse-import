@@ -1,8 +1,8 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {Patient} from "@uukmm/ng-fhir-model/stu3";
-import {combineLatest, Observable, of, throwError} from "rxjs";
-import {catchError, map, switchMap, tap} from "rxjs/operators";
+import {combineLatest, Observable, of} from "rxjs";
+import {catchError, map, switchMap} from "rxjs/operators";
 
 @Injectable({
     providedIn: "root"

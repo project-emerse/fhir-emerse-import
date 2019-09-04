@@ -122,7 +122,7 @@ public class EpicPatientLookup implements IPatientLookup {
         body.put("PatientIDType", epicId);
         body.put("UserID", StringUtils.substringAfter(credentials.getUsername(), "emp$"));
         body.put("UserIDType", "EXTERNAL");
-        Map<String, Object> result = epicService.post(GET_IDENTIFIERS, body, true, Map.class);
+        Map<String, Object> result = epicService.post(GET_IDENTIFIERS, body, true, Map.class, true);
         List<Map<String, String>> identifiers = (List<Map<String, String>>) result.get("Identifiers");
         Patient patient = new Patient();
 
@@ -141,7 +141,7 @@ public class EpicPatientLookup implements IPatientLookup {
             }
         }
 
-        result = epicService.post(GET_DEMOGRAPHICS, body, true, Map.class);
+        result = epicService.post(GET_DEMOGRAPHICS, body, true, Map.class, true);
         String birthDate = (String) result.get("DateOfBirth");
         String maritalStatus = (String) result.get("MaritalStatus");
         String gender = (String) result.get("SexAssignedAtBirth");

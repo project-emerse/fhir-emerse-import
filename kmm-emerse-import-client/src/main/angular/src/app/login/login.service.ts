@@ -1,5 +1,5 @@
-import {HostListener, Injectable} from "@angular/core";
-import {BehaviorSubject, Observable, of, Subject} from "rxjs";
+import {Injectable} from "@angular/core";
+import {BehaviorSubject, Observable, Subject} from "rxjs";
 import {filter, tap} from "rxjs/operators";
 import {RestService} from "../rest/rest.service";
 import {ConfigService} from "../config/config.service";

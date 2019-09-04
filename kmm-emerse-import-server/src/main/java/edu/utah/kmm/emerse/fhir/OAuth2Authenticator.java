@@ -4,7 +4,6 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import edu.utah.kmm.emerse.security.Credentials;
 import edu.utah.kmm.emerse.util.MiscUtil;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.http.client.utils.URIUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.RequestEntity;

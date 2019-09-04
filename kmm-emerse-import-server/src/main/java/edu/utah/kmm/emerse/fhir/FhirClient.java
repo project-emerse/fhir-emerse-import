@@ -67,16 +67,11 @@ public class FhirClient {
         initialize(patientLookup);
     }
 
-    public void initialize(IInitializable initializable) {
-        initGenericClient();
+    private void initialize(IInitializable initializable) {
         initializable.initialize(genericClient, fhirServiceCredentials);
     }
 
     private void initGenericClient() {
-        if (genericClient != null) {
-            return;
-        }
-
         genericClient = fhirContext.newRestfulGenericClient(fhirRoot);
         genericClient.setEncoding(EncodingEnum.JSON);
 

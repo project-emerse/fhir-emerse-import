@@ -127,9 +127,7 @@
 
     <!-- Epic Configuration -->
 
-    <bean id="epicService" class="edu.utah.kmm.emerse.epic.EpicService">
-        <constructor-arg ref="fhirClient" />
-    </bean>
+    <bean id="epicService" class="edu.utah.kmm.emerse.epic.EpicService" init-method="init" />
 
     <!-- Other Configuration -->
 
