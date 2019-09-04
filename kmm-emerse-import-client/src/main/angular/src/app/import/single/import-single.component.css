@@ -30,13 +30,30 @@
     background: lightblue!important;
 }
 
+.emerse-import-single-documents > as-split > as-split-area {
+    position: relative;
+}
+
+.emerse-import-single-documents > as-split > as-split-area:last-child {
+    margin: 5px;
+}
+
+.emerse-import-single-documents > as-split > as-split-area > * {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0
+}
+
+
 .emerse-import-single-document {
     display: flex;
     flex-direction: row;
 }
 
 .emerse-import-single-document > *:first-child {
-    width: 100px;
+    width: 11em;
 }
 
 .emerse-import-single-document > *:last-child {
@@ -70,3 +87,4 @@
 .emerse-import-single-search > * {
     margin-right: 10px;
 }
+

@@ -5,17 +5,19 @@ import org.apache.solr.common.StringUtils;
 
 public class DocumentContent {
 
+    private static final Base64 decoder = new Base64();
+
     private final String content;
 
     private final String contentType;
 
     public DocumentContent(String content, String contentType) {
-        this.content = content;
+        this.content = new String(decoder.decode(content));
         this.contentType = StringUtils.isEmpty(contentType) ? "text/html" : contentType;
     }
 
     public DocumentContent(byte[] content, String contentType) {
-        this(new String(Base64.decodeBase64(content)), contentType);
+        this(new String(content), contentType);
     }
 
     public String getContentType() {

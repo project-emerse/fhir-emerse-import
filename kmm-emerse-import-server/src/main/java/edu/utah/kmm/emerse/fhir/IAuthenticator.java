@@ -4,5 +4,4 @@ public interface IAuthenticator extends IInitializable {
 
     String getName();
 
-    void authenticate(String patientId);
 }

@@ -15,11 +15,11 @@ import {ConfigService} from "../../config/config.service";
 })
 export class ImportSingleComponent {
 
-    mrn: string;
-
     documents: Document[];
 
     demographics: PatientDemographics;
+
+    mrn: string;
 
     patient: Patient;
 
@@ -39,24 +39,25 @@ export class ImportSingleComponent {
     }
 
     search(): void {
-        this.message = "Searching...";
+        this.clear();
+        this.message = "Searching for patient...";
         this.searching = true;
-        const patient: Observable<Patient> = this.restService.findPatient(this.mrn);
-
-        const documents: Observable<Document[]> = patient.pipe(
-            tap(patient => {
-                this.message = patient == null ? "No patient found.  Please try again." : null;
-                this.searching = false;
-            }),
-            filter(patient => patient != null),
-            switchMap(patient => this.restService.getDocuments(patient.id))
-        );
-
-        combineLatest([patient, documents]).subscribe(([patient, documents]) => {
-            this.extractDemographics(patient);
-            this.documents = documents;
-        });
-
+        this.restService.findPatient(this.mrn)
+            .pipe(
+                tap(patient => {
+                    this.message = patient == null ? "No patient found.  Please try again." : null;
+                    this.searching = patient != null;
+                }),
+                filter(patient => patient != null),
+                tap(patient => {
+                    this.extractDemographics(patient);
+                    this.message = "Searching for documents..."
+                }),
+                switchMap(patient => this.restService.getDocuments(patient.id)),
+                tap(() => {
+                    this.message = null;
+                    this.searching = false;
+                })).subscribe(docs => this.documents = docs);
     }
 
     private extractDemographics(patient: Patient): PatientDemographics {
@@ -80,9 +81,10 @@ export class ImportSingleComponent {
     }
 
     clear(): void {
+        this.textBody = null;
+        this.htmlBody = null;
         this.documents = null;
         this.demographics = null;
-        this.mrn = null;
     }
 
     documentSelected(event: any, document: Document): void {

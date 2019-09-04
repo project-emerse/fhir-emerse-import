@@ -1,9 +1,9 @@
 package edu.utah.kmm.emerse.epic;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
-import edu.utah.kmm.emerse.fhir.BaseOAuth2Authenticator;
-import edu.utah.kmm.emerse.fhir.TokenResponse;
+import edu.utah.kmm.emerse.oauth.AccessToken;
+import edu.utah.kmm.emerse.oauth.BaseOAuth2Authenticator;
+import edu.utah.kmm.emerse.oauth.OAuthInterceptor;
 import edu.utah.kmm.emerse.security.Credentials;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -15,9 +15,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -26,21 +24,14 @@ import java.util.stream.Collectors;
 
 public class EpicAuthenticator extends BaseOAuth2Authenticator {
 
-    private static class OAuthInterceptor extends BearerTokenAuthInterceptor {
+    private class EpicAuthInterceptor extends OAuthInterceptor {
 
-        private TokenResponse accessToken;
-
-        public TokenResponse getAccessToken() {
-            return accessToken;
+        @Override
+        protected AccessToken generateToken() {
+            return generateAccessToken("e3-ooNeHcmrnIanfYJ.wmEQ3");
         }
 
-        public void setAccessToken(TokenResponse accessToken) {
-            this.accessToken = accessToken;
-            setToken(accessToken.access_token);
-        }
     }
-
-    private final OAuthInterceptor oauthInterceptor = new OAuthInterceptor();
 
     @Autowired
     private EpicService epicService;
@@ -65,22 +56,10 @@ public class EpicAuthenticator extends BaseOAuth2Authenticator {
     @Override
     public void initialize(IGenericClient client, Credentials credentials) {
         super.initialize(client, credentials);
-        client.registerInterceptor(oauthInterceptor);
+        client.registerInterceptor(new EpicAuthInterceptor());
     }
 
-    @Override
-    public void authenticate(String patientId) {
-        synchronized (oauthInterceptor) {
-            TokenResponse accessToken = oauthInterceptor.getAccessToken();
-
-            if (accessToken == null || accessToken.isExpired()) {
-                accessToken = generateAccessToken(patientId);
-                oauthInterceptor.setAccessToken(accessToken);
-            }
-        }
-    }
-
-    private TokenResponse generateAccessToken(String patientId) {
+    private AccessToken generateAccessToken(String patientId) {
         String launchToken = fetchLaunchToken(patientId);
         String authorizationCode = fetchAuthorizationCode(launchToken);
         return fetchAccessToken(authorizationCode);
@@ -88,7 +67,7 @@ public class EpicAuthenticator extends BaseOAuth2Authenticator {
 
     private String fetchLaunchToken(String patientId) {
         MultiValueMap<String, String> body = newRequestParams(false);
-        body.set("patient", "e3-ooNeHcmrnIanfYJ.wmEQ3");
+        body.set("patient", patientId);
         body.set("user", userId);
         Map<String, String> result = epicService.post("UU/2017/Security/OAuth2/IssueLaunchToken", body, true, Map.class, true);
         String launchToken = result == null ? null : result.get("launchToken");
@@ -111,12 +90,12 @@ public class EpicAuthenticator extends BaseOAuth2Authenticator {
         return qs.get(0).getValue();
     }
 
-    private TokenResponse fetchAccessToken(String authorizationCode) {
+    private AccessToken fetchAccessToken(String authorizationCode) {
         MultiValueMap<String, String> params = newRequestParams(true);
         params.set("code", authorizationCode);
         params.set("grant_type", "authorization_code");
         String body = UriComponentsBuilder.newInstance().queryParams(params).build().getQuery();
-        return epicService.post(tokenEndpoint, body, false, TokenResponse.class, false);
+        return epicService.post(tokenEndpoint, body, false, AccessToken.class, false);
     }
 
     private MultiValueMap<String, String> newRequestParams(boolean encode) {
@@ -126,11 +105,4 @@ public class EpicAuthenticator extends BaseOAuth2Authenticator {
         return params;
     }
 
-    private String encode(String value) {
-        try {
-            return URLEncoder.encode(value, "ASCII");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

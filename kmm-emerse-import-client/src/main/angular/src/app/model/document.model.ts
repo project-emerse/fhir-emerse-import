@@ -4,7 +4,9 @@ export interface Document {
 
     body: string;
 
-    date: string;
+    date: number;
+
+    dateStr: string;
 
     isHtml: boolean;
 

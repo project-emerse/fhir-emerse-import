@@ -3,6 +3,7 @@ package edu.utah.kmm.emerse.epic;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import edu.utah.kmm.emerse.fhir.IPatientLookup;
 import edu.utah.kmm.emerse.security.Credentials;
+import edu.utah.kmm.emerse.util.MiscUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
@@ -27,8 +28,6 @@ public class EpicPatientLookup implements IPatientLookup {
 
     private static final String GET_IDENTIFIERS = "epic/2015/Common/Patient/GetPatientIdentifiers/Patient/Identifiers";
 
-    private static final SimpleDateFormat dateParser = new SimpleDateFormat("yyyy-MM-dd");
-
     // TODO: where are the OID mappings?
     private static final String[] CODE_MAPPINGS = {
             "EPI=0",
@@ -44,7 +43,7 @@ public class EpicPatientLookup implements IPatientLookup {
 
     private static Date parseDate(String dateStr) {
         try {
-            return dateStr ==  null ? null : dateParser.parse(dateStr);
+            return dateStr ==  null ? null : MiscUtil.dateParser.parse(dateStr);
         } catch (Exception e) {
             return null;
         }

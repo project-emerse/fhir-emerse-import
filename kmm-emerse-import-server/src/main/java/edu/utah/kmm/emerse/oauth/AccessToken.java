@@ -1,6 +1,6 @@
-package edu.utah.kmm.emerse.fhir;
+package edu.utah.kmm.emerse.oauth;
 
-public class TokenResponse {
+public class AccessToken {
 
     public String access_token;
 
@@ -14,7 +14,7 @@ public class TokenResponse {
 
     private long expirationTime;
 
-    public TokenResponse() {
+    public AccessToken() {
         issued = System.currentTimeMillis();
     }
 

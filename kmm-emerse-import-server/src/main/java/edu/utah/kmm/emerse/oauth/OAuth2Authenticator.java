@@ -1,4 +1,4 @@
-package edu.utah.kmm.emerse.fhir;
+package edu.utah.kmm.emerse.oauth;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import edu.utah.kmm.emerse.security.Credentials;
@@ -18,7 +18,13 @@ public class OAuth2Authenticator extends BaseOAuth2Authenticator {
 
     private static final String SCOPES = "patient/*.read";
 
-    private TokenResponse tokenResponse;
+    private class OAuth2Interceptor extends OAuthInterceptor {
+
+        @Override
+        protected AccessToken generateToken() {
+            return generateAccessToken();
+        }
+    }
 
     @Override
     public String getName() {
@@ -28,26 +34,21 @@ public class OAuth2Authenticator extends BaseOAuth2Authenticator {
     @Override
     public void initialize(IGenericClient client, Credentials credentials) {
         super.initialize(client, credentials);
-        authenticate(null);
+        client.registerInterceptor(new OAuth2Interceptor());
     }
 
-    @Override
-    public void authenticate(String patientId) {
-        if (tokenResponse == null || tokenResponse.isExpired()) {
-            tokenResponse = null;
+    private AccessToken generateAccessToken() {
             RestTemplate restTemplate = new RestTemplate();
             MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
             params.set("grant_type", "client_credentials");
-            params.set("scope", SCOPES);
+            params.set("scope", encode(SCOPES));
             HttpHeaders headers = new HttpHeaders();
             URI ep = MiscUtil.toURI(tokenEndpoint);
             headers.set("Authorization", "Basic "
                     + Base64.encodeBase64String((credentials.getUsername() + ":" + credentials.getPassword()).getBytes()));
             RequestEntity<Object> request = new RequestEntity<Object>(params, headers, HttpMethod.POST, ep);
-            ResponseEntity<TokenResponse> response = restTemplate.exchange(request, TokenResponse.class);
-            tokenResponse = response.getBody();
-        }
-
+            ResponseEntity<AccessToken> response = restTemplate.exchange(request, AccessToken.class);
+            return response.getBody();
     }
 
 }

@@ -2,15 +2,16 @@
     <div class="emerse-import-single-search">
         <span>Enter MRN of patient:</span>
         <input type="text" [(ngModel)]="mrn" autofocus
+               [disabled]="searching"
                (keyup.enter)="srch.disabled ? null : search()">
         <button mat-raised-button color="accent" #srch
                 [disabled]="!mrn || searching"
                 (click)="search()">Search</button>
         <button mat-raised-button color="warn"
-                [disabled]="!demographics"
+                [disabled]="!demographics || searching"
                 (click)="clear()">Clear</button>
         <button mat-raised-button color="primary"
-                [disabled]="!demographics"
+                [disabled]="!demographics || searching"
                 (click)="index()">Index</button>
         <span class="text-danger">{{message}}</span>
     </div>
@@ -32,7 +33,7 @@
                     <button mat-list-item *ngFor="let document of documents"
                         (click)="documentSelected($event, document)">
                         <div class="emerse-import-single-document">
-                            <span>{{document.date}}</span>
+                            <span>{{document.dateStr}}</span>
                             <span>{{document.title}}</span>
                         </div>
                         <mat-divider></mat-divider>

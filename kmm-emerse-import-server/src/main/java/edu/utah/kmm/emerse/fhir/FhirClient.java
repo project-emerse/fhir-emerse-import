@@ -92,8 +92,6 @@ public class FhirClient {
     }
 
     public Patient getPatientById(String patientId) {
-        authenticator.authenticate(patientId);
-
         return genericClient.read()
                 .resource(Patient.class)
                 .withId(patientId)
@@ -101,11 +99,10 @@ public class FhirClient {
     }
 
     public Bundle getDocumentBundle(String patientId) {
-        authenticator.authenticate(patientId);
-
         return genericClient.search()
                 .forResource(DocumentReference.class)
-                .where(DocumentReference.SUBJECT.hasId(patientId))
+                .where(DocumentReference.PATIENT.hasId(patientId))
+                .where(DocumentReference.CLASS.exactly().code("clinical-notes"))
                 .returnBundle(Bundle.class)
                 .execute();
     }
@@ -143,7 +140,6 @@ public class FhirClient {
 
     public DocumentContent getDocumentContent(DocumentReference documentReference) {
         if (!documentReference.getContent().isEmpty()) {
-            documentReference.getSubjectTarget().getId();
             DocumentReference.DocumentReferenceContentComponent content = documentReference.getContentFirstRep();
             Attachment attachment = content.getAttachment();
 
@@ -152,9 +148,8 @@ public class FhirClient {
             }
 
             if (!attachment.getUrlElement().isEmpty()) {
-                authenticator.authenticate(getPatientId(documentReference));
                 Binary data = genericClient.read().resource(Binary.class).withUrl(attachment.getUrl()).execute();
-                return new DocumentContent(data.getContent(), data.getContentType());
+                return new DocumentContent(data.getContentAsBase64(), data.getContentType());
             }
         }
 

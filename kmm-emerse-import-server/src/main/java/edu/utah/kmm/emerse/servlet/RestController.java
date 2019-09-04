@@ -5,6 +5,7 @@ import edu.utah.kmm.emerse.database.DatabaseService;
 import edu.utah.kmm.emerse.fhir.FhirClient;
 import edu.utah.kmm.emerse.model.DocumentContent;
 import edu.utah.kmm.emerse.solr.SolrService;
+import edu.utah.kmm.emerse.util.MiscUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -18,10 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Controller for all REST services.
@@ -88,7 +86,7 @@ public class RestController {
      * @param patientId
      * @return
      */
-    @GetMapping("/documents/{patientId}")
+    @GetMapping("/documents/{patientId:.+}")
     @ResponseBody
     public List<?> getDocuments(@PathVariable("patientId") String patientId) {
         List<Map<String, Object>> docs = new ArrayList<>();
@@ -100,8 +98,10 @@ public class RestController {
 
             if (documentContent != null) {
                 Map<String, Object> map = new HashMap<>();
+                Date date = documentReference.hasCreated() ? documentReference.getCreated() : null;
                 map.put("title", documentReference.getType().getText());
-                map.put("date", documentReference.getCreated());
+                map.put("date", date == null ? null :  date.getTime());
+                map.put("dateStr", date == null ? null : MiscUtil.dateTimeParser.format(date));
                 map.put("body", documentContent.getContent());
                 map.put("isHtml", "text/html".equals(documentContent.getContentType()));
                 docs.add(map);

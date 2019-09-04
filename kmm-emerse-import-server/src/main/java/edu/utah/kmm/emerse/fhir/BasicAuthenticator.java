@@ -18,8 +18,4 @@ public class BasicAuthenticator implements IAuthenticator {
         client.registerInterceptor(interceptor);
     }
 
-    @Override
-    public void authenticate(String patientId) {
-        // NOP
-    }
 }
