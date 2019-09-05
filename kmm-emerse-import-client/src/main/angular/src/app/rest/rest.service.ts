@@ -49,8 +49,8 @@ export class RestService {
         return this.get(`api/patient?mrn=${mrn}`);
     }
 
-    getDocuments(fhirId: string): Observable<Document[]> {
-        return this.get(`api/documents?fhir=${fhirId}`);
+    getDocuments(patid: string): Observable<Document[]> {
+        return this.get(`api/documents?patid=${patid}`);
     }
 
     singleIndex(mrn: string): Observable<IndexResult> {

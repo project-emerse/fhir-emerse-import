@@ -62,16 +62,16 @@ public class RestController {
      * Fetch patient from FHIR service.
      *
      * @param mrn The patient's MRN.
-     * @param fhir The patient's FHIR logical id.
+     * @param patid The patient's FHIR id.
      * @return Serialized form of the Patient resource.
      */
     @GetMapping("/patient")
     @ResponseBody
     public String getPatient(
             @RequestParam(required = false) String mrn,
-            @RequestParam(required = false) String fhir) {
-        IdentifierType type = validateIdentifiers(mrn, fhir);
-        return fhirClient.serialize(fhirClient.getPatient(mrn != null ? mrn : fhir, type));
+            @RequestParam(required = false) String patid) {
+        IdentifierType type = validateIdentifiers(mrn, patid);
+        return fhirClient.serialize(fhirClient.getPatient(mrn != null ? mrn : patid, type));
     }
 
     /**
@@ -91,18 +91,16 @@ public class RestController {
     /**
      * Fetch a patient's documents.
      *
-     * @param fhir The patient's FHIR logical id.
+     * @param patid The patient's FHIR id.
      * @return A list of documents.
      */
     @GetMapping("/documents")
     @ResponseBody
     public List<?> getDocuments(
-            @RequestParam String fhir) {
+            @RequestParam String patid) {
         List<Map<String, Object>> docs = new ArrayList<>();
-        Bundle bundle = fhirClient.getDocumentBundleById(fhir);
 
-        for (Bundle.BundleEntryComponent entry: bundle.getEntry()) {
-            DocumentReference documentReference = (DocumentReference) entry.getResource();
+        for (DocumentReference documentReference: fhirClient.getDocumentsForPatient(patid)) {
             DocumentContent documentContent = fhirClient.getDocumentContent(documentReference);
 
             if (documentContent != null) {
@@ -125,45 +123,43 @@ public class RestController {
      * Index a patient's documents.
      *
      * @param mrn The patient's MRN.
-     * @param fhir The patient's FHIR logical id.
+     * @param patid The patient's FHIR id.
      * @return Result of the indexing request.
      */
     @GetMapping("/index")
     @ResponseBody
     public IndexResult indexPatient(
             @RequestParam(required = false) String mrn,
-            @RequestParam(required = false) String fhir) {
-        return solrService.indexDocuments(mrn != null ? mrn : fhir, validateIdentifiers(mrn, fhir));
+            @RequestParam(required = false) String patid) {
+        return solrService.indexDocuments(mrn != null ? mrn : patid, validateIdentifiers(mrn, patid));
     }
 
     /**
      * Batch index.
      *
      * @param file File containing list of id's.
-     * @param type The id type.
-     * @return Count of patients indexed.
+     * @return The indexing result.
      */
     @PostMapping("/batch")
     @ResponseBody
     public IndexResult indexBatch(
-            @RequestParam MultipartFile file,
-            @RequestParam String type) {
-        return solrService.batchIndex(file.getResource(), MiscUtil.toIdentifierType(type));
+            @RequestParam MultipartFile file) {
+        return solrService.batchIndex(file.getResource());
     }
 
     /**
      * Validates that a single identifier is present.
      *
      * @param mrn The MRN.
-     * @param fhir The FHIR logical id.
+     * @param patid The FHIR id.
      * @return The identifier type.
      * @throws IllegalArgumentException if both identifiers are null or both are non-null.
      */
-    private IdentifierType validateIdentifiers(String mrn, String fhir) {
-        Assert.isTrue(mrn != null ^ fhir != null, mrn == null
-                ? "You must specify an identifier (mrn or fhir)."
-                : "You may specify one and only one identifier (mrn or fhir).");
-        return mrn != null ? IdentifierType.MRN : IdentifierType.FHIR;
+    private IdentifierType validateIdentifiers(String mrn, String patid) {
+        Assert.isTrue(mrn != null ^ patid != null, mrn == null
+                ? "You must specify an identifier (mrn or patid)."
+                : "You may specify one and only one identifier (mrn or patid).");
+        return mrn != null ? IdentifierType.MRN : IdentifierType.PATID;
     }
 
 }

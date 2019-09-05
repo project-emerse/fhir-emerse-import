@@ -14,8 +14,6 @@ export class ImportBatchComponent {
 
     file: File;
 
-    type: string;
-
     message: string;
 
     private target: any;
@@ -29,15 +27,10 @@ export class ImportBatchComponent {
         this.file = files.item(0);
     }
 
-    handleIdFormat(event: MatRadioChange): void {
-        this.type = event.source.value;
-    }
-
     indexFile(): void {
         this.message = "Indexing...";
         const formData: FormData = new FormData();
         formData.set('file', this.file, this.file.name);
-        formData.set('type', this.type);
         this.restService
             .batchIndex(formData)
             .subscribe({
@@ -53,7 +46,6 @@ export class ImportBatchComponent {
             this.file = null;
         }
 
-        this.type = null;
         this.message = message;
     }
 

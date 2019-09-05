@@ -17,9 +17,9 @@ public class IndexRequest {
 
     final Date completed;
 
-    final int totalPatients;
+    final int total;
 
-    final int processedPatients;
+    final int processed;
 
     final String errorText;
 
@@ -27,19 +27,19 @@ public class IndexRequest {
 
     final IdentifierType identifierType;
 
-    final List<String> patientList;
+    final List<String> identifiers;
 
     IndexRequest(ResultSet rs) {
         try {
             this.id = rs.getLong("ID");
             this.submitted = rs.getDate("SUBMITTED");
             this.completed = rs.getDate("COMPLETED");
-            this.totalPatients = rs.getInt("TOTAL_PATIENTS");
-            this.processedPatients = rs.getInt("PROCESSED_PATIENTS");
+            this.total = rs.getInt("TOTAL");
+            this.processed = rs.getInt("PROCESSED");
             this.errorText = rs.getString("ERROR_TEXT");
             this.processingFlag = rs.getInt("PROCESSING_FLAG") != 1;
             this.identifierType = toIdentifierType(rs.getString("IDENTIFIER_TYPE"));
-            this.patientList = IOUtils.readLines(rs.getClob("PATIENT_LIST").getAsciiStream(), "UTF-8");
+            this.identifiers = IOUtils.readLines(rs.getClob("IDENTIFIERS").getAsciiStream(), "UTF-8");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

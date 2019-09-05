@@ -1,6 +1,7 @@
 package edu.utah.kmm.emerse.model;
 
 public enum IdentifierType {
-    MRN,    // The medical record number
-    FHIR    // The FHIR logical id.
+    MRN,        // Patient medical record number
+    PATID,      // Patient FHIR id
+    DOCID       // DocumentReference FHIR id
 }

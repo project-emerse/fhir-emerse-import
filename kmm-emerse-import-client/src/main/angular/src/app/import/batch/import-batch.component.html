@@ -3,18 +3,6 @@
         <label for="file">Choose File to Import:</label>
         <input type="file" id="file"
                (change)="handleFileInput($event)">
-        <fieldset>
-            <legend>Identifier Type</legend>
-            <mat-radio-group id="type"
-                    (change)="handleIdFormat($event)">
-                <mat-radio-button value="mrn" [checked]="type==='mrn'">
-                    Medical Record Number
-                </mat-radio-button>
-                <mat-radio-button value="fhir" [checked]="type=='fhir'">
-                    FHIR Logical ID
-                </mat-radio-button>
-            </mat-radio-group>
-        </fieldset>
     </div>
     <div class="text-danger" style="min-height: 50px">{{message}}</div>
     <button [disabled]="!file || !type" mat-raised-button color="accent"

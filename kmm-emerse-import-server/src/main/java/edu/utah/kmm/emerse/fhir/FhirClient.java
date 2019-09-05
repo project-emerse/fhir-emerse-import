@@ -89,6 +89,7 @@ public class FhirClient {
     }
 
     public Patient getPatient(String id, IdentifierType type) {
+        Assert.isTrue(type == IdentifierType.MRN || type == IdentifierType.PATID, "Invalid identifier type.");
         return type == IdentifierType.MRN ? getPatientByMrn(id) : getPatientById(id);
     }
 
@@ -96,25 +97,33 @@ public class FhirClient {
         return patientLookup.lookupByMrn(mrn);
     }
 
-    public Patient getPatientById(String fhirId) {
-        return genericClient.read()
-                .resource(Patient.class)
-                .withId(fhirId)
-                .execute();
+    public <T extends IBaseResource> T readResource(Class<T> type, String fhirId) {
+        try {
+            return genericClient.read()
+                    .resource(type)
+                    .withId(fhirId)
+                    .execute();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
-    public Bundle getDocumentBundleById(String fhirId) {
-        return genericClient.search()
+    public Patient getPatientById(String patid) {
+        return readResource(Patient.class, patid);
+    }
+
+    public DocumentReference getDocumentById(String docid) {
+        return readResource(DocumentReference.class, docid);
+    }
+
+    public List<DocumentReference> getDocumentsForPatient(String patid) {
+        List<DocumentReference> documents = new ArrayList<>();
+        Bundle bundle = genericClient.search()
                 .forResource(DocumentReference.class)
-                .where(DocumentReference.PATIENT.hasId(fhirId))
+                .where(DocumentReference.PATIENT.hasId(patid))
                 .where(DocumentReference.CLASS.exactly().code("clinical-notes"))
                 .returnBundle(Bundle.class)
                 .execute();
-    }
-
-    public List<DocumentReference> getDocumentsById(String fhirId) {
-        List<DocumentReference> documents = new ArrayList<>();
-        Bundle bundle = getDocumentBundleById(fhirId);
 
         for (Bundle.BundleEntryComponent entry: bundle.getEntry()) {
             Resource resource = entry.getResource();
@@ -133,7 +142,7 @@ public class FhirClient {
      * @param documentReference The document.
      * @return The FHIR id of the subject, or null if not found.
      */
-    private String getPatientId(DocumentReference documentReference) {
+    public String getPatientId(DocumentReference documentReference) {
         Resource res = documentReference.getSubjectTarget();
 
         if (res instanceof Patient) {
@@ -144,6 +153,30 @@ public class FhirClient {
             Reference ref = documentReference.getSubject();
             String id = ref.getId();
             return id == null ? StringUtils.substringAfterLast(ref.getReference(), "/") : id;
+        }
+
+        return null;
+    }
+
+    /**
+     * Return the MRN of the subject of a document.
+     *
+     * @param documentReference The document.
+     * @return The MRN of the subject, or null if not found.
+     */
+    public String getPatientMrn(DocumentReference documentReference) {
+        Resource res = documentReference.getSubjectTarget();
+
+        if (res instanceof Patient) {
+            return extractMRN((Patient) res);
+        }
+
+        String patid = getPatientId(documentReference);
+
+        if (patid != null) {
+            Patient patient = getPatientById(patid);
+            documentReference.setSubjectTarget(patient);
+            return extractMRN(patient);
         }
 
         return null;
