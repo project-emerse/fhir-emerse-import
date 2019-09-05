@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import edu.utah.kmm.emerse.model.DocumentContent;
+import edu.utah.kmm.emerse.model.IdentifierType;
 import edu.utah.kmm.emerse.security.Credentials;
 import org.apache.commons.lang.StringUtils;
 import org.hl7.fhir.dstu3.model.*;
@@ -87,29 +88,33 @@ public class FhirClient {
         }
     }
 
-    public Patient getPatientByMrn(String mrn) {
-        return patientLookup.lookupByIdentifier(mrnSystem, mrn);
+    public Patient getPatient(String id, IdentifierType type) {
+        return type == IdentifierType.MRN ? getPatientByMrn(id) : getPatientById(id);
     }
 
-    public Patient getPatientById(String patientId) {
+    public Patient getPatientByMrn(String mrn) {
+        return patientLookup.lookupByMrn(mrn);
+    }
+
+    public Patient getPatientById(String fhirId) {
         return genericClient.read()
                 .resource(Patient.class)
-                .withId(patientId)
+                .withId(fhirId)
                 .execute();
     }
 
-    public Bundle getDocumentBundle(String patientId) {
+    public Bundle getDocumentBundleById(String fhirId) {
         return genericClient.search()
                 .forResource(DocumentReference.class)
-                .where(DocumentReference.PATIENT.hasId(patientId))
+                .where(DocumentReference.PATIENT.hasId(fhirId))
                 .where(DocumentReference.CLASS.exactly().code("clinical-notes"))
                 .returnBundle(Bundle.class)
                 .execute();
     }
 
-    public List<DocumentReference> getDocuments(String patientId) {
+    public List<DocumentReference> getDocumentsById(String fhirId) {
         List<DocumentReference> documents = new ArrayList<>();
-        Bundle bundle = getDocumentBundle(patientId);
+        Bundle bundle = getDocumentBundleById(fhirId);
 
         for (Bundle.BundleEntryComponent entry: bundle.getEntry()) {
             Resource resource = entry.getResource();
@@ -122,6 +127,12 @@ public class FhirClient {
         return documents;
     }
 
+    /**
+     * Return the FHIR id of the subject of a document.
+     *
+     * @param documentReference The document.
+     * @return The FHIR id of the subject, or null if not found.
+     */
     private String getPatientId(DocumentReference documentReference) {
         Resource res = documentReference.getSubjectTarget();
 

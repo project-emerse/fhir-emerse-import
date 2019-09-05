@@ -2,16 +2,16 @@
     <div class="emerse-import-single-search">
         <span>Enter MRN of patient:</span>
         <input type="text" [(ngModel)]="mrn" autofocus
-               [disabled]="searching"
+               [disabled]="busy"
                (keyup.enter)="srch.disabled ? null : search()">
         <button mat-raised-button color="accent" #srch
-                [disabled]="!mrn || searching"
+                [disabled]="!mrn || busy"
                 (click)="search()">Search</button>
         <button mat-raised-button color="warn"
-                [disabled]="!demographics || searching"
+                [disabled]="!demographics || busy"
                 (click)="clear()">Clear</button>
         <button mat-raised-button color="primary"
-                [disabled]="!demographics || searching"
+                [disabled]="!demographics || busy"
                 (click)="index()">Index</button>
         <span class="text-danger">{{message}}</span>
     </div>

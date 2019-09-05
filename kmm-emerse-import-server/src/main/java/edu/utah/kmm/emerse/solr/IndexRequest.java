@@ -1,5 +1,6 @@
 package edu.utah.kmm.emerse.solr;
 
+import edu.utah.kmm.emerse.model.IdentifierType;
 import org.apache.commons.io.IOUtils;
 
 import java.sql.ResultSet;
@@ -7,11 +8,6 @@ import java.util.Date;
 import java.util.List;
 
 public class IndexRequest {
-
-    public enum IdentifierType {
-        MRN, // The medical record number
-        ID   // The logical id.
-    };
 
     final long id;
 
@@ -40,10 +36,18 @@ public class IndexRequest {
             this.processedPatients = rs.getInt("PROCESSED_PATIENTS");
             this.errorText = rs.getString("ERROR_TEXT");
             this.processingFlag = rs.getInt("PROCESSING_FLAG") != 1;
-            this.identifierType = IdentifierType.valueOf(rs.getString("IDENTIFIER_TYPE"));
+            this.identifierType = toIdentifierType(rs.getString("IDENTIFIER_TYPE"));
             this.patientList = IOUtils.readLines(rs.getClob("PATIENT_LIST").getAsciiStream(), "UTF-8");
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private IdentifierType toIdentifierType(String value) {
+        try {
+            return IdentifierType.valueOf(value);
+        } catch (Exception e) {
+            return null;
         }
     }
 }

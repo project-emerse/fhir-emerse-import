@@ -24,7 +24,7 @@ public class DaemonManager {
 
     private final int maxDaemons;
 
-    private final List<IndexerDaemon> daemons = new ArrayList<>();
+    private final List<IndexDaemon> daemons = new ArrayList<>();
 
     public DaemonManager(int maxDaemons) {
         this.maxDaemons = maxDaemons;
@@ -44,7 +44,7 @@ public class DaemonManager {
         int count = 0;
 
         for (int i = daemons.size(); i < maxDaemons; i++) {
-            daemons.add(new IndexerDaemon(solrQueue, solrService));
+            daemons.add(new IndexDaemon(solrQueue, solrService));
             count++;
         }
 
@@ -53,7 +53,7 @@ public class DaemonManager {
     }
 
     public int stopBackgroundProcessors() {
-        Iterator<IndexerDaemon> daemons = this.daemons.iterator();
+        Iterator<IndexDaemon> daemons = this.daemons.iterator();
         int count = 0;
 
         while (daemons.hasNext()) {

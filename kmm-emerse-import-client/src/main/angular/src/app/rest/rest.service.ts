@@ -6,6 +6,7 @@ import {Document} from "../model/document.model";
 import {catchError, map, shareReplay, switchMap} from "rxjs/operators";
 import {environment} from "../../environments/environment";
 import {v4 as uuid} from "uuid";
+import {IndexResult} from "../model/index-result.model";
 
 @Injectable({
     providedIn: "root"
@@ -45,18 +46,18 @@ export class RestService {
     }
 
     findPatient(mrn: string): Observable<Patient> {
-        return this.get(`api/patient/${mrn}`);
+        return this.get(`api/patient?mrn=${mrn}`);
     }
 
-    getDocuments(patientId: string): Observable<Document[]> {
-        return this.get(`api/documents/${patientId}`);
+    getDocuments(fhirId: string): Observable<Document[]> {
+        return this.get(`api/documents?fhir=${fhirId}`);
     }
 
-    singleIndex(mrn: string): Observable<number> {
-        return this.get(`api/index/${mrn}`);
+    singleIndex(mrn: string): Observable<IndexResult> {
+        return this.get(`api/index?mrn=${mrn}`);
     }
 
-    batchIndex(formData): Observable<any> {
+    batchIndex(formData): Observable<IndexResult> {
         return this.post("api/batch", formData);
     }
 

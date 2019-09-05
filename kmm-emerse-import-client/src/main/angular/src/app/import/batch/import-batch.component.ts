@@ -1,6 +1,8 @@
 import {Component, ViewEncapsulation} from "@angular/core";
 import {HttpErrorResponse} from "@angular/common/http";
 import {RestService} from "../../rest/rest.service";
+import {MatRadioChange} from "@angular/material/radio";
+import {IndexResultUtil} from "../../model/index-result.model";
 
 @Component({
     selector: 'emerse-import-batch',
@@ -11,6 +13,8 @@ import {RestService} from "../../rest/rest.service";
 export class ImportBatchComponent {
 
     file: File;
+
+    type: string;
 
     message: string;
 
@@ -25,13 +29,19 @@ export class ImportBatchComponent {
         this.file = files.item(0);
     }
 
+    handleIdFormat(event: MatRadioChange): void {
+        this.type = event.source.value;
+    }
+
     indexFile(): void {
+        this.message = "Indexing...";
         const formData: FormData = new FormData();
-        formData.append('file', this.file, this.file.name);
+        formData.set('file', this.file, this.file.name);
+        formData.set('type', this.type);
         this.restService
             .batchIndex(formData)
             .subscribe({
-                next: count => this.clear(`Indexed ${count} patient(s).`),
+                next: result => this.clear(IndexResultUtil.toString(result)),
                 error: err => this.handleError(err)
             });
     }
@@ -43,6 +53,7 @@ export class ImportBatchComponent {
             this.file = null;
         }
 
+        this.type = null;
         this.message = message;
     }
 

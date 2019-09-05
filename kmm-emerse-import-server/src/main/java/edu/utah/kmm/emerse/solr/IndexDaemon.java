@@ -3,9 +3,9 @@ package edu.utah.kmm.emerse.solr;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class IndexerDaemon implements Runnable {
+public class IndexDaemon implements Runnable {
 
-    private static Log log = LogFactory.getLog(IndexerDaemon.class);
+    private static Log log = LogFactory.getLog(IndexDaemon.class);
 
     private static int daemonCounter;
 
@@ -23,7 +23,7 @@ public class IndexerDaemon implements Runnable {
 
     private boolean running;
 
-    IndexerDaemon(SolrQueue solrQueue, SolrService solrService) {
+    IndexDaemon(SolrQueue solrQueue, SolrService solrService) {
         this.solrQueue = solrQueue;
         this.solrService = solrService;
         thread = new Thread(this);

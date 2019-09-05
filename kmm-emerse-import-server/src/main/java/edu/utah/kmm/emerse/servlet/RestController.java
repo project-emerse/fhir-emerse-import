@@ -4,6 +4,8 @@ import edu.utah.kmm.emerse.config.ClientConfigService;
 import edu.utah.kmm.emerse.database.DatabaseService;
 import edu.utah.kmm.emerse.fhir.FhirClient;
 import edu.utah.kmm.emerse.model.DocumentContent;
+import edu.utah.kmm.emerse.model.IdentifierType;
+import edu.utah.kmm.emerse.solr.IndexResult;
 import edu.utah.kmm.emerse.solr.SolrService;
 import edu.utah.kmm.emerse.util.MiscUtil;
 import org.apache.commons.logging.Log;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -58,23 +61,28 @@ public class RestController {
     /**
      * Fetch patient from FHIR service.
      *
-     * @param mrn
-     * @return
+     * @param mrn The patient's MRN.
+     * @param fhir The patient's FHIR logical id.
+     * @return Serialized form of the Patient resource.
      */
-    @GetMapping("/patient/{mrn}")
+    @GetMapping("/patient")
     @ResponseBody
-    public String getPatientByMrn(@PathVariable("mrn") String mrn) {
-        return fhirClient.serialize(fhirClient.getPatientByMrn(mrn));
+    public String getPatient(
+            @RequestParam(required = false) String mrn,
+            @RequestParam(required = false) String fhir) {
+        IdentifierType type = validateIdentifiers(mrn, fhir);
+        return fhirClient.serialize(fhirClient.getPatient(mrn != null ? mrn : fhir, type));
     }
 
     /**
      * Create/update entry in EMERSE patient table.
      *
-     * @param payload Serialized form of patient.
-     * @return
+     * @param payload Serialized form of the Patient resource.
+     * @return Status of the operation.
      */
     @PostMapping("/patient")
-    public ResponseEntity updatePatient(@RequestBody String payload) {
+    public ResponseEntity updatePatient(
+            @RequestBody String payload) {
         Patient patient = fhirClient.deserialize(payload, Patient.class);
         databaseService.createOrUpdatePatient(patient, true);
         return new ResponseEntity(HttpStatus.OK);
@@ -83,14 +91,15 @@ public class RestController {
     /**
      * Fetch a patient's documents.
      *
-     * @param patientId
-     * @return
+     * @param fhir The patient's FHIR logical id.
+     * @return A list of documents.
      */
-    @GetMapping("/documents/{patientId:.+}")
+    @GetMapping("/documents")
     @ResponseBody
-    public List<?> getDocuments(@PathVariable("patientId") String patientId) {
+    public List<?> getDocuments(
+            @RequestParam String fhir) {
         List<Map<String, Object>> docs = new ArrayList<>();
-        Bundle bundle = fhirClient.getDocumentBundle(patientId);
+        Bundle bundle = fhirClient.getDocumentBundleById(fhir);
 
         for (Bundle.BundleEntryComponent entry: bundle.getEntry()) {
             DocumentReference documentReference = (DocumentReference) entry.getResource();
@@ -111,22 +120,49 @@ public class RestController {
         return docs;
     }
 
-    @GetMapping("/index/{mrn}")
+    /**
+     * Index a patient's documents.
+     *
+     * @param mrn The patient's MRN.
+     * @param fhir The patient's FHIR logical id.
+     * @return Result of the indexing request.
+     */
+    @GetMapping("/index")
     @ResponseBody
-    public int indexPatient(@PathVariable("mrn") String mrn) {
-        return solrService.batchIndex(Collections.singletonList(mrn));
+    public IndexResult indexPatient(
+            @RequestParam(required = false) String mrn,
+            @RequestParam(required = false) String fhir) {
+        return solrService.indexDocuments(mrn != null ? mrn : fhir, validateIdentifiers(mrn, fhir));
     }
 
     /**
      * Batch index.
      *
-     * @param file
+     * @param file File containing list of id's.
+     * @param type The id type.
      * @return Count of patients indexed.
      */
     @PostMapping("/batch")
     @ResponseBody
-    public int indexBatch(@RequestParam("file") MultipartFile file) {
-        return solrService.batchIndex(file.getResource());
+    public IndexResult indexBatch(
+            @RequestParam MultipartFile file,
+            @RequestParam String type) {
+        return solrService.batchIndex(file.getResource(), MiscUtil.toIdentifierType(type));
+    }
+
+    /**
+     * Validates that a single identifier is present.
+     *
+     * @param mrn The MRN.
+     * @param fhir The FHIR logical id.
+     * @return The identifier type.
+     * @throws IllegalArgumentException if both identifiers are null or both are non-null.
+     */
+    private IdentifierType validateIdentifiers(String mrn, String fhir) {
+        Assert.isTrue(mrn != null ^ fhir != null, mrn == null
+                ? "You must specify an identifier (mrn or fhir)."
+                : "You may specify one and only one identifier (mrn or fhir).");
+        return mrn != null ? IdentifierType.MRN : IdentifierType.FHIR;
     }
 
 }

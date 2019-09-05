@@ -25,6 +25,7 @@
     <solr.version>7.3.1</solr.version>
     <jackson.version>2.9.9</jackson.version>
     <hapi-fhir.version>3.8.0</hapi-fhir.version>
+    <log4j.version>2.11.2</log4j.version>
   </properties>
 
   <build>

@@ -6,3 +6,20 @@
 .emerse-import-batch button {
     margin-left: 15px
 }
+
+.emerse-import-batch mat-radio-group {
+    display: inline-flex;
+    flex-direction: column;
+    padding: 5px;
+}
+
+.emerse-import-batch legend {
+    width: auto;
+    font-size: .9rem;
+}
+
+.emerse-import-batch fieldset {
+    display: inline;
+    border: 1px solid lightgray;
+    padding: 5px;
+}

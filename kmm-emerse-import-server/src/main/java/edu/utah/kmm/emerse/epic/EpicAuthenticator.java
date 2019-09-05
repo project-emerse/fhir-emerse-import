@@ -59,15 +59,15 @@ public class EpicAuthenticator extends BaseOAuth2Authenticator {
         client.registerInterceptor(new EpicAuthInterceptor());
     }
 
-    private AccessToken generateAccessToken(String patientId) {
-        String launchToken = fetchLaunchToken(patientId);
+    private AccessToken generateAccessToken(String fhirId) {
+        String launchToken = fetchLaunchToken(fhirId);
         String authorizationCode = fetchAuthorizationCode(launchToken);
         return fetchAccessToken(authorizationCode);
     }
 
-    private String fetchLaunchToken(String patientId) {
+    private String fetchLaunchToken(String fhirId) {
         MultiValueMap<String, String> body = newRequestParams(false);
-        body.set("patient", patientId);
+        body.set("patient", fhirId);
         body.set("user", userId);
         Map<String, String> result = epicService.post("UU/2017/Security/OAuth2/IssueLaunchToken", body, true, Map.class, true);
         String launchToken = result == null ? null : result.get("launchToken");

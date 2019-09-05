@@ -2,10 +2,11 @@ import {Component, ViewEncapsulation} from "@angular/core";
 import {combineLatest, Observable} from "rxjs";
 import {FhirStu3Util, HumanName, Identifier, Patient} from "@uukmm/ng-fhir-model/stu3";
 import {RestService} from "../../rest/rest.service";
-import {filter, switchMap, tap} from "rxjs/operators";
+import {filter, map, switchMap, tap} from "rxjs/operators";
 import {Document} from "../../model/document.model";
 import {PatientDemographics} from "../../model/patient-demographics.model";
 import {ConfigService} from "../../config/config.service";
+import {IndexResult, IndexResultUtil} from "../../model/index-result.model";
 
 @Component({
     selector: 'emerse-import-single',
@@ -29,7 +30,7 @@ export class ImportSingleComponent {
 
     message: string;
 
-    searching: boolean;
+    busy: boolean;
 
     private target: any;
 
@@ -41,12 +42,12 @@ export class ImportSingleComponent {
     search(): void {
         this.clear();
         this.message = "Searching for patient...";
-        this.searching = true;
+        this.busy = true;
         this.restService.findPatient(this.mrn)
             .pipe(
                 tap(patient => {
                     this.message = patient == null ? "No patient found.  Please try again." : null;
-                    this.searching = patient != null;
+                    this.busy = patient != null;
                 }),
                 filter(patient => patient != null),
                 tap(patient => {
@@ -56,7 +57,7 @@ export class ImportSingleComponent {
                 switchMap(patient => this.restService.getDocuments(patient.id)),
                 tap(() => {
                     this.message = null;
-                    this.searching = false;
+                    this.busy = false;
                 })).subscribe(docs => this.documents = docs);
     }
 
@@ -72,12 +73,16 @@ export class ImportSingleComponent {
         }
     }
 
-    private searchForPatient(mrn: string): Observable<Patient> {
-        return this.restService.findPatient(mrn);
-    }
-
     index(): void {
-        this.restService.singleIndex(this.mrn);
+        this.message = null;
+        this.busy = true;
+        this.message = "Indexing documents..."
+        this.restService.singleIndex(this.mrn).pipe(
+            tap(() => {
+                this.message = null;
+                this.busy = false;
+            })
+        ).subscribe(result => this.message = IndexResultUtil.toString(result));
     }
 
     clear(): void {
@@ -85,6 +90,7 @@ export class ImportSingleComponent {
         this.htmlBody = null;
         this.documents = null;
         this.demographics = null;
+        this.message = null;
     }
 
     documentSelected(event: any, document: Document): void {

@@ -37,6 +37,7 @@
             <sec:frame-options policy="SAMEORIGIN" />
         </sec:headers>
         <sec:cors />
+        <sec:csrf disabled="true" />
         <sec:http-basic entry-point-ref="authenticationEntryPoint" />
         <sec:logout
              logout-url="/api/logout"
