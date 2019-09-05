@@ -108,6 +108,7 @@ public class RestController {
             if (documentContent != null) {
                 Map<String, Object> map = new HashMap<>();
                 Date date = documentReference.hasCreated() ? documentReference.getCreated() : null;
+                map.put("id", documentReference.getIdElement().getIdPart());
                 map.put("title", documentReference.getType().getText());
                 map.put("date", date == null ? null :  date.getTime());
                 map.put("dateStr", date == null ? null : MiscUtil.dateTimeParser.format(date));

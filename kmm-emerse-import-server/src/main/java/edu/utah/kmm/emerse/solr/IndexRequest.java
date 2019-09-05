@@ -7,6 +7,8 @@ import java.sql.ResultSet;
 import java.util.Date;
 import java.util.List;
 
+import static edu.utah.kmm.emerse.util.MiscUtil.toIdentifierType;
+
 public class IndexRequest {
 
     final long id;
@@ -43,11 +45,4 @@ public class IndexRequest {
         }
     }
 
-    private IdentifierType toIdentifierType(String value) {
-        try {
-            return IdentifierType.valueOf(value);
-        } catch (Exception e) {
-            return null;
-        }
-    }
 }
