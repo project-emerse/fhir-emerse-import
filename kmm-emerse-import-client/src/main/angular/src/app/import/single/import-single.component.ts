@@ -77,7 +77,7 @@ export class ImportSingleComponent {
     }
 
     index(): void {
-
+        this.restService.singleIndex(this.mrn);
     }
 
     clear(): void {

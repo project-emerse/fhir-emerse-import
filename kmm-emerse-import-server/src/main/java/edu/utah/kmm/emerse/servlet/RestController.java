@@ -111,6 +111,12 @@ public class RestController {
         return docs;
     }
 
+    @GetMapping("/index/{mrn}")
+    @ResponseBody
+    public int indexPatient(@PathVariable("mrn") String mrn) {
+        return solrService.batchIndex(Collections.singletonList(mrn));
+    }
+
     /**
      * Batch index.
      *
@@ -119,7 +125,7 @@ public class RestController {
      */
     @PostMapping("/batch")
     @ResponseBody
-    public int batch(@RequestParam("file") MultipartFile file) {
+    public int indexBatch(@RequestParam("file") MultipartFile file) {
         return solrService.batchIndex(file.getResource());
     }
 

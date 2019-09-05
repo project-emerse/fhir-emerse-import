@@ -52,6 +52,10 @@ export class RestService {
         return this.get(`api/documents/${patientId}`);
     }
 
+    singleIndex(mrn: string): Observable<number> {
+        return this.get(`api/index/${mrn}`);
+    }
+
     batchIndex(formData): Observable<any> {
         return this.post("api/batch", formData);
     }
