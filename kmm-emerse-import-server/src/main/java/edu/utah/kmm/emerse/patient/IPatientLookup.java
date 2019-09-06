@@ -7,6 +7,6 @@ public interface IPatientLookup extends IInitializable {
 
     String getName();
 
-    Patient lookupByMrn(String mrn);
+    Patient lookupByMRN(String mrn);
 
 }

@@ -1,11 +1,13 @@
 package edu.utah.kmm.emerse.database;
 
+import edu.utah.kmm.emerse.patient.PatientService;
 import edu.utah.kmm.emerse.solr.IndexRequestDTO;
 import edu.utah.kmm.emerse.patient.PatientDTO;
 import edu.utah.kmm.emerse.fhir.FhirService;
 import edu.utah.kmm.emerse.fhir.IdentifierType;
 import edu.utah.kmm.emerse.security.Credentials;
 import edu.utah.kmm.emerse.solr.SolrService;
+import org.apache.calcite.avatica.Meta;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -58,18 +60,15 @@ public class DatabaseService {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
-    private final DriverManagerDataSource dataSource;
-
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
-    @Autowired
-    private FhirService fhirService;
 
     @Autowired
     private SolrService solrService;
 
+    @Autowired
+    private PatientService patientService;
+
     public DatabaseService(DriverManagerDataSource dataSource, Credentials dbCredentials) {
-        this.dataSource = dataSource;
         dataSource.setUsername(dbCredentials.getUsername());
         dataSource.setPassword(dbCredentials.getPassword());
         jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
@@ -122,7 +121,7 @@ public class DatabaseService {
      * @param patient Patient resource.
      */
     public void createOrUpdatePatient(Patient patient, boolean canUpdate) {
-        String mrn = fhirService.extractMRN(patient);
+        String mrn = patientService.extractMRN(patient);
         Integer recno = getPatientRecNum(mrn);
 
         if (recno != null && !canUpdate) {

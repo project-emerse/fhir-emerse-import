@@ -3,6 +3,8 @@ package edu.utah.kmm.emerse.servlet;
 import edu.utah.kmm.emerse.config.ClientConfigService;
 import edu.utah.kmm.emerse.database.DatabaseService;
 import edu.utah.kmm.emerse.document.ContentDTO;
+import edu.utah.kmm.emerse.document.DocumentService;
+import edu.utah.kmm.emerse.patient.PatientService;
 import edu.utah.kmm.emerse.solr.IndexRequestDTO;
 import edu.utah.kmm.emerse.fhir.FhirService;
 import edu.utah.kmm.emerse.fhir.IdentifierType;
@@ -38,6 +40,12 @@ public class RestController {
     private FhirService fhirService;
 
     @Autowired
+    private PatientService patientService;
+
+    @Autowired
+    private DocumentService documentService;
+
+    @Autowired
     private SolrService solrService;
 
     @Autowired
@@ -71,7 +79,7 @@ public class RestController {
             @RequestParam(required = false) String mrn,
             @RequestParam(required = false) String patid) {
         IdentifierType type = validateIdentifiers(mrn, patid);
-        return fhirService.serialize(fhirService.getPatient(mrn != null ? mrn : patid, type));
+        return fhirService.serialize(patientService.getPatient(mrn != null ? mrn : patid, type));
     }
 
     /**
@@ -100,8 +108,8 @@ public class RestController {
             @RequestParam String patid) {
         List<Map<String, Object>> docs = new ArrayList<>();
 
-        for (DocumentReference document: fhirService.getDocumentsForPatient(patid)) {
-            ContentDTO documentContent = fhirService.getDocumentContent(document);
+        for (DocumentReference document: documentService.getDocumentsForPatient(patid)) {
+            ContentDTO documentContent = documentService.getDocumentContent(document);
 
             if (documentContent != null) {
                 Map<String, Object> map = new HashMap<>();

@@ -25,7 +25,7 @@ public class DefaultPatientLookup implements IPatientLookup {
     }
 
     @Override
-    public Patient lookupByMrn(String mrn) {
+    public Patient lookupByMRN(String mrn) {
         Bundle bundle = client.search()
                 .forResource(Patient.class)
                 .where(Patient.IDENTIFIER.exactly().systemAndCode(mrnSystem, mrn))

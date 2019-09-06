@@ -68,7 +68,6 @@
 
     <bean id="solrService" class="edu.utah.kmm.emerse.solr.SolrService">
         <constructor-arg value="${solr.server.root}" />
-        <constructor-arg ref="solrServiceCredentials" />
     </bean>
 
     <bean id="solrIndexer" class="edu.utah.kmm.emerse.solr.DaemonManager"
@@ -107,7 +106,11 @@
 
     <bean id="fhirContext" class="ca.uhn.fhir.context.FhirContext" factory-method="forDstu3" />
 
-    <bean id="fhirClient" class="edu.utah.kmm.emerse.fhir.FhirService" init-method="init"/>
+    <bean id="fhirClient" class="edu.utah.kmm.emerse.fhir.FhirService" init-method="init" />
+
+    <bean id="patientService" class="edu.utah.kmm.emerse.patient.PatientService" init-method="init" />
+
+    <bean id="documentService" class="edu.utah.kmm.emerse.document.DocumentService" />
 
     <!-- Datasource Configuration -->
 

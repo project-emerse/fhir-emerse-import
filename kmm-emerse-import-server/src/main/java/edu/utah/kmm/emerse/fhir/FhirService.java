@@ -25,17 +25,11 @@ import java.util.List;
  */
 public class FhirService {
 
-    @Value("${fhir.mrn.system}")
-    private String mrnSystem;
-
     @Value("${fhir.server.root}")
     private String fhirRoot;
 
     @Value("${fhir.server.authtype}")
     private String authenticationType;
-
-    @Value("${fhir.server.patientlookup:DEFAULT}")
-    private String patientLookupType;
 
     @Value("${fhir.server.headers:}")
     private String extraHeaders;
@@ -49,14 +43,9 @@ public class FhirService {
     @Autowired
     private AuthenticatorRegistry authenticatorRegistry;
 
-    @Autowired
-    private PatientLookupRegistry patientLookupRegistry;
-
     private IGenericClient genericClient;
 
     private IAuthenticator authenticator;
-
-    private IPatientLookup patientLookup;
 
     private CapabilityStatement capabilityStatement;
 
@@ -67,14 +56,7 @@ public class FhirService {
         initGenericClient();
         authenticator = authenticatorRegistry.get(authenticationType);
         Assert.notNull(authenticator, "Unrecognized authentication scheme: " + authenticationType);
-        initialize(authenticator);
-        patientLookup = patientLookupRegistry.get(patientLookupType);
-        Assert.notNull(patientLookup, "Unknown patient lookup plugin: " + patientLookupType);
-        initialize(patientLookup);
-    }
-
-    private void initialize(IInitializable target) {
-        target.initialize(this);
+        authenticator.initialize(this);
     }
 
     private void initGenericClient() {
@@ -107,25 +89,6 @@ public class FhirService {
         return capabilityStatement;
     }
 
-    public Patient getPatient(String id, IdentifierType type) {
-        Assert.isTrue(type == IdentifierType.MRN || type == IdentifierType.PATID, "Invalid identifier type.");
-        return type == IdentifierType.MRN ? getPatientByMrn(id) : getPatientById(id);
-    }
-
-    public Patient getPatientByMrn(String mrn) {
-        return patientLookup.lookupByMrn(mrn);
-    }
-
-    public String extractMRN(Patient patient) {
-        for (Identifier identifier: patient.getIdentifier()) {
-            if (mrnSystem.equals(identifier.getSystem())) {
-                return identifier.getValue();
-            }
-        }
-
-        return null;
-    }
-
     public <T extends IBaseResource> T readResource(Class<T> type, String fhirId) {
         try {
             return genericClient.read()
@@ -135,98 +98,6 @@ public class FhirService {
         } catch (Exception e) {
             return null;
         }
-    }
-
-    public Patient getPatientById(String patid) {
-        return readResource(Patient.class, patid);
-    }
-
-    public DocumentReference getDocumentById(String docid) {
-        return readResource(DocumentReference.class, docid);
-    }
-
-    public List<DocumentReference> getDocumentsForPatient(String patid) {
-        List<DocumentReference> documents = new ArrayList<>();
-        Bundle bundle = genericClient.search()
-                .forResource(DocumentReference.class)
-                .where(DocumentReference.PATIENT.hasId(patid))
-                .where(DocumentReference.CLASS.exactly().code("clinical-notes"))
-                .returnBundle(Bundle.class)
-                .execute();
-
-        for (Bundle.BundleEntryComponent entry: bundle.getEntry()) {
-            Resource resource = entry.getResource();
-
-            if (resource instanceof DocumentReference) {
-                documents.add((DocumentReference) resource);
-            }
-        }
-
-        return documents;
-    }
-
-    /**
-     * Return the FHIR id of the subject of a document.
-     *
-     * @param document The document.
-     * @return The FHIR id of the subject, or null if not found.
-     */
-    public String getPatientId(DocumentReference document) {
-        Resource res = document.getSubjectTarget();
-
-        if (res instanceof Patient) {
-            return res.getId();
-        }
-
-        if (document.hasSubject()) {
-            Reference ref = document.getSubject();
-            String id = ref.getId();
-            return id == null ? StringUtils.substringAfterLast(ref.getReference(), "/") : id;
-        }
-
-        return null;
-    }
-
-    /**
-     * Return the MRN of the subject of a document.
-     *
-     * @param document The document.
-     * @return The MRN of the subject, or null if not found.
-     */
-    public String getPatientMrn(DocumentReference document) {
-        Resource res = document.getSubjectTarget();
-
-        if (res instanceof Patient) {
-            return extractMRN((Patient) res);
-        }
-
-        String patid = getPatientId(document);
-
-        if (patid != null) {
-            Patient patient = getPatientById(patid);
-            document.setSubjectTarget(patient);
-            return extractMRN(patient);
-        }
-
-        return null;
-    }
-
-    public ContentDTO getDocumentContent(DocumentReference document) {
-        if (!document.getContent().isEmpty()) {
-            DocumentReference.DocumentReferenceContentComponent content = document.getContentFirstRep();
-            Attachment attachment = content.getAttachment();
-
-            if (!attachment.getDataElement().isEmpty()) {
-                return new ContentDTO(attachment.getData(), attachment.getContentType());
-            }
-
-            if (!attachment.getUrlElement().isEmpty()) {
-                Binary data = genericClient.read().resource(Binary.class).withUrl(attachment.getUrl()).execute();
-                return new ContentDTO(data.getContentAsBase64(), data.getContentType());
-            }
-        }
-
-        return null;
     }
 
     public String serialize(IBaseResource resource) {
