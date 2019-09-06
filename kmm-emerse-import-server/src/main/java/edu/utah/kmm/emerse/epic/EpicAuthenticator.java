@@ -27,7 +27,7 @@ public class EpicAuthenticator extends BaseOAuth2Authenticator {
 
         @Override
         protected AccessToken generateToken() {
-            return generateAccessToken("e3-ooNeHcmrnIanfYJ.wmEQ3");
+            return generateAccessToken();
         }
 
     }
@@ -58,15 +58,14 @@ public class EpicAuthenticator extends BaseOAuth2Authenticator {
         fhirService.getGenericClient().registerInterceptor(new EpicAuthInterceptor());
     }
 
-    private AccessToken generateAccessToken(String patid) {
-        String launchToken = fetchLaunchToken(patid);
+    private AccessToken generateAccessToken() {
+        String launchToken = fetchLaunchToken();
         String authorizationCode = fetchAuthorizationCode(launchToken);
         return fetchAccessToken(authorizationCode);
     }
 
-    private String fetchLaunchToken(String patid) {
+    private String fetchLaunchToken() {
         MultiValueMap<String, String> body = newRequestParams(false);
-        body.set("patient", patid);
         body.set("user", userId);
         Map<String, String> result = epicService.post("UU/2017/Security/OAuth2/IssueLaunchToken", body, true, Map.class, true);
         String launchToken = result == null ? null : result.get("launchToken");

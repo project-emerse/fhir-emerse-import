@@ -68,6 +68,7 @@
 
     <bean id="solrService" class="edu.utah.kmm.emerse.solr.SolrService">
         <constructor-arg value="${solr.server.root}" />
+        <constructor-arg ref="solrServiceCredentials" />
     </bean>
 
     <bean id="solrIndexer" class="edu.utah.kmm.emerse.solr.DaemonManager"

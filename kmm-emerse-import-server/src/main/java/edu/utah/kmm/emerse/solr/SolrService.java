@@ -8,6 +8,7 @@ import edu.utah.kmm.emerse.document.DocumentService;
 import edu.utah.kmm.emerse.fhir.IdentifierType;
 import edu.utah.kmm.emerse.patient.PatientDTO;
 import edu.utah.kmm.emerse.patient.PatientService;
+import edu.utah.kmm.emerse.security.Credentials;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -40,6 +41,10 @@ public class SolrService {
 
     private final HttpSolrClient solrClient;
 
+    private final String solrUsername;
+
+    private final String solrPassword;
+
     @Autowired
     private DocumentService documentService;
 
@@ -49,7 +54,9 @@ public class SolrService {
     @Autowired
     private DatabaseService databaseService;
 
-    public SolrService(String solrServerRoot) {
+    public SolrService(String solrServerRoot, Credentials solrServiceCredentials) {
+        solrUsername = solrServiceCredentials.getUsername();
+        solrPassword = solrServiceCredentials.getPassword();
         solrClient = new HttpSolrClient.Builder(solrServerRoot)
                 .withResponseParser(new XMLResponseParser())
                 .allowCompression(true)
@@ -186,6 +193,7 @@ public class SolrService {
     private boolean indexDTO(BaseDTO dto, String collection) {
         try {
             UpdateRequest request = new UpdateRequest();
+            request.setBasicAuthCredentials(solrUsername, solrPassword);
             request.add(newSolrDocument(dto.getMap()));
             request.process(solrClient, collection);
             return true;
