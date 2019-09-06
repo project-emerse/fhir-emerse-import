@@ -1,5 +1,6 @@
 package edu.utah.kmm.emerse.solr;
 
+import edu.utah.kmm.emerse.dto.IndexRequestDTO;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -45,7 +46,7 @@ public class IndexDaemon implements Runnable {
         running = true;
 
         while (!terminated && !thread.isInterrupted()) {
-            IndexRequest request = solrQueue.nextRequest();
+            IndexRequestDTO request = solrQueue.nextRequest();
 
             if (request == null) {
                 try {

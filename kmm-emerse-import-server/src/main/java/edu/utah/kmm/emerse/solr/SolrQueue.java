@@ -1,6 +1,7 @@
 package edu.utah.kmm.emerse.solr;
 
 import edu.utah.kmm.emerse.database.DatabaseService;
+import edu.utah.kmm.emerse.dto.IndexRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -13,14 +14,14 @@ public class SolrQueue implements RowMapper {
     @Autowired
     private DatabaseService databaseService;
 
-    private Queue<IndexRequest> queue = new LinkedBlockingQueue<>();
+    private Queue<IndexRequestDTO> queue = new LinkedBlockingQueue<>();
 
     private long nextRefresh;
 
     public SolrQueue() {
     }
 
-    IndexRequest nextRequest() {
+    IndexRequestDTO nextRequest() {
         synchronized (queue) {
             long currentTime = System.currentTimeMillis();
 
@@ -34,8 +35,8 @@ public class SolrQueue implements RowMapper {
     }
 
     @Override
-    public IndexRequest mapRow(ResultSet rs, int i) {
-        IndexRequest entry = new IndexRequest(rs);
+    public IndexRequestDTO mapRow(ResultSet rs, int i) {
+        IndexRequestDTO entry = new IndexRequestDTO(rs);
         queue.add(entry);
         return entry;
     }

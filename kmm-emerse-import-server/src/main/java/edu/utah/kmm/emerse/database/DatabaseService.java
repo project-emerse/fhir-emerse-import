@@ -1,12 +1,13 @@
 package edu.utah.kmm.emerse.database;
 
+import edu.utah.kmm.emerse.dto.IndexRequestDTO;
+import edu.utah.kmm.emerse.dto.PatientDTO;
 import edu.utah.kmm.emerse.fhir.FhirClient;
 import edu.utah.kmm.emerse.model.IdentifierType;
 import edu.utah.kmm.emerse.security.Credentials;
-import edu.utah.kmm.emerse.solr.IndexRequest;
+import edu.utah.kmm.emerse.solr.SolrService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -18,7 +19,9 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Database-related services.
@@ -27,6 +30,8 @@ public class DatabaseService {
 
     private static final Log log = LogFactory.getLog(DatabaseService.class);
 
+    private static final String QUEUE_TABLE = "INDEXING_QUEUE";
+
     private static final String[] QUEUE_UPDATE_FIELDS = {
             "ID", "COMPLETED", "PROCESSED", "ERROR_TEXT", "PROCESSING_FLAG"
     };
@@ -34,6 +39,8 @@ public class DatabaseService {
     private static final String[] QUEUE_INSERT_FIELDS = {
             "SUBMITTED", "TOTAL", "PROCESSED", "PROCESSING_FLAG", "IDENTIFIER_TYPE", "IDENTIFIERS"
     };
+
+    private static final String PATIENT_TABLE = "PATIENT";
 
     private static final String[] PATIENT_UPDATE_FIELDS = {
             "EXTERNAL_ID", "FIRST_NAME", "MIDDLE_NAME", "LAST_NAME", "BIRTH_DATE", "SEX_CD", "DECEASED_FLAG",
@@ -57,6 +64,9 @@ public class DatabaseService {
 
     @Autowired
     private FhirClient fhirClient;
+
+    @Autowired
+    private SolrService solrService;
 
     public DatabaseService(DriverManagerDataSource dataSource, Credentials dbCredentials) {
         this.dataSource = dataSource;
@@ -99,11 +109,11 @@ public class DatabaseService {
     }
 
     private String getPatientInsertSQL() {
-        return getInsertSQL("PATIENT", PATIENT_INSERT_FIELDS, "PATIENT_SEQ");
+        return getInsertSQL(PATIENT_TABLE, PATIENT_INSERT_FIELDS, "PATIENT_SEQ");
     }
 
     private String getPatientUpdateSQL() {
-        return getUpdateSQL("PATIENT", PATIENT_INSERT_FIELDS);
+        return getUpdateSQL(PATIENT_TABLE, PATIENT_UPDATE_FIELDS);
     }
 
     /**
@@ -112,7 +122,7 @@ public class DatabaseService {
      * @param patient Patient resource.
      */
     public void createOrUpdatePatient(Patient patient, boolean canUpdate) {
-        String mrn = fhirClient.extractMRN(patient);
+        String mrn = FhirClient.extractMRN(patient);
         Integer recno = getPatientRecNum(mrn);
 
         if (recno != null && !canUpdate) {
@@ -120,41 +130,22 @@ public class DatabaseService {
         }
 
         String SQL = recno == null ? getPatientInsertSQL() : getPatientUpdateSQL();
-        HumanName name = patient.getNameFirstRep();
-        boolean deceased = patient.hasDeceasedDateTimeType() || (patient.hasDeceasedBooleanType() && patient.getDeceasedBooleanType().getValue());
-
-        MapSqlParameterSource params = new MapSqlParameterSource();
-
-        params.addValue("ID", recno);
-        params.addValue("EXTERNAL_ID", mrn);
-        params.addValue("FIRST_NAME", truncate(name.getGivenAsSingleString(), 65));
-        params.addValue("MIDDLE_NAME", null);
-        params.addValue("LAST_NAME", truncate(name.getFamily(), 75));
-        params.addValue("BIRTH_DATE", patient.getBirthDate());
-        params.addValue("SEX_CD", truncate(patient.getGender().toCode(), 50));
-        params.addValue("DECEASED_FLAG", deceased ? 1 : 0);
-        params.addValue("LANGUAGE_CD", truncate(patient.getLanguage(), 50));
-        params.addValue("RACE_CD", null);
-        params.addValue("ETHNICITY_CD", null);
-        params.addValue("MARITAL_STATUS_CD", truncate(patient.getMaritalStatus().getCodingFirstRep().getCode(), 50));
-        params.addValue("RELIGION_CD", null);
-        params.addValue("ZIP_CD", truncate(patient.getAddressFirstRep().getPostalCode(), 10));
-        params.addValue("UPDATE_DATE", new Date());
-        params.addValue("UPDATED_BY", "EMERSE-IT");
-        params.addValue("CREATE_DATE", new Date());
-        params.addValue("CREATED_BY", "EMERSE-IT");
-        params.addValue("DELETED_FLAG", 0);
+        Map<String, Object> params = new HashMap<>();
+        params.put("ID", recno);
+        params.put("UPDATE_DATE", new Date());
+        params.put("UPDATED_BY", "EMERSE-IT");
+        params.put("CREATE_DATE", new Date());
+        params.put("CREATED_BY", "EMERSE-IT");
+        params.put("DELETED_FLAG", 0);
+        PatientDTO patientDTO = new PatientDTO(patient, params);
 
         try {
-            jdbcTemplate.update(SQL, params);
+            jdbcTemplate.update(SQL, patientDTO.getMap());
+            solrService.indexPatient(patientDTO);
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
 
-    }
-
-    private String truncate(String value, int maxsize) {
-        return value == null ? null : value.length() <= maxsize ? value : value.substring(0, maxsize);
     }
 
     private Integer getPatientRecNum(String mrn) {
@@ -168,27 +159,25 @@ public class DatabaseService {
     }
 
     private String getQueueInsertSQL() {
-        return getInsertSQL("QUEUE", QUEUE_INSERT_FIELDS, null);
+        return getInsertSQL(QUEUE_TABLE, QUEUE_INSERT_FIELDS, null);
     }
 
     private String getQueueUpdateSQL() {
-        return getUpdateSQL("QUEUE", QUEUE_UPDATE_FIELDS);
+        return getUpdateSQL(QUEUE_TABLE, QUEUE_UPDATE_FIELDS);
     }
 
-    public IndexRequest queueRequest(List<String> ids, IdentifierType type) {
-        return createOrUpdateIndexRequest(new IndexRequest(ids, type));
+    public IndexRequestDTO queueRequest(List<String> ids, IdentifierType type) {
+        return createOrUpdateIndexRequest(new IndexRequestDTO(ids, type));
     }
 
-    public IndexRequest createOrUpdateIndexRequest(IndexRequest request) {
+    public IndexRequestDTO createOrUpdateIndexRequest(IndexRequestDTO request) {
         String SQL = request.initial() ? getQueueInsertSQL() : getQueueUpdateSQL();
-        MapSqlParameterSource params = new MapSqlParameterSource();
 
-        if (request.write(params)) {
-            try {
-                jdbcTemplate.update(SQL, params);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+        try {
+            jdbcTemplate.update(SQL, request.getMap());
+            request.clearChanged();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
         return request;

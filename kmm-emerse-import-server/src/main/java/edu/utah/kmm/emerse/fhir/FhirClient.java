@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
-import edu.utah.kmm.emerse.model.DocumentContent;
+import edu.utah.kmm.emerse.dto.ContentDTO;
 import edu.utah.kmm.emerse.model.IdentifierType;
 import edu.utah.kmm.emerse.security.Credentials;
 import org.apache.commons.lang.StringUtils;
@@ -21,6 +21,22 @@ import java.util.List;
  * FHIR-related services.
  */
 public class FhirClient {
+
+    private static String MRN_SYSTEM;
+
+    public static String getMrnSystem() {
+        return MRN_SYSTEM;
+    }
+
+    public static String extractMRN(Patient patient) {
+        for (Identifier identifier: patient.getIdentifier()) {
+            if (MRN_SYSTEM.equals(identifier.getSystem())) {
+                return identifier.getValue();
+            }
+        }
+
+        return null;
+    }
 
     @Value("${fhir.mrn.system}")
     private String mrnSystem;
@@ -59,6 +75,7 @@ public class FhirClient {
     }
 
     private void init() {
+        MRN_SYSTEM = mrnSystem;
         initGenericClient();
         authenticator = authenticatorRegistry.get(authenticationType);
         Assert.notNull(authenticator, "Unrecognized authentication scheme: " + authenticationType);
@@ -190,28 +207,18 @@ public class FhirClient {
         return null;
     }
 
-    public DocumentContent getDocumentContent(DocumentReference document) {
+    public ContentDTO getDocumentContent(DocumentReference document) {
         if (!document.getContent().isEmpty()) {
             DocumentReference.DocumentReferenceContentComponent content = document.getContentFirstRep();
             Attachment attachment = content.getAttachment();
 
             if (!attachment.getDataElement().isEmpty()) {
-                return new DocumentContent(attachment.getData(), attachment.getContentType());
+                return new ContentDTO(attachment.getData(), attachment.getContentType());
             }
 
             if (!attachment.getUrlElement().isEmpty()) {
                 Binary data = genericClient.read().resource(Binary.class).withUrl(attachment.getUrl()).execute();
-                return new DocumentContent(data.getContentAsBase64(), data.getContentType());
-            }
-        }
-
-        return null;
-    }
-
-    public String extractMRN(Patient patient) {
-        for (Identifier identifier: patient.getIdentifier()) {
-            if (mrnSystem.equals(identifier.getSystem())) {
-                return identifier.getValue();
+                return new ContentDTO(data.getContentAsBase64(), data.getContentType());
             }
         }
 

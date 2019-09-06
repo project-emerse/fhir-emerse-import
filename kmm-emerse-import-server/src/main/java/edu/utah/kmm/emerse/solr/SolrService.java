@@ -1,12 +1,13 @@
 package edu.utah.kmm.emerse.solr;
 
 import edu.utah.kmm.emerse.database.DatabaseService;
+import edu.utah.kmm.emerse.dto.*;
 import edu.utah.kmm.emerse.fhir.FhirClient;
-import edu.utah.kmm.emerse.model.DocumentContent;
 import edu.utah.kmm.emerse.model.IdentifierType;
 import edu.utah.kmm.emerse.security.Credentials;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.client.solrj.request.UpdateRequest;
@@ -14,10 +15,12 @@ import org.apache.solr.common.SolrInputDocument;
 import org.hl7.fhir.dstu3.model.DocumentReference;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Solr-related services.
@@ -26,7 +29,11 @@ public class SolrService {
 
     private static final Log log = LogFactory.getLog(SolrService.class);
 
-    private static final String DOCUMENTS = "documents";
+    private static final String COLLECTION_DOCUMENTS = "documents";
+
+    private static final String COLLECTION_PATIENT = "patient";
+
+    private static final String COLLECTION_SLAVE = "patient-slave";
 
     private final HttpSolrClient solrClient;
 
@@ -52,14 +59,14 @@ public class SolrService {
      * @param request The index request.
      * @return The indexing result.
      */
-    public IndexResult batchIndexImmediate(IndexRequest request) {
+    public IndexResult batchIndexImmediate(IndexRequestDTO request) {
         IndexResult result = new IndexResult();
 
         for (String id: request) {
             id = id.trim();
 
             if (!id.isEmpty()) {
-                result.combine(indexDocuments(id, request.identifierType));
+                result.combine(indexDocuments(id, request.getIdentifierType()));
             }
 
             if (result.getTotal() % 100 == 0) {
@@ -71,7 +78,7 @@ public class SolrService {
         return result;
     }
 
-    public void batchIndexQueued(IndexRequest request) {
+    public void batchIndexQueued(IndexRequestDTO request) {
         databaseService.createOrUpdateIndexRequest(request);
     }
 
@@ -134,32 +141,17 @@ public class SolrService {
      */
     public IndexResult indexDocument(String mrn, DocumentReference document) {
         IndexResult result = new IndexResult();
-        DocumentContent content = fhirClient.getDocumentContent(document);
+        ContentDTO content = fhirClient.getDocumentContent(document);
 
-        if (content == null || content.getContent() == null) {
+        if (content.isEmpty()) {
             log.warn("Document has no content: " + document.getId());
             return result.success(false);
         }
 
-        SolrInputDocument solrDoc = new SolrInputDocument();
-        String id = document.getIdElement().getIdPart();
-        solrDoc.addField("ID", id);
-        solrDoc.addField("RPT_ID", id);
-        solrDoc.addField("MRN", mrn);
-        solrDoc.addField("RPT_DATE", document.getCreated());
-        solrDoc.addField("SOURCE", "source1");
-        solrDoc.addField("RPT_TEXT", content.getContent());
-
-        try {
-            UpdateRequest request = new UpdateRequest();
-            request.add(solrDoc);
-            request.setBasicAuthCredentials(solrCredentials.getUsername(), solrCredentials.getPassword());
-            request.process(solrClient, DOCUMENTS);
-            return result.success(true);
-        } catch (Exception e) {
-            log.error("Error indexing document: " + document.getId(), e);
-            return result.success(false);
-        }
+        Map<String, Object> map = new HashMap<>();
+        map.putAll(content.getMap());
+        map.put("MRN", mrn);
+        return result.success(indexDTO(new DocumentDTO(document, map), COLLECTION_DOCUMENTS));
     }
 
     /**
@@ -168,11 +160,11 @@ public class SolrService {
      * @param request The index request.
      * @return The indexing result.
      */
-    public IndexResult index(IndexRequest request) {
+    public IndexResult index(IndexRequestDTO request) {
         IndexResult result = new IndexResult();
 
-        for (String id: request.identifiers) {
-            result.combine(indexDocuments(id, request.identifierType));
+        for (String id: request) {
+            result.combine(indexDocuments(id, request.getIdentifierType()));
         }
 
         return result;
@@ -180,10 +172,42 @@ public class SolrService {
 
     public void commit() {
         try {
-            solrClient.commit(DOCUMENTS);
+            solrClient.commit(COLLECTION_DOCUMENTS);
+            solrClient.commit(COLLECTION_PATIENT);
+            solrClient.commit(COLLECTION_SLAVE);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
+    private boolean indexDTO(BaseDTO dto, String collection) {
+        try {
+            UpdateRequest request = new UpdateRequest();
+            request.add(newSolrDocument(dto.getMap()));
+            request.process(solrClient, collection);
+            return true;
+        } catch (SolrServerException | IOException e) {
+            log.error("Error indexing entity for collection " + collection, e);
+            return false;
+        }
+    }
+
+    private SolrInputDocument newSolrDocument(Map<String, Object> fields) {
+        SolrInputDocument solrDoc = new SolrInputDocument();
+
+        for (Map.Entry<String, Object> entry: fields.entrySet()) {
+            solrDoc.addField(entry.getKey(), entry.getValue());
+        }
+
+        return solrDoc;
+    }
+
+    public void indexPatient(PatientDTO patientDTO) {
+        indexDTO(patientDTO, COLLECTION_PATIENT);
+        indexDTO(patientDTO, COLLECTION_SLAVE);
+    }
+
+    public void indexDocument(DocumentDTO documentDTO) {
+        indexDTO(documentDTO, COLLECTION_DOCUMENTS);
+    }
 }

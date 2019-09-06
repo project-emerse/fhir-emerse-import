@@ -2,10 +2,11 @@ package edu.utah.kmm.emerse.servlet;
 
 import edu.utah.kmm.emerse.config.ClientConfigService;
 import edu.utah.kmm.emerse.database.DatabaseService;
+import edu.utah.kmm.emerse.dto.ContentDTO;
+import edu.utah.kmm.emerse.dto.DocumentDTO;
+import edu.utah.kmm.emerse.dto.IndexRequestDTO;
 import edu.utah.kmm.emerse.fhir.FhirClient;
-import edu.utah.kmm.emerse.model.DocumentContent;
 import edu.utah.kmm.emerse.model.IdentifierType;
-import edu.utah.kmm.emerse.solr.IndexRequest;
 import edu.utah.kmm.emerse.solr.IndexResult;
 import edu.utah.kmm.emerse.solr.SolrService;
 import edu.utah.kmm.emerse.util.MiscUtil;
@@ -101,7 +102,7 @@ public class RestController {
         List<Map<String, Object>> docs = new ArrayList<>();
 
         for (DocumentReference document: fhirClient.getDocumentsForPatient(patid)) {
-            DocumentContent documentContent = fhirClient.getDocumentContent(document);
+            ContentDTO documentContent = fhirClient.getDocumentContent(document);
 
             if (documentContent != null) {
                 Map<String, Object> map = new HashMap<>();
@@ -144,7 +145,7 @@ public class RestController {
     @ResponseBody
     public IndexResult indexBatchImmediate(
             @RequestParam MultipartFile file) {
-        return solrService.batchIndexImmediate(new IndexRequest(file.getResource()) );
+        return solrService.batchIndexImmediate(new IndexRequestDTO(file.getResource()) );
     }
 
     /**
@@ -157,7 +158,7 @@ public class RestController {
     @ResponseBody
     public ResponseEntity indexBatchQueued(
             @RequestParam MultipartFile file) {
-        solrService.batchIndexQueued(new IndexRequest(file.getResource()));
+        solrService.batchIndexQueued(new IndexRequestDTO(file.getResource()));
         return new ResponseEntity(HttpStatus.OK);
     }
 

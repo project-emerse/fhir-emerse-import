@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Returns selected configuration data to client.
+ * Returns selected configuration data to send to client.
  */
 public class ClientConfigService {
 
