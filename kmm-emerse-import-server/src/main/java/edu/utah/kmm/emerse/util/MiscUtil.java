@@ -16,13 +16,5 @@ public class MiscUtil {
         return IdentifierType.valueOf(value.toUpperCase());
     }
 
-    public static URI toURI(String uri) {
-        try {
-            return new URI(uri);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     private MiscUtil() {}
 }

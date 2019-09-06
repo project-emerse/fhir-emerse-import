@@ -1,6 +1,7 @@
 package edu.utah.kmm.emerse.epic;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import edu.utah.kmm.emerse.fhir.FhirClient;
 import edu.utah.kmm.emerse.oauth.AccessToken;
 import edu.utah.kmm.emerse.oauth.BaseOAuth2Authenticator;
 import edu.utah.kmm.emerse.oauth.OAuthInterceptor;
@@ -54,20 +55,20 @@ public class EpicAuthenticator extends BaseOAuth2Authenticator {
     }
 
     @Override
-    public void initialize(IGenericClient client, Credentials credentials) {
-        super.initialize(client, credentials);
-        client.registerInterceptor(new EpicAuthInterceptor());
+    public void initialize(FhirClient fhirClient) {
+        super.initialize(fhirClient);
+        fhirClient.getGenericClient().registerInterceptor(new EpicAuthInterceptor());
     }
 
-    private AccessToken generateAccessToken(String fhirId) {
-        String launchToken = fetchLaunchToken(fhirId);
+    private AccessToken generateAccessToken(String patid) {
+        String launchToken = fetchLaunchToken(patid);
         String authorizationCode = fetchAuthorizationCode(launchToken);
         return fetchAccessToken(authorizationCode);
     }
 
-    private String fetchLaunchToken(String fhirId) {
+    private String fetchLaunchToken(String patid) {
         MultiValueMap<String, String> body = newRequestParams(false);
-        body.set("patient", fhirId);
+        body.set("patient", patid);
         body.set("user", userId);
         Map<String, String> result = epicService.post("UU/2017/Security/OAuth2/IssueLaunchToken", body, true, Map.class, true);
         String launchToken = result == null ? null : result.get("launchToken");

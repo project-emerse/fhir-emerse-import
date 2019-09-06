@@ -5,6 +5,6 @@ import edu.utah.kmm.emerse.security.Credentials;
 
 public interface IInitializable {
 
-    void initialize(IGenericClient client, Credentials credentials);
+    void initialize(FhirClient fhirClient);
 
 }

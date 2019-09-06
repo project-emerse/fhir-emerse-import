@@ -68,8 +68,8 @@ public class FhirClient {
         initialize(patientLookup);
     }
 
-    private void initialize(IInitializable initializable) {
-        initializable.initialize(genericClient, fhirServiceCredentials);
+    private void initialize(IInitializable target) {
+        target.initialize(this);
     }
 
     private void initGenericClient() {
@@ -86,6 +86,14 @@ public class FhirClient {
 
             genericClient.registerInterceptor(interceptor);
         }
+    }
+
+    public IGenericClient getGenericClient() {
+        return genericClient;
+    }
+
+    public Credentials getCredentials() {
+        return fhirServiceCredentials;
     }
 
     public Patient getPatient(String id, IdentifierType type) {

@@ -1,14 +1,17 @@
 package edu.utah.kmm.emerse.oauth;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import edu.utah.kmm.emerse.fhir.FhirClient;
 import edu.utah.kmm.emerse.fhir.IAuthenticator;
 import edu.utah.kmm.emerse.security.Credentials;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.UriType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLEncoder;
 
 public abstract class BaseOAuth2Authenticator implements IAuthenticator {
@@ -19,22 +22,17 @@ public abstract class BaseOAuth2Authenticator implements IAuthenticator {
 
     protected String tokenEndpoint;
 
-    protected Credentials credentials;
-
-    protected IGenericClient client;
-
     private String fhirEndpoint;
 
     @Override
-    public void initialize(IGenericClient client, Credentials credentials) {
-        this.client = client;
-        this.credentials = credentials;
+    public void initialize(FhirClient fhirClient) {
+        IGenericClient client = fhirClient.getGenericClient();
         fhirEndpoint = client.getServerBase();
         fhirEndpoint = fhirEndpoint.endsWith("/") ? fhirEndpoint : fhirEndpoint + "/";
-        getOAuthEndpoints();
+        getOAuthEndpoints(client);
     }
 
-    private void getOAuthEndpoints() {
+    private void getOAuthEndpoints(IGenericClient client) {
         CapabilityStatement cp = client.capabilities().ofType(CapabilityStatement.class).execute();
 
         for (Extension ext: cp.getRest().get(0).getSecurity().getExtension()) {

@@ -10,7 +10,6 @@ import edu.utah.kmm.emerse.solr.SolrService;
 import edu.utah.kmm.emerse.util.MiscUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.DocumentReference;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;

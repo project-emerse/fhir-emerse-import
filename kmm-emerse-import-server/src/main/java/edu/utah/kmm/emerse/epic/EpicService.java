@@ -65,31 +65,31 @@ public class EpicService {
         return new RestTemplate(factory);
     }
 
-    public <T> ResponseEntity<T> getResponse(String url, MultiValueMap<String, String> params, Class<T> returnType, boolean authenticate) {
+    public <T> ResponseEntity<T> getResponse(String uri, MultiValueMap<String, String> params, Class<T> returnType, boolean authenticate) {
         RequestEntity request = addHeaders(RequestEntity
-                .get(createURI(url, params)))
+                .get(createURI(uri, params)))
                 .build();
 
         return getRestTemplate(authenticate).exchange(request, returnType);
     }
 
-    public <T> T get(String url, MultiValueMap<String, String> params, Class<T> returnType, boolean authenticate) {
-        return getResponse(url, params, returnType, authenticate).getBody();
+    public <T> T get(String uri, MultiValueMap<String, String> params, Class<T> returnType, boolean authenticate) {
+        return getResponse(uri, params, returnType, authenticate).getBody();
     }
 
-    public <T> ResponseEntity<T> postResponse(String url, Object body, boolean asJSON, Class<T> returnType, boolean authenticate) {
+    public <T> ResponseEntity<T> postResponse(String uri, Object body, boolean asJSON, Class<T> returnType, boolean authenticate) {
         body = body instanceof MultiValueMap ? ((MultiValueMap<?, ?>) body).toSingleValueMap() : body;
 
         RequestEntity request = addHeaders(RequestEntity
-                .post(createURI(url, null)))
+                .post(createURI(uri, null)))
                 .contentType(asJSON ? MediaType.APPLICATION_JSON : MediaType.APPLICATION_FORM_URLENCODED)
                 .body(body);
 
         return getRestTemplate(authenticate).exchange(request, returnType);
     }
 
-    public <T> T post(String url, Object body, boolean asJSON, Class<T> returnType, boolean authenticate) {
-        return postResponse(url, body, asJSON, returnType, authenticate).getBody();
+    public <T> T post(String uri, Object body, boolean asJSON, Class<T> returnType, boolean authenticate) {
+        return postResponse(uri, body, asJSON, returnType, authenticate).getBody();
     }
 
     private RestTemplate getRestTemplate(boolean authenticate) {
@@ -103,11 +103,11 @@ public class EpicService {
                 .header("Epic-Client-ID", clientId);
     }
 
-    private URI createURI(String url, MultiValueMap<String, String> params) {
-        String uri = UriComponentsBuilder.fromUriString(url.startsWith("http") ? url : apiRoot + url)
+    private URI createURI(String uri, MultiValueMap<String, String> params) {
+        return UriComponentsBuilder
+                .fromUriString(uri.startsWith("http") ? uri : apiRoot + uri)
                 .queryParams(params)
-                .toUriString();
-
-        return URI.create(uri);
+                .build()
+                .toUri();
     }
 }

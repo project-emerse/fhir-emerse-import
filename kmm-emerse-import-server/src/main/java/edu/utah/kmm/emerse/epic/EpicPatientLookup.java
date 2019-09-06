@@ -1,6 +1,6 @@
 package edu.utah.kmm.emerse.epic;
 
-import ca.uhn.fhir.rest.client.api.IGenericClient;
+import edu.utah.kmm.emerse.fhir.FhirClient;
 import edu.utah.kmm.emerse.fhir.IPatientLookup;
 import edu.utah.kmm.emerse.security.Credentials;
 import org.apache.commons.lang3.StringUtils;
@@ -19,9 +19,9 @@ public class EpicPatientLookup implements IPatientLookup {
 
     private static final String GET_IDENTIFIERS = "epic/2015/Common/Patient/GetPatientIdentifiers/Patient/Identifiers";
 
-    private IGenericClient client;
-
     private String userid;
+
+    private FhirClient fhirClient;
 
     @Autowired
     private EpicService epicService;
@@ -32,9 +32,9 @@ public class EpicPatientLookup implements IPatientLookup {
     }
 
     @Override
-    public void initialize(IGenericClient client, Credentials credentials) {
-        this.client = client;
-        this.userid = StringUtils.substringAfter(credentials.getUsername(), "emp$");
+    public void initialize(FhirClient fhirClient) {
+        this.fhirClient = fhirClient;
+        userid = StringUtils.substringAfter(fhirClient.getCredentials().getUsername(), "emp$");
     }
 
     @Override
@@ -52,11 +52,8 @@ public class EpicPatientLookup implements IPatientLookup {
                 String type = entry.get("IDType");
 
                 if ("FHIR STU3".equals(type)) {
-                    String fhirId = entry.get("ID");
-                    return client.read()
-                            .resource(Patient.class)
-                            .withId(fhirId)
-                            .execute();
+                    String patid = entry.get("ID");
+                    return fhirClient.getPatientById(patid);
                 }
             }
         } catch (Exception e) {
@@ -65,4 +62,5 @@ public class EpicPatientLookup implements IPatientLookup {
 
         return null;
    }
+
 }

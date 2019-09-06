@@ -12,10 +12,11 @@ public class BasicAuthenticator implements IAuthenticator {
     }
 
     @Override
-    public void initialize(IGenericClient client, Credentials credentials) {
+    public void initialize(FhirClient fhirClient) {
+        Credentials credentials = fhirClient.getCredentials();
         IClientInterceptor interceptor = new BasicAuthInterceptor(
                 credentials.getUsername(), credentials.getPassword());
-        client.registerInterceptor(interceptor);
+        fhirClient.getGenericClient().registerInterceptor(interceptor);
     }
 
 }
