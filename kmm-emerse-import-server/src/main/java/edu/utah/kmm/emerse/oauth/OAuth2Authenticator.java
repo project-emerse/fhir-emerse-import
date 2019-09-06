@@ -1,6 +1,6 @@
 package edu.utah.kmm.emerse.oauth;
 
-import edu.utah.kmm.emerse.fhir.FhirClient;
+import edu.utah.kmm.emerse.fhir.FhirService;
 import edu.utah.kmm.emerse.security.Credentials;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.http.HttpHeaders;
@@ -33,10 +33,10 @@ public class OAuth2Authenticator extends BaseOAuth2Authenticator {
     }
 
     @Override
-    public void initialize(FhirClient fhirClient) {
-        super.initialize(fhirClient);
-        fhirClient.getGenericClient().registerInterceptor(new OAuth2Interceptor());
-        Credentials credentials = fhirClient.getCredentials();
+    public void initialize(FhirService fhirService) {
+        super.initialize(fhirService);
+        fhirService.getGenericClient().registerInterceptor(new OAuth2Interceptor());
+        Credentials credentials = fhirService.getCredentials();
         authHeader = "Basic " + Base64.encodeBase64String((credentials.getUsername() + ":" + credentials.getPassword()).getBytes());
     }
 

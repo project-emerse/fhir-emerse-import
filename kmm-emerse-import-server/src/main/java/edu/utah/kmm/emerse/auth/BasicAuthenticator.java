@@ -1,7 +1,8 @@
-package edu.utah.kmm.emerse.fhir;
+package edu.utah.kmm.emerse.auth;
 
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
+import edu.utah.kmm.emerse.fhir.FhirService;
 import edu.utah.kmm.emerse.security.Credentials;
 
 public class BasicAuthenticator implements IAuthenticator {
@@ -11,11 +12,11 @@ public class BasicAuthenticator implements IAuthenticator {
     }
 
     @Override
-    public void initialize(FhirClient fhirClient) {
-        Credentials credentials = fhirClient.getCredentials();
+    public void initialize(FhirService fhirService) {
+        Credentials credentials = fhirService.getCredentials();
         IClientInterceptor interceptor = new BasicAuthInterceptor(
                 credentials.getUsername(), credentials.getPassword());
-        fhirClient.getGenericClient().registerInterceptor(interceptor);
+        fhirService.getGenericClient().registerInterceptor(interceptor);
     }
 
 }

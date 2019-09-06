@@ -1,7 +1,6 @@
 package edu.utah.kmm.emerse.solr;
 
 import edu.utah.kmm.emerse.database.DatabaseService;
-import edu.utah.kmm.emerse.dto.IndexRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 

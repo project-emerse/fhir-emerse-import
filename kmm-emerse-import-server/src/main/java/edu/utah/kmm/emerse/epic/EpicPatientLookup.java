@@ -1,7 +1,7 @@
 package edu.utah.kmm.emerse.epic;
 
-import edu.utah.kmm.emerse.fhir.FhirClient;
-import edu.utah.kmm.emerse.fhir.IPatientLookup;
+import edu.utah.kmm.emerse.fhir.FhirService;
+import edu.utah.kmm.emerse.patient.IPatientLookup;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ public class EpicPatientLookup implements IPatientLookup {
 
     private String userid;
 
-    private FhirClient fhirClient;
+    private FhirService fhirService;
 
     @Autowired
     private EpicService epicService;
@@ -31,9 +31,9 @@ public class EpicPatientLookup implements IPatientLookup {
     }
 
     @Override
-    public void initialize(FhirClient fhirClient) {
-        this.fhirClient = fhirClient;
-        userid = StringUtils.substringAfter(fhirClient.getCredentials().getUsername(), "emp$");
+    public void initialize(FhirService fhirService) {
+        this.fhirService = fhirService;
+        userid = StringUtils.substringAfter(fhirService.getCredentials().getUsername(), "emp$");
     }
 
     @Override
@@ -52,7 +52,7 @@ public class EpicPatientLookup implements IPatientLookup {
 
                 if ("FHIR STU3".equals(type)) {
                     String patid = entry.get("ID");
-                    return fhirClient.getPatientById(patid);
+                    return fhirService.getPatientById(patid);
                 }
             }
         } catch (Exception e) {

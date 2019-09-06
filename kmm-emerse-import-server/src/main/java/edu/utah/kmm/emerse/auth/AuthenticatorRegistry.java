@@ -1,4 +1,6 @@
-package edu.utah.kmm.emerse.fhir;
+package edu.utah.kmm.emerse.auth;
+
+import edu.utah.kmm.emerse.fhir.BaseRegistry;
 
 public class AuthenticatorRegistry extends BaseRegistry<IAuthenticator> {
 

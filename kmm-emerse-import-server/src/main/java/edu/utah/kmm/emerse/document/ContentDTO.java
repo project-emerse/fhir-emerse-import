@@ -1,5 +1,6 @@
-package edu.utah.kmm.emerse.dto;
+package edu.utah.kmm.emerse.document;
 
+import edu.utah.kmm.emerse.database.BaseDTO;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.solr.common.StringUtils;
 

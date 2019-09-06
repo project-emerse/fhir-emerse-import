@@ -1,9 +1,12 @@
 package edu.utah.kmm.emerse.solr;
 
+import edu.utah.kmm.emerse.database.BaseDTO;
 import edu.utah.kmm.emerse.database.DatabaseService;
-import edu.utah.kmm.emerse.dto.*;
-import edu.utah.kmm.emerse.fhir.FhirClient;
-import edu.utah.kmm.emerse.model.IdentifierType;
+import edu.utah.kmm.emerse.document.ContentDTO;
+import edu.utah.kmm.emerse.document.DocumentDTO;
+import edu.utah.kmm.emerse.fhir.FhirService;
+import edu.utah.kmm.emerse.fhir.IdentifierType;
+import edu.utah.kmm.emerse.patient.PatientDTO;
 import edu.utah.kmm.emerse.security.Credentials;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,7 +43,7 @@ public class SolrService {
     private final Credentials solrCredentials;
 
     @Autowired
-    private FhirClient fhirClient;
+    private FhirService fhirService;
 
     @Autowired
     private DatabaseService databaseService;
@@ -91,8 +94,8 @@ public class SolrService {
     public IndexResult indexDocuments(Patient patient) {
         IndexResult result = new IndexResult();
         databaseService.createOrUpdatePatient(patient, false);
-        List<DocumentReference> documents = fhirClient.getDocumentsForPatient(patient.getId());
-        String mrn = fhirClient.extractMRN(patient);
+        List<DocumentReference> documents = fhirService.getDocumentsForPatient(patient.getId());
+        String mrn = fhirService.extractMRN(patient);
 
         for (DocumentReference document: documents) {
             result.combine(indexDocument(mrn, document));
@@ -113,7 +116,7 @@ public class SolrService {
         if (type == IdentifierType.DOCID) {
             return indexDocument(id);
         } else {
-            Patient patient = fhirClient.getPatient(id, type);
+            Patient patient = fhirService.getPatient(id, type);
             return patient == null ? new IndexResult() : indexDocuments(patient);
         }
     }
@@ -125,9 +128,9 @@ public class SolrService {
      * @return The indexing result.
      */
     public IndexResult indexDocument(String docid) {
-        DocumentReference document = fhirClient.getDocumentById(docid);
+        DocumentReference document = fhirService.getDocumentById(docid);
         Assert.notNull(document, "Document could not be located.");
-        String mrn = fhirClient.getPatientMrn(document);
+        String mrn = fhirService.getPatientMrn(document);
         Assert.notNull(mrn, "Cannot determine subject of document.");
         return indexDocument(mrn, document);
     }
@@ -141,7 +144,7 @@ public class SolrService {
      */
     public IndexResult indexDocument(String mrn, DocumentReference document) {
         IndexResult result = new IndexResult();
-        ContentDTO content = fhirClient.getDocumentContent(document);
+        ContentDTO content = fhirService.getDocumentContent(document);
 
         if (content.isEmpty()) {
             log.warn("Document has no content: " + document.getId());

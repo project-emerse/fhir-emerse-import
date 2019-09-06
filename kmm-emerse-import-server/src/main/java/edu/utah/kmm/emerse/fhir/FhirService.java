@@ -4,8 +4,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
-import edu.utah.kmm.emerse.dto.ContentDTO;
-import edu.utah.kmm.emerse.model.IdentifierType;
+import edu.utah.kmm.emerse.auth.AuthenticatorRegistry;
+import edu.utah.kmm.emerse.auth.IAuthenticator;
+import edu.utah.kmm.emerse.document.ContentDTO;
+import edu.utah.kmm.emerse.patient.IPatientLookup;
+import edu.utah.kmm.emerse.patient.PatientLookupRegistry;
 import edu.utah.kmm.emerse.security.Credentials;
 import org.apache.commons.lang.StringUtils;
 import org.hl7.fhir.dstu3.model.*;
@@ -20,23 +23,7 @@ import java.util.List;
 /**
  * FHIR-related services.
  */
-public class FhirClient {
-
-    private static String MRN_SYSTEM;
-
-    public static String getMrnSystem() {
-        return MRN_SYSTEM;
-    }
-
-    public static String extractMRN(Patient patient) {
-        for (Identifier identifier: patient.getIdentifier()) {
-            if (MRN_SYSTEM.equals(identifier.getSystem())) {
-                return identifier.getValue();
-            }
-        }
-
-        return null;
-    }
+public class FhirService {
 
     @Value("${fhir.mrn.system}")
     private String mrnSystem;
@@ -71,11 +58,12 @@ public class FhirClient {
 
     private IPatientLookup patientLookup;
 
-    public FhirClient() {
+    private CapabilityStatement capabilityStatement;
+
+    public FhirService() {
     }
 
     private void init() {
-        MRN_SYSTEM = mrnSystem;
         initGenericClient();
         authenticator = authenticatorRegistry.get(authenticationType);
         Assert.notNull(authenticator, "Unrecognized authentication scheme: " + authenticationType);
@@ -103,6 +91,8 @@ public class FhirClient {
 
             genericClient.registerInterceptor(interceptor);
         }
+
+        capabilityStatement = genericClient.capabilities().ofType(CapabilityStatement.class).execute();
     }
 
     public IGenericClient getGenericClient() {
@@ -113,6 +103,10 @@ public class FhirClient {
         return fhirServiceCredentials;
     }
 
+    public CapabilityStatement getCapabilityStatement() {
+        return capabilityStatement;
+    }
+
     public Patient getPatient(String id, IdentifierType type) {
         Assert.isTrue(type == IdentifierType.MRN || type == IdentifierType.PATID, "Invalid identifier type.");
         return type == IdentifierType.MRN ? getPatientByMrn(id) : getPatientById(id);
@@ -120,6 +114,16 @@ public class FhirClient {
 
     public Patient getPatientByMrn(String mrn) {
         return patientLookup.lookupByMrn(mrn);
+    }
+
+    public String extractMRN(Patient patient) {
+        for (Identifier identifier: patient.getIdentifier()) {
+            if (mrnSystem.equals(identifier.getSystem())) {
+                return identifier.getValue();
+            }
+        }
+
+        return null;
     }
 
     public <T extends IBaseResource> T readResource(Class<T> type, String fhirId) {

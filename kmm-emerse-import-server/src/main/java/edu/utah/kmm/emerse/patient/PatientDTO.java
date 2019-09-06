@@ -1,6 +1,6 @@
-package edu.utah.kmm.emerse.dto;
+package edu.utah.kmm.emerse.patient;
 
-import edu.utah.kmm.emerse.fhir.FhirClient;
+import edu.utah.kmm.emerse.database.BaseDTO;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Patient;
 
@@ -11,13 +11,12 @@ import static org.apache.commons.lang3.StringUtils.truncate;
 /**
  * DTO encapsulating patient attributes.
  */
-public class PatientDTO extends BaseDTO{
+public class PatientDTO extends BaseDTO {
 
     public PatientDTO(Patient patient, Map<String, Object> additionalParams) {
         super(additionalParams);
         HumanName name = patient.getNameFirstRep();
         boolean deceased = patient.hasDeceasedDateTimeType() || (patient.hasDeceasedBooleanType() && patient.getDeceasedBooleanType().getValue());
-        map.put("EXTERNAL_ID", FhirClient.extractMRN(patient));
         map.put("FIRST_NAME", truncate(name.getGivenAsSingleString(), 65));
         map.put("MIDDLE_NAME", null);
         map.put("LAST_NAME", truncate(name.getFamily(), 75));

@@ -1,8 +1,7 @@
 package edu.utah.kmm.emerse.oauth;
 
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import edu.utah.kmm.emerse.fhir.FhirClient;
-import edu.utah.kmm.emerse.fhir.IAuthenticator;
+import edu.utah.kmm.emerse.fhir.FhirService;
+import edu.utah.kmm.emerse.auth.IAuthenticator;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.UriType;
@@ -22,16 +21,13 @@ public abstract class BaseOAuth2Authenticator implements IAuthenticator {
     private String fhirEndpoint;
 
     @Override
-    public void initialize(FhirClient fhirClient) {
-        IGenericClient client = fhirClient.getGenericClient();
-        fhirEndpoint = client.getServerBase();
+    public void initialize(FhirService fhirService) {
+        fhirEndpoint = fhirService.getGenericClient().getServerBase();
         fhirEndpoint = fhirEndpoint.endsWith("/") ? fhirEndpoint : fhirEndpoint + "/";
-        getOAuthEndpoints(client);
+        getOAuthEndpoints(fhirService.getCapabilityStatement());
     }
 
-    private void getOAuthEndpoints(IGenericClient client) {
-        CapabilityStatement cp = client.capabilities().ofType(CapabilityStatement.class).execute();
-
+    private void getOAuthEndpoints(CapabilityStatement cp) {
         for (Extension ext: cp.getRest().get(0).getSecurity().getExtension()) {
             if (OAUTH_EXTENSION.equals(ext.getUrl())) {
                 for (Extension ext2: ext.getExtension()) {

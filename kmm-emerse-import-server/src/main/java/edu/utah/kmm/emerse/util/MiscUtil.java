@@ -1,6 +1,6 @@
 package edu.utah.kmm.emerse.util;
 
-import edu.utah.kmm.emerse.model.IdentifierType;
+import edu.utah.kmm.emerse.fhir.IdentifierType;
 
 import java.text.SimpleDateFormat;
 

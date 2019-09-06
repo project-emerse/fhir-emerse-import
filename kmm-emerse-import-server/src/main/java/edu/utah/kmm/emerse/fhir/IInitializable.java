@@ -2,6 +2,6 @@ package edu.utah.kmm.emerse.fhir;
 
 public interface IInitializable {
 
-    void initialize(FhirClient fhirClient);
+    void initialize(FhirService fhirService);
 
 }

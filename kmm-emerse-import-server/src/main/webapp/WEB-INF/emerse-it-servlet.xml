@@ -80,10 +80,10 @@
 
     <!-- FHIR Configuration -->
 
-    <bean id="authenticatorRegistry" class="edu.utah.kmm.emerse.fhir.AuthenticatorRegistry">
+    <bean id="authenticatorRegistry" class="edu.utah.kmm.emerse.auth.AuthenticatorRegistry">
         <constructor-arg>
             <list>
-                <bean class="edu.utah.kmm.emerse.fhir.BasicAuthenticator" />
+                <bean class="edu.utah.kmm.emerse.auth.BasicAuthenticator" />
                 <bean class="edu.utah.kmm.emerse.oauth.OAuth2Authenticator" />
                 <bean class="edu.utah.kmm.emerse.epic.EpicAuthenticator" />
             </list>
@@ -91,10 +91,10 @@
     </bean>
 
 
-    <bean id="patientLookupRegistry" class="edu.utah.kmm.emerse.fhir.PatientLookupRegistry">
+    <bean id="patientLookupRegistry" class="edu.utah.kmm.emerse.patient.PatientLookupRegistry">
         <constructor-arg>
             <list>
-                <bean class="edu.utah.kmm.emerse.fhir.DefaultPatientLookup" />
+                <bean class="edu.utah.kmm.emerse.patient.DefaultPatientLookup" />
                 <bean class="edu.utah.kmm.emerse.epic.EpicPatientLookup" />
             </list>
         </constructor-arg>
@@ -107,7 +107,7 @@
 
     <bean id="fhirContext" class="ca.uhn.fhir.context.FhirContext" factory-method="forDstu3" />
 
-    <bean id="fhirClient" class="edu.utah.kmm.emerse.fhir.FhirClient" init-method="init"/>
+    <bean id="fhirClient" class="edu.utah.kmm.emerse.fhir.FhirService" init-method="init"/>
 
     <!-- Datasource Configuration -->
 

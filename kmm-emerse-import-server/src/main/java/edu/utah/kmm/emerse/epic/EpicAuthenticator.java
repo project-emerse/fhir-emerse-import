@@ -1,6 +1,6 @@
 package edu.utah.kmm.emerse.epic;
 
-import edu.utah.kmm.emerse.fhir.FhirClient;
+import edu.utah.kmm.emerse.fhir.FhirService;
 import edu.utah.kmm.emerse.oauth.AccessToken;
 import edu.utah.kmm.emerse.oauth.BaseOAuth2Authenticator;
 import edu.utah.kmm.emerse.oauth.OAuthInterceptor;
@@ -53,9 +53,9 @@ public class EpicAuthenticator extends BaseOAuth2Authenticator {
     }
 
     @Override
-    public void initialize(FhirClient fhirClient) {
-        super.initialize(fhirClient);
-        fhirClient.getGenericClient().registerInterceptor(new EpicAuthInterceptor());
+    public void initialize(FhirService fhirService) {
+        super.initialize(fhirService);
+        fhirService.getGenericClient().registerInterceptor(new EpicAuthInterceptor());
     }
 
     private AccessToken generateAccessToken(String patid) {

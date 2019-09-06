@@ -1,4 +1,4 @@
-package edu.utah.kmm.emerse.dto;
+package edu.utah.kmm.emerse.database;
 
 import java.util.Collections;
 import java.util.HashMap;

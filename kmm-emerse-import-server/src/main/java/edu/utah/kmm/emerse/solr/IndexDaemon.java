@@ -1,6 +1,5 @@
 package edu.utah.kmm.emerse.solr;
 
-import edu.utah.kmm.emerse.dto.IndexRequestDTO;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

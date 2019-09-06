@@ -1,6 +1,7 @@
-package edu.utah.kmm.emerse.dto;
+package edu.utah.kmm.emerse.solr;
 
-import edu.utah.kmm.emerse.model.IdentifierType;
+import edu.utah.kmm.emerse.database.BaseDTO;
+import edu.utah.kmm.emerse.fhir.IdentifierType;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.core.io.Resource;

@@ -1,6 +1,8 @@
-package edu.utah.kmm.emerse.fhir;
+package edu.utah.kmm.emerse.patient;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import edu.utah.kmm.emerse.fhir.FhirService;
+import edu.utah.kmm.emerse.patient.IPatientLookup;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,8 +20,8 @@ public class DefaultPatientLookup implements IPatientLookup {
     }
 
     @Override
-    public void initialize(FhirClient fhirClient) {
-        this.client = fhirClient.getGenericClient();
+    public void initialize(FhirService fhirService) {
+        this.client = fhirService.getGenericClient();
     }
 
     @Override

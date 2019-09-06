@@ -2,11 +2,10 @@ package edu.utah.kmm.emerse.servlet;
 
 import edu.utah.kmm.emerse.config.ClientConfigService;
 import edu.utah.kmm.emerse.database.DatabaseService;
-import edu.utah.kmm.emerse.dto.ContentDTO;
-import edu.utah.kmm.emerse.dto.DocumentDTO;
-import edu.utah.kmm.emerse.dto.IndexRequestDTO;
-import edu.utah.kmm.emerse.fhir.FhirClient;
-import edu.utah.kmm.emerse.model.IdentifierType;
+import edu.utah.kmm.emerse.document.ContentDTO;
+import edu.utah.kmm.emerse.solr.IndexRequestDTO;
+import edu.utah.kmm.emerse.fhir.FhirService;
+import edu.utah.kmm.emerse.fhir.IdentifierType;
 import edu.utah.kmm.emerse.solr.IndexResult;
 import edu.utah.kmm.emerse.solr.SolrService;
 import edu.utah.kmm.emerse.util.MiscUtil;
@@ -36,7 +35,7 @@ public class RestController {
     private static final Log log = LogFactory.getLog(RestController.class);
 
     @Autowired
-    private FhirClient fhirClient;
+    private FhirService fhirService;
 
     @Autowired
     private SolrService solrService;
@@ -72,7 +71,7 @@ public class RestController {
             @RequestParam(required = false) String mrn,
             @RequestParam(required = false) String patid) {
         IdentifierType type = validateIdentifiers(mrn, patid);
-        return fhirClient.serialize(fhirClient.getPatient(mrn != null ? mrn : patid, type));
+        return fhirService.serialize(fhirService.getPatient(mrn != null ? mrn : patid, type));
     }
 
     /**
@@ -84,7 +83,7 @@ public class RestController {
     @PostMapping("/patient")
     public ResponseEntity updatePatient(
             @RequestBody String payload) {
-        Patient patient = fhirClient.deserialize(payload, Patient.class);
+        Patient patient = fhirService.deserialize(payload, Patient.class);
         databaseService.createOrUpdatePatient(patient, true);
         return new ResponseEntity(HttpStatus.OK);
     }
@@ -101,8 +100,8 @@ public class RestController {
             @RequestParam String patid) {
         List<Map<String, Object>> docs = new ArrayList<>();
 
-        for (DocumentReference document: fhirClient.getDocumentsForPatient(patid)) {
-            ContentDTO documentContent = fhirClient.getDocumentContent(document);
+        for (DocumentReference document: fhirService.getDocumentsForPatient(patid)) {
+            ContentDTO documentContent = fhirService.getDocumentContent(document);
 
             if (documentContent != null) {
                 Map<String, Object> map = new HashMap<>();

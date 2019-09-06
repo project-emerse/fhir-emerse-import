@@ -1,9 +1,9 @@
 package edu.utah.kmm.emerse.database;
 
-import edu.utah.kmm.emerse.dto.IndexRequestDTO;
-import edu.utah.kmm.emerse.dto.PatientDTO;
-import edu.utah.kmm.emerse.fhir.FhirClient;
-import edu.utah.kmm.emerse.model.IdentifierType;
+import edu.utah.kmm.emerse.solr.IndexRequestDTO;
+import edu.utah.kmm.emerse.patient.PatientDTO;
+import edu.utah.kmm.emerse.fhir.FhirService;
+import edu.utah.kmm.emerse.fhir.IdentifierType;
 import edu.utah.kmm.emerse.security.Credentials;
 import edu.utah.kmm.emerse.solr.SolrService;
 import org.apache.commons.logging.Log;
@@ -63,7 +63,7 @@ public class DatabaseService {
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Autowired
-    private FhirClient fhirClient;
+    private FhirService fhirService;
 
     @Autowired
     private SolrService solrService;
@@ -122,7 +122,7 @@ public class DatabaseService {
      * @param patient Patient resource.
      */
     public void createOrUpdatePatient(Patient patient, boolean canUpdate) {
-        String mrn = FhirClient.extractMRN(patient);
+        String mrn = fhirService.extractMRN(patient);
         Integer recno = getPatientRecNum(mrn);
 
         if (recno != null && !canUpdate) {
@@ -132,6 +132,7 @@ public class DatabaseService {
         String SQL = recno == null ? getPatientInsertSQL() : getPatientUpdateSQL();
         Map<String, Object> params = new HashMap<>();
         params.put("ID", recno);
+        params.put("EXTERNAL_ID", mrn);
         params.put("UPDATE_DATE", new Date());
         params.put("UPDATED_BY", "EMERSE-IT");
         params.put("CREATE_DATE", new Date());
