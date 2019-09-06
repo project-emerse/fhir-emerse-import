@@ -147,18 +147,18 @@ public class FhirClient {
     /**
      * Return the FHIR id of the subject of a document.
      *
-     * @param documentReference The document.
+     * @param document The document.
      * @return The FHIR id of the subject, or null if not found.
      */
-    public String getPatientId(DocumentReference documentReference) {
-        Resource res = documentReference.getSubjectTarget();
+    public String getPatientId(DocumentReference document) {
+        Resource res = document.getSubjectTarget();
 
         if (res instanceof Patient) {
             return res.getId();
         }
 
-        if (documentReference.hasSubject()) {
-            Reference ref = documentReference.getSubject();
+        if (document.hasSubject()) {
+            Reference ref = document.getSubject();
             String id = ref.getId();
             return id == null ? StringUtils.substringAfterLast(ref.getReference(), "/") : id;
         }
@@ -169,30 +169,30 @@ public class FhirClient {
     /**
      * Return the MRN of the subject of a document.
      *
-     * @param documentReference The document.
+     * @param document The document.
      * @return The MRN of the subject, or null if not found.
      */
-    public String getPatientMrn(DocumentReference documentReference) {
-        Resource res = documentReference.getSubjectTarget();
+    public String getPatientMrn(DocumentReference document) {
+        Resource res = document.getSubjectTarget();
 
         if (res instanceof Patient) {
             return extractMRN((Patient) res);
         }
 
-        String patid = getPatientId(documentReference);
+        String patid = getPatientId(document);
 
         if (patid != null) {
             Patient patient = getPatientById(patid);
-            documentReference.setSubjectTarget(patient);
+            document.setSubjectTarget(patient);
             return extractMRN(patient);
         }
 
         return null;
     }
 
-    public DocumentContent getDocumentContent(DocumentReference documentReference) {
-        if (!documentReference.getContent().isEmpty()) {
-            DocumentReference.DocumentReferenceContentComponent content = documentReference.getContentFirstRep();
+    public DocumentContent getDocumentContent(DocumentReference document) {
+        if (!document.getContent().isEmpty()) {
+            DocumentReference.DocumentReferenceContentComponent content = document.getContentFirstRep();
             Attachment attachment = content.getAttachment();
 
             if (!attachment.getDataElement().isEmpty()) {

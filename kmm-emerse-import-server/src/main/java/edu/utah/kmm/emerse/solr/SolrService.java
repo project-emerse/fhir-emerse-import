@@ -94,7 +94,7 @@ public class SolrService {
      */
     public IndexResult indexDocuments(Patient patient) {
         IndexResult result = new IndexResult();
-        databaseService.createOrUpdatePatient(patient, true);
+        databaseService.createOrUpdatePatient(patient, false);
         List<DocumentReference> documents = fhirClient.getDocumentsForPatient(patient.getId());
         String mrn = fhirClient.extractMRN(patient);
 
@@ -107,15 +107,19 @@ public class SolrService {
     }
 
     /**
-     * Index all documents for a given patient.
+     * Index all document(s) for a given id.
      *
-     * @param id The patient's id.
+     * @param id The id.
      * @param type The id type.
      * @return The indexing result.
      */
     public IndexResult indexDocuments(String id, IdentifierType type) {
-        Patient patient = fhirClient.getPatient(id, type);
-        return patient == null ? new IndexResult() : indexDocuments(patient);
+        if (type == IdentifierType.DOCID) {
+            return indexDocument(id);
+        } else {
+            Patient patient = fhirClient.getPatient(id, type);
+            return patient == null ? new IndexResult() : indexDocuments(patient);
+        }
     }
 
     /**
@@ -125,45 +129,46 @@ public class SolrService {
      * @return The indexing result.
      */
     public IndexResult indexDocument(String docid) {
-        DocumentReference documentReference = fhirClient.getDocumentById(docid);
-        String mrn = fhirClient.getPatientMrn(documentReference);
+        DocumentReference document = fhirClient.getDocumentById(docid);
+        Assert.notNull(document, "Document could not be located.");
+        String mrn = fhirClient.getPatientMrn(document);
         Assert.notNull(mrn, "Cannot determine subject of document.");
-        return indexDocument(mrn, documentReference);
+        return indexDocument(mrn, document);
     }
 
     /**
      * Index a single document.
      *
      * @param mrn MRN of the subject of the document.
-     * @param documentReference The document to index.
+     * @param document The document to index.
      * @return The indexing result.
      */
-    public IndexResult indexDocument(String mrn, DocumentReference documentReference) {
+    public IndexResult indexDocument(String mrn, DocumentReference document) {
         IndexResult result = new IndexResult();
-        DocumentContent content = fhirClient.getDocumentContent(documentReference);
+        DocumentContent content = fhirClient.getDocumentContent(document);
 
         if (content == null || content.getContent() == null) {
-            log.warn("Document has no content: " + documentReference.getId());
+            log.warn("Document has no content: " + document.getId());
             return result.success(false);
         }
 
-        SolrInputDocument document = new SolrInputDocument();
-        String id = documentReference.getIdElement().getIdPart();
-        document.addField("ID", id);
-        document.addField("RPT_ID", id);
-        document.addField("MRN", mrn);
-        document.addField("RPT_DATE", documentReference.getCreated());
-        document.addField("SOURCE", "source1");
-        document.addField("RPT_TEXT", content.getContent());
+        SolrInputDocument solrDoc = new SolrInputDocument();
+        String id = document.getIdElement().getIdPart();
+        solrDoc.addField("ID", id);
+        solrDoc.addField("RPT_ID", id);
+        solrDoc.addField("MRN", mrn);
+        solrDoc.addField("RPT_DATE", document.getCreated());
+        solrDoc.addField("SOURCE", "source1");
+        solrDoc.addField("RPT_TEXT", content.getContent());
 
         try {
             UpdateRequest request = new UpdateRequest();
-            request.add(document);
+            request.add(solrDoc);
             request.setBasicAuthCredentials(solrCredentials.getUsername(), solrCredentials.getPassword());
             request.process(solrClient, DOCUMENTS);
             return result.success(true);
         } catch (Exception e) {
-            log.error("Error indexing document: " + documentReference.getId(), e);
+            log.error("Error indexing document: " + document.getId(), e);
             return result.success(false);
         }
     }
@@ -176,15 +181,9 @@ public class SolrService {
      */
     public IndexResult index(IndexRequest request) {
         IndexResult result = new IndexResult();
-        boolean isDocId = request.identifierType == IdentifierType.DOCID;
 
         for (String id: request.identifiers) {
-            if (isDocId) {
-                result.combine(indexDocument(id));
-            } else {
-                Patient patient = fhirClient.getPatient(id, request.identifierType);
-                result.combine(indexDocuments(patient));
-            }
+            result.combine(indexDocuments(id, request.identifierType));
         }
 
         return result;

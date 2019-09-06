@@ -99,14 +99,14 @@ public class RestController {
             @RequestParam String patid) {
         List<Map<String, Object>> docs = new ArrayList<>();
 
-        for (DocumentReference documentReference: fhirClient.getDocumentsForPatient(patid)) {
-            DocumentContent documentContent = fhirClient.getDocumentContent(documentReference);
+        for (DocumentReference document: fhirClient.getDocumentsForPatient(patid)) {
+            DocumentContent documentContent = fhirClient.getDocumentContent(document);
 
             if (documentContent != null) {
                 Map<String, Object> map = new HashMap<>();
-                Date date = documentReference.hasCreated() ? documentReference.getCreated() : null;
-                map.put("id", documentReference.getIdElement().getIdPart());
-                map.put("title", documentReference.getType().getText());
+                Date date = document.hasCreated() ? document.getCreated() : null;
+                map.put("id", document.getIdElement().getIdPart());
+                map.put("title", document.getType().getText());
                 map.put("date", date == null ? null :  date.getTime());
                 map.put("dateStr", date == null ? null : MiscUtil.dateTimeParser.format(date));
                 map.put("body", documentContent.getContent());
