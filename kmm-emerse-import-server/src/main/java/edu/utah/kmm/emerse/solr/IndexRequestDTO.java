@@ -61,8 +61,8 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
         put(FieldType.COMPLETED, rs, Date.class);
         put(FieldType.TOTAL, rs, Integer.class);
         put(FieldType.PROCESSED, rs, Integer.class);
-        put(FieldType.ERROR_TEXT, rs, String.class);
         put(FieldType.PROCESSING_FLAG, rs, Boolean.class);
+        put(FieldType.ERROR_TEXT, rs, String.class);
         put(FieldType.IDENTIFIER_TYPE, rs, String.class);
         put(FieldType.IDENTIFIERS, rs, String.class);
         identifiers = stringToList(get(FieldType.IDENTIFIERS, String.class));
@@ -78,10 +78,11 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
         put(FieldType.ID, UUID.randomUUID().toString());
         put(FieldType.SUBMITTED, now());
         put(FieldType.TOTAL, identifiers.size());
-        put(FieldType.IDENTIFIER_TYPE, identifierType.name());
-        put(FieldType.IDENTIFIERS, listToString(identifiers));
         put(FieldType.PROCESSED, 0);
         put(FieldType.PROCESSING_FLAG, false);
+        put(FieldType.ERROR_TEXT, null);
+        put(FieldType.IDENTIFIER_TYPE, identifierType.name());
+        put(FieldType.IDENTIFIERS, listToString(identifiers));
     }
 
     private List<String> stringToList(String value) {
@@ -135,6 +136,7 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
 
     public void clearChanged() {
         this.changed = false;
+        this.initial = false;
     }
 
     public IdentifierType getIdentifierType() {

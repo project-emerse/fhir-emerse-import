@@ -172,15 +172,16 @@ public class DatabaseService {
     }
 
     public IndexRequestDTO createOrUpdateIndexRequest(IndexRequestDTO request) {
-        String SQL = request.initial() ? getQueueInsertSQL() : getQueueUpdateSQL();
+        if (request.changed()) {
+            String SQL = request.initial() ? getQueueInsertSQL() : getQueueUpdateSQL();
 
-        try {
-            jdbcTemplate.update(SQL, request.getMap());
-            request.clearChanged();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            try {
+                jdbcTemplate.update(SQL, request.getMap());
+                request.clearChanged();
+            } catch (DataAccessException e) {
+                throw new RuntimeException(e);
+            }
         }
-
         return request;
     }
 
