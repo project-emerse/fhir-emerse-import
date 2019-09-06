@@ -2,7 +2,6 @@ package edu.utah.kmm.emerse.epic;
 
 import edu.utah.kmm.emerse.fhir.FhirClient;
 import edu.utah.kmm.emerse.fhir.IPatientLookup;
-import edu.utah.kmm.emerse.security.Credentials;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;

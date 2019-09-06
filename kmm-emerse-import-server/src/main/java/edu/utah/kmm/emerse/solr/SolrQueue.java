@@ -13,7 +13,7 @@ public class SolrQueue implements RowMapper {
     @Autowired
     private DatabaseService databaseService;
 
-    private Queue<IndexRequest> queue = new LinkedBlockingQueue<IndexRequest>();
+    private Queue<IndexRequest> queue = new LinkedBlockingQueue<>();
 
     private long nextRefresh;
 

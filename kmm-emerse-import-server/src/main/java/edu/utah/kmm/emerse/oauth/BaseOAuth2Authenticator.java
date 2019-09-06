@@ -3,15 +3,12 @@ package edu.utah.kmm.emerse.oauth;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import edu.utah.kmm.emerse.fhir.FhirClient;
 import edu.utah.kmm.emerse.fhir.IAuthenticator;
-import edu.utah.kmm.emerse.security.Credentials;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.UriType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URLEncoder;
 
 public abstract class BaseOAuth2Authenticator implements IAuthenticator {

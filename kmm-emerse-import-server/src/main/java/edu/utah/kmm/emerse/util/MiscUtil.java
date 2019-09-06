@@ -2,8 +2,6 @@ package edu.utah.kmm.emerse.util;
 
 import edu.utah.kmm.emerse.model.IdentifierType;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 
 public class MiscUtil {

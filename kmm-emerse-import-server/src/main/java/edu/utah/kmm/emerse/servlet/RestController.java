@@ -5,6 +5,7 @@ import edu.utah.kmm.emerse.database.DatabaseService;
 import edu.utah.kmm.emerse.fhir.FhirClient;
 import edu.utah.kmm.emerse.model.DocumentContent;
 import edu.utah.kmm.emerse.model.IdentifierType;
+import edu.utah.kmm.emerse.solr.IndexRequest;
 import edu.utah.kmm.emerse.solr.IndexResult;
 import edu.utah.kmm.emerse.solr.SolrService;
 import edu.utah.kmm.emerse.util.MiscUtil;
@@ -127,23 +128,37 @@ public class RestController {
      */
     @GetMapping("/index")
     @ResponseBody
-    public IndexResult indexPatient(
+    public IndexResult indexDocumentsByPatient(
             @RequestParam(required = false) String mrn,
             @RequestParam(required = false) String patid) {
         return solrService.indexDocuments(mrn != null ? mrn : patid, validateIdentifiers(mrn, patid));
     }
 
     /**
-     * Batch index.
+     * Immediate batch index.
      *
      * @param file File containing list of id's.
      * @return The indexing result.
      */
     @PostMapping("/batch")
     @ResponseBody
-    public IndexResult indexBatch(
+    public IndexResult indexBatchImmediate(
             @RequestParam MultipartFile file) {
-        return solrService.batchIndex(file.getResource());
+        return solrService.batchIndexImmediate(new IndexRequest(file.getResource()) );
+    }
+
+    /**
+     * Queued batch index.
+     *
+     * @param file File containing list of id's.
+     * @return The indexing result.
+     */
+    @PostMapping("/queue")
+    @ResponseBody
+    public ResponseEntity indexBatchQueued(
+            @RequestParam MultipartFile file) {
+        solrService.batchIndexQueued(new IndexRequest(file.getResource()));
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     /**

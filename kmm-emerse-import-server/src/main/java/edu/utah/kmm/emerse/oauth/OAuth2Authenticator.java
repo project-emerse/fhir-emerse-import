@@ -1,9 +1,7 @@
 package edu.utah.kmm.emerse.oauth;
 
-import ca.uhn.fhir.rest.client.api.IGenericClient;
 import edu.utah.kmm.emerse.fhir.FhirClient;
 import edu.utah.kmm.emerse.security.Credentials;
-import edu.utah.kmm.emerse.util.MiscUtil;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;

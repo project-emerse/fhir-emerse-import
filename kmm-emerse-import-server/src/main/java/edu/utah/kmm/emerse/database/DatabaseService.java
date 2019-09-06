@@ -1,12 +1,15 @@
 package edu.utah.kmm.emerse.database;
 
 import edu.utah.kmm.emerse.fhir.FhirClient;
+import edu.utah.kmm.emerse.model.IdentifierType;
 import edu.utah.kmm.emerse.security.Credentials;
+import edu.utah.kmm.emerse.solr.IndexRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -15,6 +18,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Database-related services.
@@ -23,18 +27,24 @@ public class DatabaseService {
 
     private static final Log log = LogFactory.getLog(DatabaseService.class);
 
-    private static final String QUEUE_TABLE = "INDEXING_QUEUE";
-
-    private static final String[] PATIENT_UPDATE_FIELDS = {
-            "EXTERNAL_ID","FIRST_NAME","MIDDLE_NAME","LAST_NAME","BIRTH_DATE","SEX_CD","DECEASED_FLAG",
-            "LANGUAGE_CD","RACE_CD","ETHNICITY_CD","MARITAL_STATUS_CD","RELIGION_CD","ZIP_CD",
-            "UPDATE_DATE","UPDATED_BY"
+    private static final String[] QUEUE_UPDATE_FIELDS = {
+            "ID", "COMPLETED", "PROCESSED", "ERROR_TEXT", "PROCESSING_FLAG"
     };
 
-    private static final String[] PATIENT_CREATE_FIELDS = {
-            "EXTERNAL_ID","FIRST_NAME","MIDDLE_NAME","LAST_NAME","BIRTH_DATE","SEX_CD","DECEASED_FLAG",
-            "LANGUAGE_CD","RACE_CD","ETHNICITY_CD","MARITAL_STATUS_CD","RELIGION_CD","ZIP_CD",
-            "CREATE_DATE","CREATED_BY", "DELETED_FLAG"
+    private static final String[] QUEUE_INSERT_FIELDS = {
+            "SUBMITTED", "TOTAL", "PROCESSED", "PROCESSING_FLAG", "IDENTIFIER_TYPE", "IDENTIFIERS"
+    };
+
+    private static final String[] PATIENT_UPDATE_FIELDS = {
+            "EXTERNAL_ID", "FIRST_NAME", "MIDDLE_NAME", "LAST_NAME", "BIRTH_DATE", "SEX_CD", "DECEASED_FLAG",
+            "LANGUAGE_CD", "RACE_CD", "ETHNICITY_CD", "MARITAL_STATUS_CD", "RELIGION_CD", "ZIP_CD",
+            "UPDATE_DATE", "UPDATED_BY"
+    };
+
+    private static final String[] PATIENT_INSERT_FIELDS = {
+            "EXTERNAL_ID", "FIRST_NAME", "MIDDLE_NAME", "LAST_NAME", "BIRTH_DATE", "SEX_CD", "DECEASED_FLAG",
+            "LANGUAGE_CD", "RACE_CD", "ETHNICITY_CD", "MARITAL_STATUS_CD", "RELIGION_CD", "ZIP_CD",
+            "CREATE_DATE", "CREATED_BY", "DELETED_FLAG"
     };
 
     private static final String QUEUE_CHECK = "SELECT * FROM INDEXING_QUEUE WHERE COMPLETED IS NULL ORDER BY ID ASC";
@@ -55,16 +65,57 @@ public class DatabaseService {
         jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
     }
 
+    public boolean authenticate(String username, String password) {
+        try {
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("USERNAME", username);
+            String encodedPassword = jdbcTemplate.queryForObject(
+                    "SELECT PASSWORD FROM LOGIN_ACCOUNT WHERE USER_ID = :USERNAME", params, String.class);
+            return encodedPassword != null && passwordEncoder.matches(password, encodedPassword);
+        } catch (Exception e) {
+            log.error("Error while attempting user authentication.", e);
+            return false;
+        }
+    }
+
+    private String getInsertSQL(String table, String[] insertFields, String sequence) {
+        String idset = sequence == null ? ":ID" : sequence + ".NEXTVAL";
+        return "INSERT INTO " + table + " (ID," + String.join(",", insertFields) + ") VALUES (" +
+                idset + ",:" + String.join(",:", insertFields) + ")";
+    }
+
+    private String getUpdateSQL(String table, String[] updateFields) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("UPDATE ").append(table).append(" SET ");
+        String delim = "";
+
+        for (String field : updateFields) {
+            sb.append(delim).append(field + "=:" + field);
+            delim = ",";
+        }
+
+        sb.append(" WHERE ID=:ID");
+        return sb.toString();
+    }
+
+    private String getPatientInsertSQL() {
+        return getInsertSQL("PATIENT", PATIENT_INSERT_FIELDS, "PATIENT_SEQ");
+    }
+
+    private String getPatientUpdateSQL() {
+        return getUpdateSQL("PATIENT", PATIENT_INSERT_FIELDS);
+    }
+
     /**
      * Creates or updates entry in EMERSE patient table.
      *
      * @param patient Patient resource.
      */
-    public void createOrUpdatePatient(Patient patient, boolean update) {
+    public void createOrUpdatePatient(Patient patient, boolean canUpdate) {
         String mrn = fhirClient.extractMRN(patient);
         Integer recno = getPatientRecNum(mrn);
 
-        if (recno != null && !update) {
+        if (recno != null && !canUpdate) {
             return;
         }
 
@@ -96,7 +147,7 @@ public class DatabaseService {
 
         try {
             jdbcTemplate.update(SQL, params);
-        } catch (Exception e) {
+        } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
 
@@ -104,25 +155,6 @@ public class DatabaseService {
 
     private String truncate(String value, int maxsize) {
         return value == null ? null : value.length() <= maxsize ? value : value.substring(0, maxsize);
-    }
-
-    private String getPatientInsertSQL() {
-        return "INSERT INTO PATIENT (ID," + String.join(",", PATIENT_CREATE_FIELDS) + ") VALUES (PATIENT_SEQ.NEXTVAL,:"
-                + String.join(",:", PATIENT_CREATE_FIELDS) + ")";
-    }
-
-    private String getPatientUpdateSQL() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("UPDATE PATIENT SET ");
-        String delim = "";
-
-        for (String field: PATIENT_UPDATE_FIELDS) {
-            sb.append(delim).append(field + "=:" + field);
-            delim = ",";
-        }
-
-        sb.append(" WHERE ID=:ID");
-        return sb.toString();
     }
 
     private Integer getPatientRecNum(String mrn) {
@@ -135,17 +167,31 @@ public class DatabaseService {
         }
     }
 
-    public boolean authenticate(String username, String password) {
-        try {
-            MapSqlParameterSource params = new MapSqlParameterSource();
-            params.addValue("USERNAME", username);
-            String encodedPassword = jdbcTemplate.queryForObject(
-                    "SELECT PASSWORD FROM LOGIN_ACCOUNT WHERE USER_ID = :USERNAME", params, String.class);
-            return encodedPassword != null && passwordEncoder.matches(password, encodedPassword);
-        } catch (Exception e) {
-            log.error("Error while attempting user authentication.", e);
-            return false;
+    private String getQueueInsertSQL() {
+        return getInsertSQL("QUEUE", QUEUE_INSERT_FIELDS, null);
+    }
+
+    private String getQueueUpdateSQL() {
+        return getUpdateSQL("QUEUE", QUEUE_UPDATE_FIELDS);
+    }
+
+    public IndexRequest queueRequest(List<String> ids, IdentifierType type) {
+        return createOrUpdateIndexRequest(new IndexRequest(ids, type));
+    }
+
+    public IndexRequest createOrUpdateIndexRequest(IndexRequest request) {
+        String SQL = request.initial() ? getQueueInsertSQL() : getQueueUpdateSQL();
+        MapSqlParameterSource params = new MapSqlParameterSource();
+
+        if (request.write(params)) {
+            try {
+                jdbcTemplate.update(SQL, params);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
+
+        return request;
     }
 
     public void refreshQueue(RowMapper<?> rowMapper) {

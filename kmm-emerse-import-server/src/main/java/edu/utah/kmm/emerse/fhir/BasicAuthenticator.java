@@ -1,7 +1,6 @@
 package edu.utah.kmm.emerse.fhir;
 
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import edu.utah.kmm.emerse.security.Credentials;
 

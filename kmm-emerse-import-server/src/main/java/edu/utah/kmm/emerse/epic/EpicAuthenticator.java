@@ -1,11 +1,9 @@
 package edu.utah.kmm.emerse.epic;
 
-import ca.uhn.fhir.rest.client.api.IGenericClient;
 import edu.utah.kmm.emerse.fhir.FhirClient;
 import edu.utah.kmm.emerse.oauth.AccessToken;
 import edu.utah.kmm.emerse.oauth.BaseOAuth2Authenticator;
 import edu.utah.kmm.emerse.oauth.OAuthInterceptor;
-import edu.utah.kmm.emerse.security.Credentials;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.springframework.beans.factory.annotation.Autowired;

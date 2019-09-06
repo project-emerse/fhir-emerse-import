@@ -5,7 +5,6 @@ import edu.utah.kmm.emerse.fhir.FhirClient;
 import edu.utah.kmm.emerse.model.DocumentContent;
 import edu.utah.kmm.emerse.model.IdentifierType;
 import edu.utah.kmm.emerse.security.Credentials;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -18,10 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
-import java.io.IOException;
 import java.util.List;
-
-import static edu.utah.kmm.emerse.util.MiscUtil.toIdentifierType;
 
 /**
  * Solr-related services.
@@ -51,39 +47,32 @@ public class SolrService {
     }
 
     /**
-     * Index documents for a resource containing a list of patient id's.
+     * Service an index request.
      *
-     * @param source The resource containing a list of patient id's.
+     * @param request The index request.
      * @return The indexing result.
      */
-    public IndexResult batchIndex(Resource source) {
-        try {
-            return batchIndex(IOUtils.readLines(source.getInputStream(), "UTF-8"));
-        } catch (IOException e) {
-            return new IndexResult();
-        }
-    }
-
-    /**
-     * Index documents for a list of patient id's.
-     *
-     * @param ids A list of patient id's.
-     * @return The indexing result.
-     */
-    public IndexResult batchIndex(List<String> ids) {
+    public IndexResult batchIndexImmediate(IndexRequest request) {
         IndexResult result = new IndexResult();
-        IdentifierType type = toIdentifierType(ids.isEmpty() ? "" : ids.remove(0).trim());
-        Assert.notNull(type, "An valid identifier type was not found.");
 
-        for (String id: ids) {
+        for (String id: request) {
             id = id.trim();
 
             if (!id.isEmpty()) {
-                result.combine(indexDocuments(id, type));
+                result.combine(indexDocuments(id, request.identifierType));
+            }
+
+            if (result.getTotal() % 100 == 0) {
+                databaseService.createOrUpdateIndexRequest(request);
             }
         }
 
+        databaseService.createOrUpdateIndexRequest(request);
         return result;
+    }
+
+    public void batchIndexQueued(IndexRequest request) {
+        databaseService.createOrUpdateIndexRequest(request);
     }
 
     /**

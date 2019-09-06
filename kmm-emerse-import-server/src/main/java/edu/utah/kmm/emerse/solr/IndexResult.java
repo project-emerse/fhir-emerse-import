@@ -27,7 +27,11 @@ public class IndexResult {
         return failed;
     }
 
+    public int getTotal() {
+        return succeeded + failed;
+    }
+
     public double getPercentageSucceeded() {
-        return (double) succeeded / (double) (succeeded + failed) * 100.0;
+        return (double) succeeded / (double) getTotal() * 100.0;
     }
 }
