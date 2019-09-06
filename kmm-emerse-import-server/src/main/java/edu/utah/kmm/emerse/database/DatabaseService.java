@@ -1,13 +1,11 @@
 package edu.utah.kmm.emerse.database;
 
-import edu.utah.kmm.emerse.patient.PatientService;
-import edu.utah.kmm.emerse.solr.IndexRequestDTO;
-import edu.utah.kmm.emerse.patient.PatientDTO;
-import edu.utah.kmm.emerse.fhir.FhirService;
 import edu.utah.kmm.emerse.fhir.IdentifierType;
+import edu.utah.kmm.emerse.patient.PatientDTO;
+import edu.utah.kmm.emerse.patient.PatientService;
 import edu.utah.kmm.emerse.security.Credentials;
+import edu.utah.kmm.emerse.solr.IndexRequestDTO;
 import edu.utah.kmm.emerse.solr.SolrService;
-import org.apache.calcite.avatica.Meta;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hl7.fhir.dstu3.model.Patient;

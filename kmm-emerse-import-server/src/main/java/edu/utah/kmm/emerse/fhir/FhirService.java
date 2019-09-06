@@ -6,19 +6,12 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import edu.utah.kmm.emerse.auth.AuthenticatorRegistry;
 import edu.utah.kmm.emerse.auth.IAuthenticator;
-import edu.utah.kmm.emerse.document.ContentDTO;
-import edu.utah.kmm.emerse.patient.IPatientLookup;
-import edu.utah.kmm.emerse.patient.PatientLookupRegistry;
 import edu.utah.kmm.emerse.security.Credentials;
-import org.apache.commons.lang.StringUtils;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.Assert;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * FHIR-related services.

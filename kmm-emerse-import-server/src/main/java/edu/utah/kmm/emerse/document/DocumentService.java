@@ -1,6 +1,5 @@
 package edu.utah.kmm.emerse.document;
 
-import edu.utah.kmm.emerse.database.DatabaseService;
 import edu.utah.kmm.emerse.fhir.FhirService;
 import edu.utah.kmm.emerse.patient.PatientService;
 import org.apache.commons.lang.StringUtils;

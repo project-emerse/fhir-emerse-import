@@ -1,7 +1,7 @@
 package edu.utah.kmm.emerse.oauth;
 
-import edu.utah.kmm.emerse.fhir.FhirService;
 import edu.utah.kmm.emerse.auth.IAuthenticator;
+import edu.utah.kmm.emerse.fhir.FhirService;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.UriType;

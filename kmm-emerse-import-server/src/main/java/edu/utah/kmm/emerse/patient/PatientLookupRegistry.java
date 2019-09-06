@@ -1,7 +1,6 @@
 package edu.utah.kmm.emerse.patient;
 
 import edu.utah.kmm.emerse.fhir.BaseRegistry;
-import edu.utah.kmm.emerse.patient.IPatientLookup;
 
 public class PatientLookupRegistry extends BaseRegistry<IPatientLookup> {
 
