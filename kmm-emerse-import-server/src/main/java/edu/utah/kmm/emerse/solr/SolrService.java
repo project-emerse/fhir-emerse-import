@@ -173,6 +173,7 @@ public class SolrService {
     public IndexResult index(IndexRequestDTO request) {
         IndexResult result = new IndexResult();
         request.processing(true);
+        databaseService.createOrUpdateIndexRequest(request);
 
         for (String id: request) {
             try {
