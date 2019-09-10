@@ -1,2 +1,15 @@
 <div class="emerse-import-manager">
+    <table mat-table [dataSource]="dataSource">
+        <mat-text-column name="submitted"></mat-text-column>
+        <mat-text-column name="completed"></mat-text-column>
+        <mat-text-column name="total"></mat-text-column>
+        <mat-text-column name="processed"></mat-text-column>
+        <mat-text-column name="error_text"></mat-text-column>
+        <mat-text-column name="processing_flag"></mat-text-column>
+        <mat-text-column name="identifier_type"></mat-text-column>
+
+        <tr mat-header-row *matHeaderRowDef="columns"></tr>
+        <tr mat-row *matRowDef="let row; columns: columns"></tr>
+    </table>
+    <mat-paginator></mat-paginator>
 </div>

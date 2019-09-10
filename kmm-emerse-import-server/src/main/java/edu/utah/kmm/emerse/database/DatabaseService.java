@@ -6,6 +6,7 @@ import edu.utah.kmm.emerse.patient.PatientService;
 import edu.utah.kmm.emerse.security.Credentials;
 import edu.utah.kmm.emerse.solr.IndexRequestDTO;
 import edu.utah.kmm.emerse.solr.SolrService;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -18,10 +19,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Database-related services.
@@ -40,6 +38,10 @@ public class DatabaseService {
             "SUBMITTED", "TOTAL", "PROCESSED", "PROCESSING_FLAG", "IDENTIFIER_TYPE", "IDENTIFIERS"
     };
 
+    private static final String[] QUEUE_SUMMARY_FIELDS = {
+            "ID", "COMPLETED", "SUBMITTED", "TOTAL", "PROCESSED", "PROCESSING_FLAG", "IDENTIFIER_TYPE", "ERROR_TEXT"
+    };
+
     private static final String PATIENT_TABLE = "PATIENT";
 
     private static final String[] PATIENT_UPDATE_FIELDS = {
@@ -54,7 +56,7 @@ public class DatabaseService {
             "CREATE_DATE", "CREATED_BY", "DELETED_FLAG"
     };
 
-    private static final String QUEUE_CHECK = "SELECT * FROM INDEXING_QUEUE WHERE COMPLETED IS NULL ORDER BY ID ASC";
+    private static final String QUEUE_CHECK = "SELECT * FROM INDEXING_QUEUE WHERE COMPLETED IS NULL ORDER BY SUBMITTED ASC";
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
@@ -184,5 +186,10 @@ public class DatabaseService {
 
     public void refreshQueue(RowMapper<?> rowMapper) {
         jdbcTemplate.query(QUEUE_CHECK, rowMapper);
+    }
+
+    public List<Map<String, Object>> fetchQueueEntries() {
+        String sql = "SELECT " + StringUtils.join(QUEUE_SUMMARY_FIELDS, ",") + " FROM " + QUEUE_TABLE;
+        return jdbcTemplate.queryForList(sql, Collections.emptyMap());
     }
 }

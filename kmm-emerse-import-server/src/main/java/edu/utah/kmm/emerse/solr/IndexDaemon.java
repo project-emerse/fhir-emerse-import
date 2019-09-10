@@ -17,8 +17,6 @@ public class IndexDaemon implements Runnable {
 
     private final int daemonId = ++daemonCounter;
 
-    private boolean terminate;
-
     private boolean terminated;
 
     private boolean running;
@@ -32,11 +30,15 @@ public class IndexDaemon implements Runnable {
     }
 
     public void terminate() {
-        this.terminate = true;
+        this.terminated = true;
     }
 
     public boolean isTerminated() {
         return terminated;
+    }
+
+    public boolean isRunning() {
+        return running;
     }
 
     @Override
@@ -58,6 +60,7 @@ public class IndexDaemon implements Runnable {
             }
         }
 
+        running = false;
         log.info("Stopped indexing daemon #" + daemonId);
     }
 

@@ -172,11 +172,18 @@ public class SolrService {
      */
     public IndexResult index(IndexRequestDTO request) {
         IndexResult result = new IndexResult();
+        request.processing(true);
 
         for (String id: request) {
-            result.combine(indexDocuments(id, request.getIdentifierType()));
+            try {
+                result.combine(indexDocuments(id, request.getIdentifierType()));
+            } catch (Exception e) {
+                request.setErrorText(e.getMessage());
+            }
         }
 
+        request.completed();
+        databaseService.createOrUpdateIndexRequest(request);
         return result;
     }
 

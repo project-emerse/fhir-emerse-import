@@ -1,5 +1,6 @@
 import {Component, ViewEncapsulation} from "@angular/core";
 import {RestService} from "../../rest/rest.service";
+import {QueueEntry} from "./queue-entry.model";
 
 @Component({
     selector: 'emerse-import-manager',
@@ -8,6 +9,10 @@ import {RestService} from "../../rest/rest.service";
     encapsulation: ViewEncapsulation.None
 })
 export class ImportManagerComponent {
+
+    dataSource: QueueEntry[];
+
+    columns = ['submitted', 'completed', 'total', 'processed', 'error', 'processing', 'type'];
 
     constructor(private readonly restService: RestService) {
     }

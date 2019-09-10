@@ -7,6 +7,7 @@ import {catchError, map, shareReplay, switchMap} from "rxjs/operators";
 import {environment} from "../../environments/environment";
 import {v4 as uuid} from "uuid";
 import {IndexResult} from "../model/index-result.model";
+import {QueueEntry} from "../import/manager/queue-entry.model";
 
 @Injectable({
     providedIn: "root"
@@ -57,8 +58,16 @@ export class RestService {
         return this.get(`api/index?mrn=${mrn}`);
     }
 
-    batchIndex(formData): Observable<IndexResult> {
-        return this.post("api/batch", formData);
+    batchIndexForeground(formData): Observable<IndexResult> {
+        return this.post("api/batch-fg", formData);
+    }
+
+    batchIndexBackground(formData): Observable<boolean> {
+        return this.post("api/batch-bg", formData);
+    }
+
+    fetchQueue(): Observable<QueueEntry[]> {
+        return this.get("api/queue")  ;
     }
 
     private get<T>(url: string, headers?: HttpHeaders): Observable<T> {

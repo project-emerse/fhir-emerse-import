@@ -5,8 +5,6 @@ import edu.utah.kmm.emerse.fhir.IdentifierType;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.core.io.Resource;
-import org.springframework.jdbc.support.lob.DefaultLobHandler;
-import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.util.Assert;
 
 import java.io.Closeable;
@@ -38,8 +36,6 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
     private List<String> identifiers;
 
     private IdentifierType identifierType;
-
-    private final LobHandler lobHandler = new DefaultLobHandler();
 
     public IndexRequestDTO(Resource source) {
         try {
@@ -120,6 +116,7 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
 
     public void completed() {
         put(FieldType.COMPLETED, now());
+        processing(false);
     }
 
     public void processing(boolean active) {

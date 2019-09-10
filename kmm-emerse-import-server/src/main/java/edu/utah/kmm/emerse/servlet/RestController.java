@@ -143,12 +143,12 @@ public class RestController {
     }
 
     /**
-     * Immediate batch index.
+     * Run batch index in foreground.
      *
      * @param file File containing list of id's.
      * @return The indexing result.
      */
-    @PostMapping("/batch")
+    @PostMapping("/batch-fg")
     @ResponseBody
     public IndexResult indexBatchImmediate(
             @RequestParam MultipartFile file) {
@@ -156,17 +156,28 @@ public class RestController {
     }
 
     /**
-     * Queued batch index.
+     * Run batch index in background
      *
      * @param file File containing list of id's.
      * @return The indexing result.
      */
-    @PostMapping("/queue")
+    @PostMapping("/batch-bg")
     @ResponseBody
     public ResponseEntity indexBatchQueued(
             @RequestParam MultipartFile file) {
         solrService.batchIndexQueued(new IndexRequestDTO(file.getResource()));
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    /**
+     * Fetches entries from the queue table.
+     *
+     * @return Entries from the queue table.
+     */
+    @GetMapping("/queue")
+    @ResponseBody
+    public List<?> fetchQueueEntries() {
+        return databaseService.fetchQueueEntries();
     }
 
     /**

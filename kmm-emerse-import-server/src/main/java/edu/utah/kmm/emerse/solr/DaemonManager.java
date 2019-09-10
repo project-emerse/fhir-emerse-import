@@ -1,6 +1,5 @@
 package edu.utah.kmm.emerse.solr;
 
-import edu.utah.kmm.emerse.database.DatabaseService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +17,6 @@ public class DaemonManager {
 
     @Autowired
     private SolrQueue solrQueue;
-
-    @Autowired
-    private DatabaseService databaseService;
 
     private final int maxDaemons;
 
