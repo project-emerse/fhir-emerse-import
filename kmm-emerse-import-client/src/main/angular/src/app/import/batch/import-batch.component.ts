@@ -32,7 +32,7 @@ export class ImportBatchComponent {
         const formData: FormData = new FormData();
         formData.set('file', this.file, this.file.name);
         this.restService
-            .batchIndex(formData)
+            .batchIndexForeground(formData)
             .subscribe({
                 next: result => this.clear(IndexResultUtil.toString(result)),
                 error: err => this.handleError(err)

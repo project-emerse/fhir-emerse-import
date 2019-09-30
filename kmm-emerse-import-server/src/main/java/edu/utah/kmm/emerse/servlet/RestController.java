@@ -17,6 +17,7 @@ import org.hl7.fhir.dstu3.model.DocumentReference;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
@@ -64,6 +65,15 @@ public class RestController {
     @ResponseBody
     public Map<String, String> getConfiguration() {
         return clientConfigService.getConfig();
+    }
+
+    @RequestMapping(
+            path = "/ping",
+            method = RequestMethod.GET,
+            produces = MediaType.TEXT_HTML_VALUE)
+    @ResponseBody
+    public String ping() {
+        return "<h1>EMERSE-IT server is running.</h1>";
     }
 
     /**
