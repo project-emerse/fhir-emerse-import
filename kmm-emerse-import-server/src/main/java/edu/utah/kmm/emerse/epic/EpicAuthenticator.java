@@ -67,7 +67,7 @@ public class EpicAuthenticator extends BaseOAuth2Authenticator {
     private String fetchLaunchToken() {
         MultiValueMap<String, String> body = newRequestParams(false);
         body.set("user", userId);
-        Map<String, String> result = epicService.post("UU/2017/Security/OAuth2/IssueLaunchToken", body, true, Map.class, true);
+        Map<String, String> result = epicService.post("UU/2017/Utah/OAuth2/IssueLaunchToken", body, true, Map.class, true);
         String launchToken = result == null ? null : result.get("launchToken");
         Assert.isTrue(launchToken != null && !launchToken.isEmpty(), "Failed to fetch a launch token.");
         return launchToken;

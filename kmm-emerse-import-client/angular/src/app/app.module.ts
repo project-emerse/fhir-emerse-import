@@ -18,6 +18,7 @@ import {MockRestService} from "./rest/rest.service.mock";
 import {ImportManagerComponent} from "./import/manager/import-manager.component";
 import {MaterialModule} from '@uukmm/ng-widget-toolkit';
 import {LoggerModule} from "@uukmm/ng-logger";
+import {APP_BASE_HREF} from "@angular/common";
 
 // Import plugin modules here:
 
@@ -59,8 +60,11 @@ import {LoggerModule} from "@uukmm/ng-logger";
         {
             provide: 'environment',
             useValue: environment
+        },
+        {
+            provide: APP_BASE_HREF,
+            useValue: '/' + (window.location.pathname.split('/', 2)[1] || '')
         }
-
     ],
     bootstrap: [AppComponent]
 })

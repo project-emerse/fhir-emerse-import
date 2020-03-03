@@ -33,6 +33,7 @@ import java.util.*;
  */
 @Controller
 @RequestMapping("/api")
+@CrossOrigin
 public class RestController {
 
     private static final Log log = LogFactory.getLog(RestController.class);

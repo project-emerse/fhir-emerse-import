@@ -13,14 +13,12 @@ case "$1" in
 
 "prod")
   config="production"
-  ext=""
   suffix=""
 ;;
 
 
 "dev")
   config="$1"
-  ext="-$1"
   suffix="$1"
 ;;
 
@@ -38,7 +36,7 @@ npm install $2
 npm run snapshot
 npm run git-hash
 echo Building distribution...
-ng build --configuration=$config --base-href "/emerse-it-client$ext/" $3
+ng build --configuration=$config $3
 echo Building war...
 cd -
 mvn clean package -Dbuild.profile="$1" -Dwar.suffix="$suffix" $4
