@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
-  "newProjectRoot": "projects",
+  "newProjectRoot": "angular",
   "projects": {
     "emerse-it": {
       "root": "",
@@ -17,7 +17,8 @@
             "tsConfig": "src/tsconfig.app.json",
             "polyfills": "src/polyfills.ts",
             "assets": [
-              "src/assets"
+              "src/assets",
+              "src/favicon.ico"
             ],
             "styles": [
               "src/styles.scss",
@@ -46,33 +47,16 @@
                 }
               ]
             },
-            "mock": {
-              "optimization": false,
-              "outputHashing": "all",
-              "sourceMap": true,
-              "extractCss": true,
-              "namedChunks": false,
-              "aot": false,
-              "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": false,
-              "assets": [
-                "src/assets",
-                "src/mock"
-              ],
-              "fileReplacements": [
-              ]
-            },
             "dev": {
-              "optimization": false,
+              "optimization": true,
               "outputHashing": "all",
-              "sourceMap": true,
+              "sourceMap": false,
               "extractCss": true,
               "namedChunks": false,
-              "aot": false,
+              "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
-              "buildOptimizer": false,
+              "buildOptimizer": true,
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -90,12 +74,6 @@
           "configurations": {
             "production": {
               "browserTarget": "emerse-it:build:production"
-            },
-            "mock": {
-              "browserTarget": "emerse-it:build:mock"
-            },
-            "dev": {
-              "browserTarget": "emerse-it:build:dev"
             }
           }
         },
@@ -122,6 +100,7 @@
             ],
             "assets": [
               "src/assets",
+              "src/launch",
               "src/favicon.ico"
             ]
           }
@@ -166,14 +145,5 @@
       }
     }
   },
-  "defaultProject": "emerse-it",
-  "schematics": {
-    "@schematics/angular:component": {
-      "prefix": "",
-      "styleext": "css"
-    },
-    "@schematics/angular:directive": {
-      "prefix": ""
-    }
-  }
+  "defaultProject": "emerse-it"
 }

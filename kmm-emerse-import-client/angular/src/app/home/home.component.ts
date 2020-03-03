@@ -17,8 +17,7 @@ export class HomeComponent {
 
     constructor(
         public readonly loginService: LoginService,
-        public readonly configService: ConfigService,
-        public readonly logMonitorService: LogMonitorDialogService) {
+        public readonly configService: ConfigService) {
         this.loginService.onTimer().subscribe(value => {
             if (this.timeoutTooltip != null) {
                 if (value < 30 && value > 0) {

@@ -3,5 +3,5 @@
  "http://java.sun.com/dtd/web-app_2_3.dtd" >
 
 <web-app>
-  <display-name>EMERSE Import Tool</display-name>
+  <display-name>EMERSE Import Tool (@build.profile@)</display-name>
 </web-app>

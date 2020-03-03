@@ -12,7 +12,7 @@ export class ImportManagerComponent {
 
     dataSource: QueueEntry[];
 
-    columns = ['submitted', 'completed', 'total', 'processed', 'error', 'processing', 'type'];
+    columns = ['submitted', 'completed', 'total', 'processed', 'error_text', 'processing', 'type'];
 
     constructor(private readonly restService: RestService) {
     }

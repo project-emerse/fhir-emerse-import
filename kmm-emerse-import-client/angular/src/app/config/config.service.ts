@@ -1,8 +1,11 @@
 import {Injectable} from "@angular/core";
 import {RestService} from "../rest/rest.service";
 import {Observable, of} from "rxjs";
-import {switchMap} from "rxjs/operators";
+import {switchMap, take} from "rxjs/operators";
 
+/**
+ * Retrieve client settings from the server.
+ */
 @Injectable({
     providedIn: "root"
 })
@@ -13,7 +16,7 @@ export class ConfigService {
     private readonly config$: Observable<any>;
 
     constructor(restService: RestService) {
-        this.config$ = restService.getServerConfig();
+        this.config$ = restService.getServerConfig().pipe(take(1));
         this.config$.subscribe(config => this.config = config);
     }
 

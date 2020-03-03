@@ -6,7 +6,6 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
 import {CUSTOM_ELEMENTS_SCHEMA, NgModule} from '@angular/core';
 import {routing} from './app.routing';
-import {LoggerModule} from "ngx-logger";
 import {environment} from "../environments/environment";
 import {HomeComponent} from "./home/home.component";
 import {LoginComponent} from "./login/login.component";
@@ -18,6 +17,7 @@ import {RestService} from "./rest/rest.service";
 import {MockRestService} from "./rest/rest.service.mock";
 import {ImportManagerComponent} from "./import/manager/import-manager.component";
 import {MaterialModule} from '@uukmm/ng-widget-toolkit';
+import {LoggerModule} from "@uukmm/ng-logger";
 
 // Import plugin modules here:
 
@@ -41,12 +41,12 @@ import {MaterialModule} from '@uukmm/ng-widget-toolkit';
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
     imports: [
-        LoggerModule.forRoot(environment.loggerConfig),
         AngularSplitModule.forRoot(),
         BrowserAnimationsModule,
         BrowserModule,
         FormsModule,
         HttpClientModule,
+        LoggerModule,
         ReactiveFormsModule,
         MaterialModule,
         routing
@@ -55,7 +55,12 @@ import {MaterialModule} from '@uukmm/ng-widget-toolkit';
         {
             provide: RestService,
             useClass: environment.serverEndpoint ? RestService : MockRestService
+        },
+        {
+            provide: 'environment',
+            useValue: environment
         }
+
     ],
     bootstrap: [AppComponent]
 })
