@@ -1,2 +1,19 @@
 .emerse-import-manager {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.emerse-import-manager > span {
+    width: 100%;
+    flex: 1;
+}
+
+.emerse-import-manager > span > table {
+    width: 100%;
+    height: 100%;
+}
+
+.emerse-import-manager > .mat-paginator {
+    border-top: 1px solid gray;
 }

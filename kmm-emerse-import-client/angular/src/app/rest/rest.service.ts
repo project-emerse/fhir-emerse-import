@@ -38,12 +38,12 @@ export class RestService {
     }
 
     logout(): Observable<boolean> {
+        this.authorization = null;
+
         return this.post("api/logout", null).pipe(
             switchMap(() => of(true)),
             catchError(() => of(false))
         )
-
-        this.authorization = null;
     }
 
     findPatient(mrn: string): Observable<Patient> {

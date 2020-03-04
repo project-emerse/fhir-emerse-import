@@ -1,15 +1,17 @@
 <div class="emerse-import-manager">
-    <table mat-table [dataSource]="dataSource">
-        <mat-text-column name="submitted"></mat-text-column>
-        <mat-text-column name="completed"></mat-text-column>
-        <mat-text-column name="total"></mat-text-column>
-        <mat-text-column name="processed"></mat-text-column>
-        <mat-text-column name="error_text"></mat-text-column>
-        <mat-text-column name="processing_flag"></mat-text-column>
-        <mat-text-column name="identifier_type"></mat-text-column>
+    <span>
+        <table mat-table [dataSource]="dataSource">
+            <mat-text-column name="submitted" headerText="Submitted"></mat-text-column>
+            <mat-text-column name="completed" headerText="Completed"></mat-text-column>
+            <mat-text-column name="total" headerText="Total"></mat-text-column>
+            <mat-text-column name="processed" headerText="Processed"></mat-text-column>
+            <mat-text-column name="error_text" headerText="Error"></mat-text-column>
+            <mat-text-column name="processing_flag" headerText="Processing"></mat-text-column>
+            <mat-text-column name="identifier_type" headerText="IdType"></mat-text-column>
 
-        <tr mat-header-row *matHeaderRowDef="columns"></tr>
-        <tr mat-row *matRowDef="let row; columns: columns"></tr>
-    </table>
+            <tr mat-header-row *matHeaderRowDef="columns"></tr>
+            <tr mat-row *matRowDef="let row; columns: columns"></tr>
+        </table>
+    </span>
     <mat-paginator></mat-paginator>
 </div>

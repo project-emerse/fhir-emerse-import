@@ -42,3 +42,14 @@
     font-size: 1em;
     max-width: 100%!important;
 }
+
+ng-log-monitor-button {
+    margin-top: 10px;
+}
+
+.mat-checkbox-label {
+    font-size: .8em;
+}
+ .mat-dialog-title {
+     border-bottom: 1px solid gray;
+ }

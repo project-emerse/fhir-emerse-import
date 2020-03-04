@@ -63,7 +63,7 @@ import {APP_BASE_HREF} from "@angular/common";
         },
         {
             provide: APP_BASE_HREF,
-            useValue: '/' + (window.location.pathname.split('/', 2)[1] || '')
+            useValue: '/' + (window.location.pathname.split('/')[1] || '')
         }
     ],
     bootstrap: [AppComponent]
