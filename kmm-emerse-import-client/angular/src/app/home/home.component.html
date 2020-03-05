@@ -7,7 +7,7 @@
         </a>
         <h2>Import Tool</h2>
         <span class="flex-fill"></span>
-        <ng-log-monitor-button></ng-log-monitor-button>
+        <ng-log-monitor-button *ngIf="loginService.isAuthenticated()"></ng-log-monitor-button>
         <span style="min-width: 100px">
             <a *ngIf="loginService.isAuthenticated()" mat-button
                (click)="loginService.logout()">Logout</a>

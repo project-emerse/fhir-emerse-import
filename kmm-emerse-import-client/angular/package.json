@@ -1,6 +1,6 @@
 {
   "name": "@uukmm/emerse-it",
-  "version": "1.0.0-SNAPSHOT.1583358587292",
+  "version": "1.0.0-SNAPSHOT.1583442292779",
   "license": "UUKMM",
   "keywords": [
     "angular",
@@ -11,6 +11,7 @@
     "registry": "https://nexus.cygni.cc/repository/uukmm"
   },
   "scripts": {
+    "clean-snapshots": "node clean-snapshots.js",
     "snapshot": "npm_update_snapshot ./package.json",
     "git-hash": "npm_update_git_hash ./package.json"
   },
@@ -85,8 +86,8 @@
     "setupTestFrameworkScriptFile": "<rootDir>/src/setupJest.ts"
   },
   "git": {
-    "short": "40a376d",
-    "long": "40a376db01d727bab559866c5648701cd9bbc02f",
+    "short": "1bd9cb6",
+    "long": "1bd9cb6aee12b7670e1a83504767fd88383ed0df",
     "branch": "master"
   }
 }

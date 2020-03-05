@@ -3,11 +3,12 @@ import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {Patient} from "@uukmm/ng-fhir-model/stu3";
 import {Observable, of} from "rxjs";
 import {Document} from "../model/document.model";
-import {catchError, map, shareReplay, switchMap} from "rxjs/operators";
+import {catchError, map, shareReplay, switchMap, tap} from "rxjs/operators";
 import {environment} from "../../environments/environment";
 import {v4 as uuid} from "uuid";
 import {IndexResult} from "../model/index-result.model";
 import {QueueEntry} from "../import/manager/queue-entry.model";
+import {LoggerService, LoggerStopwatch} from "@uukmm/ng-logger";
 
 @Injectable({
     providedIn: "root"
@@ -20,7 +21,10 @@ export class RestService {
 
     private authorization: string;
 
-    constructor(private readonly httpClient: HttpClient) {
+    constructor(
+        private readonly httpClient: HttpClient,
+        private readonly loggerService: LoggerService
+    ) {
         this.serverEndpoint = environment.serverEndpoint;
         this.serverEndpoint = this.serverEndpoint.endsWith("/") ? this.serverEndpoint : this.serverEndpoint + "/";
     }
@@ -72,8 +76,10 @@ export class RestService {
 
     private get<T>(url: string, headers?: HttpHeaders): Observable<T> {
         headers = this.addHeaders(headers);
+        const sw = new LoggerStopwatch(`GET operation: ${url}`, this.loggerService);
         return this.httpClient.get<T>(this.serverEndpoint + url, {headers, responseType: "json"})
             .pipe(
+                tap(sw),
                 catchError(error => this.catchError(error)),
                 shareReplay(1)
             );
@@ -81,8 +87,10 @@ export class RestService {
 
     private post<T>(url: string, body: any, headers?: HttpHeaders): Observable<T> {
         headers = this.addHeaders(headers);
+        const sw = new LoggerStopwatch(`POST operation: ${url}`, this.loggerService);
         return this.httpClient.post<T>(this.serverEndpoint + url, body, {headers, responseType: "json"})
             .pipe(
+                tap(sw),
                 catchError(error => this.catchError(error)),
                 shareReplay(1)
             );

@@ -36,7 +36,7 @@ export class HomeComponent {
     }
 
     getTimeoutTooltip(): string {
-        const timeRemaining = this.loginService.getTimeRemaining();
+        const timeRemaining = this.loginService.getRemainingTime();
         const show = timeRemaining < 30;
          return show ? `Application will timeout in ${timeRemaining} second(s)` : null;
     }
