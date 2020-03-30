@@ -43,6 +43,30 @@
     max-width: 100%!important;
 }
 
+/* Global styles */
+
+body {
+    min-width: 700px;
+    height: 100%;
+}
+
+input[type=text]::-ms-clear {
+    display: none;
+}
+
+.popover {
+    max-width: 100%;
+}
+
+* {
+    font-size: 13px;
+}
+
+button {
+    min-height: 30px !important;
+    padding: 0 4px 0 4px !important;
+}
+
 .mat-button-wrapper {
     display: block;
     overflow: hidden;
@@ -55,11 +79,7 @@
     margin: 0;
     padding: 0 5px 0 5px;
     background: lightgray;
-    font-size: 13px;
-}
-
-.mat-toolbar {
-    font-size: 13px;
+    outline: 1px solid gray;
 }
 
 div.mat-tab-label {
@@ -77,6 +97,10 @@ div.mat-tab-label {
 
 .mat-tab-label.mat-tab-label-active {
     opacity: 1;
+}
+
+.mat-checkbox-label {
+    padding-top: 2px;
 }
 
 .mat-checkbox-checked.mat-accent .mat-checkbox-background,

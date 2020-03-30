@@ -32,6 +32,7 @@ esac
 echo Generating $1 build...
 echo Installing dependencies...
 cd angular
+npm install @uukmm/npm-auto-snapshot
 npm run clean-snapshots
 npm install $2
 npm run snapshot
