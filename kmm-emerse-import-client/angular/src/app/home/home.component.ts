@@ -12,7 +12,7 @@ import {LogMonitorDialogService} from "@uukmm/ng-logger";
 })
 export class HomeComponent {
 
-    @ViewChild("timeoutTooltip", {static: false})
+    @ViewChild("timeoutTooltip")
     timeoutTooltip: MatTooltip;
 
     constructor(

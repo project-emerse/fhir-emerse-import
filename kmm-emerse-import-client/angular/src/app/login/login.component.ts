@@ -9,9 +9,9 @@ import {LoginService} from "./login.service";
 })
 export class LoginComponent implements AfterViewInit {
 
-    @ViewChild("usernameInput", {static: false}) usernameInput: ElementRef;
+    @ViewChild("usernameInput") usernameInput: ElementRef;
 
-    @ViewChild("passwordInput", {static: false}) passwordInput: ElementRef;
+    @ViewChild("passwordInput") passwordInput: ElementRef;
 
     username: string;
 
