@@ -17,7 +17,11 @@ public class ContentDTO extends BaseDTO {
 
     public ContentDTO(String base64Content, String contentType) {
         super();
-        content = base64Content == null ? null : new String(decoder.decode(base64Content));
+        try {
+            content = base64Content == null ? null : new String((byte[]) decoder.decode(base64Content));
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
         map.put("RPT_TEXT", content);
         this.contentType = StringUtils.isEmpty(contentType) ? "text/plain" : contentType;
     }

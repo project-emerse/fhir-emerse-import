@@ -37,7 +37,7 @@ public class OAuth2Authenticator extends BaseOAuth2Authenticator {
         super.initialize(fhirService);
         fhirService.getGenericClient().registerInterceptor(new OAuth2Interceptor());
         Credentials credentials = fhirService.getCredentials();
-        authHeader = "Basic " + Base64.encodeBase64String((credentials.getUsername() + ":" + credentials.getPassword()).getBytes());
+        authHeader = "Basic " + new String(Base64.encodeBase64((credentials.getUsername() + ":" + credentials.getPassword()).getBytes()));
     }
 
     private AccessToken generateAccessToken() {
