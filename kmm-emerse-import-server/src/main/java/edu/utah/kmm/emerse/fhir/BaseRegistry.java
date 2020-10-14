@@ -25,7 +25,7 @@ public abstract class BaseRegistry<T> {
 
     public void register(T entry) {
         String name = getName(entry).toUpperCase();
-        Assert.isTrue(!registry.containsKey(name), "Duplicate registry entry: " + name);
+        Assert.isTrue(!registry.containsKey(name), () -> "Duplicate registry entry: " + name);
         registry.put(name, entry);
     }
 

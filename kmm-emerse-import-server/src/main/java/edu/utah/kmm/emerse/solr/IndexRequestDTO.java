@@ -67,7 +67,7 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
     }
 
     private void init(List<String> identifiers, IdentifierType identifierType) {
-        Assert.notNull(identifierType, "You must specify a valid identifier type.");
+        Assert.notNull(identifierType, "You must specify a valid identifier type");
         this.initial = true;
         this.identifiers = identifiers;
         this.identifierType = identifierType;

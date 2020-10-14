@@ -200,9 +200,9 @@ public class RestController {
      * @throws IllegalArgumentException if both identifiers are null or both are non-null.
      */
     private IdentifierType validateIdentifiers(String mrn, String patid) {
-        Assert.isTrue(mrn != null ^ patid != null, mrn == null
-                ? "You must specify an identifier (mrn or patid)."
-                : "You may specify one and only one identifier (mrn or patid).");
+        Assert.isTrue(mrn != null ^ patid != null, () -> mrn == null
+                ? "You must specify an identifier (mrn or patid)"
+                : "You may specify one and only one identifier (mrn or patid)");
         return mrn != null ? IdentifierType.MRN : IdentifierType.PATID;
     }
 

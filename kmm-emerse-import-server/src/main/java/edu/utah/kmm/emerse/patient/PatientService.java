@@ -26,7 +26,7 @@ public class PatientService {
 
     private void init() {
         patientLookup = patientLookupRegistry.get(patientLookupType);
-        Assert.notNull(patientLookup, "Unknown patient lookup plugin: " + patientLookupType);
+        Assert.notNull(patientLookup, () -> "Unknown patient lookup plugin: " + patientLookupType);
         patientLookup.initialize(fhirService);
     }
 
@@ -35,7 +35,7 @@ public class PatientService {
     }
 
     public Patient getPatient(String id, IdentifierType type) {
-        Assert.isTrue(type == IdentifierType.MRN || type == IdentifierType.PATID, "Invalid identifier type.");
+        Assert.isTrue(type == IdentifierType.MRN || type == IdentifierType.PATID, "Invalid identifier type");
         return type == IdentifierType.MRN ? getPatientByMrn(id) : getPatientById(id);
     }
 

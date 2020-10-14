@@ -48,7 +48,7 @@ public class FhirService {
     private void init() {
         initGenericClient();
         authenticator = authenticatorRegistry.get(authenticationType);
-        Assert.notNull(authenticator, "Unrecognized authentication scheme: " + authenticationType);
+        Assert.notNull(authenticator, () -> "Unrecognized authentication scheme: " + authenticationType);
         authenticator.initialize(this);
     }
 

@@ -136,9 +136,9 @@ public class SolrService {
      */
     public IndexResult indexDocument(String docid) {
         DocumentReference document = documentService.getDocumentById(docid);
-        Assert.notNull(document, "Document could not be located.");
+        Assert.notNull(document, "Document could not be located");
         String mrn = documentService.extractMRN(document);
-        Assert.notNull(mrn, "Cannot determine subject of document.");
+        Assert.notNull(mrn, "Cannot determine subject of document");
         return indexDocument(mrn, document);
     }
 
