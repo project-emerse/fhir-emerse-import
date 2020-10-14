@@ -137,6 +137,11 @@
 
     <!-- Epic Configuration -->
 
+    <bean id="epicServiceCredentials" class="edu.utah.kmm.emerse.security.Credentials">
+        <constructor-arg value="${epic.server.username}" />
+        <constructor-arg value="${epic.server.password}" />
+    </bean>
+
     <bean id="epicService" class="edu.utah.kmm.emerse.epic.EpicService" init-method="init" />
 
     <!-- Other Configuration -->

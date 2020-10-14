@@ -27,11 +27,11 @@ public class EpicService {
     @Value("${app.client_id}")
     private String clientId;
 
-    @Value("${epic.api.root}/")
+    @Value("${epic.server.root}/")
     private String apiRoot;
 
     @Autowired
-    private Credentials fhirServiceCredentials;
+    private Credentials epicServiceCredentials;
 
     private RestTemplate restTemplateBasic;
 
@@ -40,7 +40,7 @@ public class EpicService {
     public void init() {
         restTemplateNone = buildRestTemplate();
         restTemplateBasic = buildRestTemplate();
-        BasicAuthenticationInterceptor interceptor = new BasicAuthenticationInterceptor(fhirServiceCredentials.getUsername(), fhirServiceCredentials.getPassword());
+        BasicAuthenticationInterceptor interceptor = new BasicAuthenticationInterceptor(epicServiceCredentials.getUsername(), epicServiceCredentials.getPassword());
         restTemplateBasic.getInterceptors().add(interceptor);
     }
 
