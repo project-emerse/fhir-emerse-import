@@ -3,6 +3,7 @@ import {BehaviorSubject, Observable, Subject} from "rxjs";
 import {filter, tap} from "rxjs/operators";
 import {RestService} from "../rest/rest.service";
 import {ConfigService} from "../config/config.service";
+import {LogMonitorService} from '@uukmm/ng-logger';
 
 /**
  * Handles interaction with login REST service and inactivity timeout.
@@ -30,6 +31,7 @@ export class LoginService {
      */
     constructor(
         private readonly restService: RestService,
+        private readonly logMonitor: LogMonitorService,
         configService: ConfigService
     ) {
         configService.getSettingAsync("app.timeout.seconds").subscribe(timeout => {
@@ -132,6 +134,7 @@ export class LoginService {
     logout(): void {
         this.authenticated = false;
         this.stopTimer();
+        this.logMonitor.clear();
         // this.restService.logout();
     }
 }

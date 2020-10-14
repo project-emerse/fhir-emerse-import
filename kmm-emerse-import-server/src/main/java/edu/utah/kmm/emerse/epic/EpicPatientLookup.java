@@ -39,28 +39,24 @@ public class EpicPatientLookup implements IPatientLookup {
 
     @Override
     public Patient lookupByMRN(String id) {
-        try {
-            Map<String, String> body = new HashMap<>();
-            body.put("PatientID", id);
-            body.put("PatientIDType", "EPICMRN");
-            body.put("UserID", userid);
-            body.put("UserIDType", "EXTERNAL");
-            Map<String, Object> result = epicService.post(GET_IDENTIFIERS, body, true, Map.class, true);
-            List<Map<String, String>> identifiers = (List<Map<String, String>>) result.get("Identifiers");
+        Map<String, String> body = new HashMap<>();
+        body.put("PatientID", id);
+        body.put("PatientIDType", "EPICMRN");
+        body.put("UserID", userid);
+        body.put("UserIDType", "EXTERNAL");
+        Map<String, Object> result = epicService.post(GET_IDENTIFIERS, body, true, Map.class, true);
+        List<Map<String, String>> identifiers = (List<Map<String, String>>) result.get("Identifiers");
 
-            for (Map<String, String> entry : identifiers) {
-                String type = entry.get("IDType");
+        for (Map<String, String> entry : identifiers) {
+            String type = entry.get("IDType");
 
-                if ("FHIR STU3".equals(type)) {
-                    String patid = entry.get("ID");
-                    return patientService.getPatientById(patid);
-                }
+            if ("FHIR STU3".equals(type)) {
+                String patid = entry.get("ID");
+                return patientService.getPatientById(patid);
             }
-        } catch (Exception e) {
-            // NOP
         }
 
         return null;
-   }
+    }
 
 }

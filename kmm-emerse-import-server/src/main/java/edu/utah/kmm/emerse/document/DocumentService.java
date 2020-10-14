@@ -5,6 +5,7 @@ import edu.utah.kmm.emerse.patient.PatientService;
 import org.apache.commons.lang.StringUtils;
 import org.hl7.fhir.dstu3.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,9 @@ public class DocumentService {
     @Autowired
     private PatientService patientService;
 
+    @Value("${fhir.document.classes:clinical-notes}")
+    private String documentClasses;
+
     public DocumentReference getDocumentById(String docid) {
         return fhirService.readResource(DocumentReference.class, docid);
     }
@@ -26,7 +30,7 @@ public class DocumentService {
         Bundle bundle = fhirService.getGenericClient().search()
                 .forResource(DocumentReference.class)
                 .where(DocumentReference.PATIENT.hasId(patid))
-                .where(DocumentReference.CLASS.exactly().code("clinical-notes"))
+                .where(DocumentReference.CLASS.exactly().code(documentClasses.replace(" ", "")))
                 .returnBundle(Bundle.class)
                 .execute();
 

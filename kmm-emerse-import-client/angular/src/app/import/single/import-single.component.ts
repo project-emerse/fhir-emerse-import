@@ -1,12 +1,11 @@
 import {Component, ViewEncapsulation} from "@angular/core";
-import {combineLatest, Observable} from "rxjs";
 import {FhirStu3Util, HumanName, Identifier, Patient} from "@uukmm/ng-fhir-model/stu3";
 import {RestService} from "../../rest/rest.service";
-import {filter, map, switchMap, tap} from "rxjs/operators";
+import {filter, switchMap, tap} from "rxjs/operators";
 import {Document} from "../../model/document.model";
 import {PatientDemographics} from "../../model/patient-demographics.model";
 import {ConfigService} from "../../config/config.service";
-import {IndexResult, IndexResultUtil} from "../../model/index-result.model";
+import {IndexResultUtil} from "../../model/index-result.model";
 
 @Component({
     selector: 'emerse-import-single',
