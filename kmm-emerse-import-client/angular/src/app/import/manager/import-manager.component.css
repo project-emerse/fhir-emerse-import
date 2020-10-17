@@ -9,11 +9,45 @@
     flex: 1;
 }
 
-.emerse-import-manager > span > table {
+.emerse-import-manager table {
     width: 100%;
     height: 100%;
+    table-layout: fixed;
 }
 
-.emerse-import-manager > .mat-paginator {
+.emerse-import-manager .mat-row.hovered {
+    outline: 1px dotted gray;
+}
+
+.emerse-import-manager .mat-row.highlighted {
+    background: #999;
+}
+
+.emerse-import-manager .mat-toolbar {
     border-top: 1px solid gray;
+    height: 40px;
+}
+
+.emerse-import-manager .mat-paginator {
+    background: transparent;
+}
+
+.emerse-import-manager .mat-paginator-container {
+    min-height: 0;
+}
+
+td.emerse-import-manager-total,
+th.emerse-import-manager-total,
+td.emerse-import-manager-processed,
+th.emerse-import-manager-processed,
+td.emerse-import-manager-processing_flag,
+th.emerse-import-manager-processing_flag,
+td.emerse-import-manager-identifier_type,
+th.emerse-import-manager-identifier_type {
+    text-align: center !important;
+}
+
+.emerse-import-manager-message {
+    width: 100%;
+    text-align: center;
 }

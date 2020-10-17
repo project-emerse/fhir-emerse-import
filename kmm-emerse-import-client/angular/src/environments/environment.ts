@@ -9,7 +9,7 @@ import {LoggerConfig} from "@uukmm/ng-logger";
 const loggerConfig: LoggerConfig = {
   level: NgxLoggerLevel.DEBUG,
   serverLogLevel: NgxLoggerLevel.OFF,
-  serverLoggingUrl: "https://edmopencdsdev.med.utah.edu:8443/kmm-client-logger/log",
+  serverLoggingUrl: "",
   disableConsoleLogging: true,
   monitorEnabled: true
 };

@@ -10,7 +10,7 @@ const loggerConfig: LoggerConfig = {
   monitorEnabled: true,
   level: NgxLoggerLevel.DEBUG,
   serverLogLevel: NgxLoggerLevel.OFF,
-  serverLoggingUrl: "https://edmopencdsdev.med.utah.edu:8443/kmm-client-logger/log",
+  serverLoggingUrl: "",
   disableConsoleLogging: true
 };
 

@@ -71,7 +71,15 @@ export class RestService {
     }
 
     fetchQueue(): Observable<QueueEntry[]> {
-        return this.get("api/queue")  ;
+        return this.get("api/queue").pipe(
+            map((entries: QueueEntry[]) => {
+                entries.forEach(entry => {
+                    entry.COMPLETED_DATE = new Date(entry.COMPLETED);
+                    entry.SUBMITTED_DATE = new Date(entry.SUBMITTED);
+                })
+                return entries;
+            })
+        );
     }
 
     private get<T>(url: string, headers?: HttpHeaders): Observable<T> {

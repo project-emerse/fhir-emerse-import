@@ -1,12 +1,14 @@
 export interface QueueEntry {
-    id: string;
-    submitted: string;
-    completed: string;
-    total: number;
-    processed: number;
-    error_text: string;
-    processing_flag: boolean;
-    identifier_type: IdentifierType;
+    ID: string;
+    SUBMITTED: number;
+    SUBMITTED_DATE: Date;
+    COMPLETED: number;
+    COMPLETED_DATE: Date;
+    TOTAL: number;
+    PROCESSED: number;
+    ERROR_TEXT: string;
+    PROCESSING_FLAG: number;
+    IDENTIFIER_TYPE: IdentifierType;
 }
 
 export enum IdentifierType {MRN= 'MRN', PATID = 'PATID', DOCID = 'DOCID'}

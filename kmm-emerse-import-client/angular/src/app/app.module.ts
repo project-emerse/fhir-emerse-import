@@ -19,6 +19,7 @@ import {ImportManagerComponent} from "./import/manager/import-manager.component"
 import {MaterialModule} from '@uukmm/ng-widget-toolkit';
 import {LoggerModule} from "@uukmm/ng-logger";
 import {APP_BASE_HREF} from "@angular/common";
+import {NgbTooltipModule} from '@ng-bootstrap/ng-bootstrap';
 
 // Import plugin modules here:
 
@@ -50,6 +51,7 @@ import {APP_BASE_HREF} from "@angular/common";
         LoggerModule,
         ReactiveFormsModule,
         MaterialModule,
+        NgbTooltipModule,
         routing
     ],
     providers: [

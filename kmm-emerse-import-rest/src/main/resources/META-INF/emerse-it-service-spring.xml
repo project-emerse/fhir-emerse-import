@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:sec="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/security
+	    https://www.springframework.org/schema/security/spring-security.xsd">
+
+    <context:component-scan base-package="edu.utah.kmm.emerse" />
+
+    <context:property-placeholder location="file:${user.home}/.emerse/emerse-it.properties" />
+
+    <!-- Servlet Configuration -->
+
+    <mvc:annotation-driven />
+
+    <mvc:cors>
+        <mvc:mapping path="/**" />
+    </mvc:cors>
+
+    <!-- Spring Security -->
+
+    <sec:http use-expressions="true" create-session="never">
+        <sec:intercept-url pattern="/api/ping" access="isAnonymous()" />
+        <sec:intercept-url pattern="/api/config" access="isAnonymous()" />
+        <sec:intercept-url pattern="/api/**" access="isAuthenticated()" />
+        <sec:headers>
+            <sec:frame-options policy="SAMEORIGIN" />
+        </sec:headers>
+        <sec:cors />
+        <sec:csrf disabled="true" />
+        <sec:http-basic entry-point-ref="authenticationEntryPoint" />
+        <sec:logout
+             invalidate-session="true"
+             delete-cookies="true"
+             logout-url="/api/logout"
+             success-handler-ref="logoutSuccessHandler" />
+    </sec:http>
+
+    <sec:authentication-manager>
+        <sec:authentication-provider ref="authenticationProvider" />
+    </sec:authentication-manager>
+
+    <bean id="authenticationProvider"
+          class="edu.utah.kmm.emerse.security.AuthenticationProvider" />
+
+    <bean id="authenticationEntryPoint"
+          class="edu.utah.kmm.emerse.security.AuthenticationEntryPoint" />
+
+    <bean id="logoutSuccessHandler"
+          class="org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler" />
+
+    <bean class="edu.utah.kmm.emerse.auth.BasicAuthenticator" />
+
+    <bean class="edu.utah.kmm.emerse.oauth.OAuth2Authenticator" />
+
+    <bean id="configService" class="edu.utah.kmm.emerse.config.ClientConfigService" />
+
+    <!-- Service Registries -->
+
+    <bean id="authenticatorRegistry" class="edu.utah.kmm.emerse.auth.AuthenticatorRegistry" />
+
+    <bean id="patientLookupRegistry" class="edu.utah.kmm.emerse.patient.PatientLookupRegistry" />
+
+    <!-- SOLR Configuration -->
+
+    <bean id="solrServiceCredentials" class="edu.utah.kmm.emerse.security.Credentials">
+        <constructor-arg value="${solr.server.username}" />
+        <constructor-arg value="${solr.server.password}" />
+    </bean>
+
+    <bean id="solrService" class="edu.utah.kmm.emerse.solr.SolrService">
+        <constructor-arg value="${solr.server.root}" />
+        <constructor-arg ref="solrServiceCredentials" />
+    </bean>
+
+    <bean id="solrDaemonManager" class="edu.utah.kmm.emerse.solr.DaemonManager"
+        init-method="init" destroy-method="destroy">
+        <constructor-arg value="${solr.server.daemons:1}" />
+    </bean>
+
+    <bean id="solrQueue" class="edu.utah.kmm.emerse.solr.SolrQueue" />
+
+    <!-- FHIR Configuration -->
+
+    <bean id="fhirServiceCredentials" class="edu.utah.kmm.emerse.security.Credentials">
+        <constructor-arg value="${fhir.server.username}" />
+        <constructor-arg value="${fhir.server.password}" />
+    </bean>
+
+    <bean id="fhirContext" class="ca.uhn.fhir.context.FhirContext" factory-method="forDstu3" />
+
+    <bean id="fhirClient" class="edu.utah.kmm.emerse.fhir.FhirService" init-method="init" />
+
+    <bean id="patientService" class="edu.utah.kmm.emerse.patient.PatientService" />
+
+    <bean id="documentService" class="edu.utah.kmm.emerse.document.DocumentService" />
+
+    <bean class="edu.utah.kmm.emerse.patient.DefaultPatientLookup" />
+
+    <!-- Datasource Configuration -->
+
+    <bean id="dataSourceCredentials" class="edu.utah.kmm.emerse.security.Credentials">
+        <constructor-arg value="${datasource.username}" />
+        <constructor-arg value="${datasource.password}" />
+    </bean>
+
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${datasource.driver.class}" />
+        <property name="url" value="${datasource.url}" />
+    </bean>
+
+    <bean id="databaseService" class="edu.utah.kmm.emerse.database.DatabaseService">
+        <constructor-arg ref="dataSource" />
+        <constructor-arg ref="dataSourceCredentials" />
+    </bean>
+
+    <!-- JWT Service -->
+
+    <bean id="jwtService" class="edu.utah.kmm.emerse.jwt.JwtService" />
+
+    <!-- Other Configuration -->
+
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="${file.upload.max.size:100000}" />
+    </bean>
+
+    <bean id="decryptor" class="edu.utah.kmm.emerse.security.Decryptor">
+        <constructor-arg value="${decryptor.master:EMERSE_MASTER}" />
+        <constructor-arg value="${decryptor.algorithm:PBEWITHSHA256AND128BITAES-CBC-BC}" />
+    </bean>
+</beans>

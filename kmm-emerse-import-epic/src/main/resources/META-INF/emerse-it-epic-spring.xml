@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- Epic Configuration -->
+
+    <bean class="edu.utah.kmm.emerse.epic.EpicAuthenticator" />
+
+    <bean id="epicServiceCredentials" class="edu.utah.kmm.emerse.security.Credentials">
+        <constructor-arg value="${epic.server.username}" />
+        <constructor-arg value="${epic.server.password}" />
+    </bean>
+
+    <bean id="epicService" class="edu.utah.kmm.emerse.epic.EpicService" init-method="init" />
+
+    <bean class="edu.utah.kmm.emerse.epic.EpicPatientLookup" init-method="init" />
+
+</beans>
