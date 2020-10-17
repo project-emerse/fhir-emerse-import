@@ -1,4 +1,4 @@
-package edu.utah.kmm.emerse.servlet;
+package edu.utah.kmm.emerse.controller;
 
 import edu.utah.kmm.emerse.config.ClientConfigService;
 import edu.utah.kmm.emerse.database.DatabaseService;
