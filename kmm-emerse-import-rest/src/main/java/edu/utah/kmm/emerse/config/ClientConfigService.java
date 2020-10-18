@@ -21,6 +21,9 @@ public class ClientConfigService {
     @Value("${app.timeout.seconds}")
     private String s3;
 
+    @Value("${solr.server.daemons:1}")
+    private String s4;
+
     public Map<String, String> getConfig() {
         Map<String, String> config = new HashMap<>();
         ReflectionUtils.doWithLocalFields(getClass(), field -> {

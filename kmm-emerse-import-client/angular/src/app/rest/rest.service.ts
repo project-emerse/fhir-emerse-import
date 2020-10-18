@@ -7,8 +7,9 @@ import {catchError, map, shareReplay, switchMap, tap} from "rxjs/operators";
 import {environment} from "../../environments/environment";
 import {v4 as uuid} from "uuid";
 import {IndexResult} from "../model/index-result.model";
-import {QueueEntry} from "../import/manager/queue-entry.model";
+import {EntryAction, ENTRY_STATUS, QueueEntry, VALID_ACTIONS} from "../import/manager/queue-entry.model";
 import {LoggerService, LoggerStopwatch} from "@uukmm/ng-logger";
+import {formatDuration, intervalToDuration} from 'date-fns';
 
 @Injectable({
     providedIn: "root"
@@ -74,12 +75,23 @@ export class RestService {
         return this.get("api/queue").pipe(
             map((entries: QueueEntry[]) => {
                 entries.forEach(entry => {
-                    entry.COMPLETED_DATE = new Date(entry.COMPLETED);
-                    entry.SUBMITTED_DATE = new Date(entry.SUBMITTED);
+                    entry.COMPLETED_DATE = entry.COMPLETED ? new Date(entry.COMPLETED) : null;
+                    entry.SUBMITTED_DATE = entry.SUBMITTED ? new Date(entry.SUBMITTED) : null;
+                    entry.STATUS_TEXT = entry.STATUS != null ? ENTRY_STATUS[entry.STATUS] : null;
+                    const duration: Duration = entry.ELAPSED == null ? null : intervalToDuration({start: 0, end: entry.ELAPSED});
+                    entry.ELAPSED_TEXT = duration ? formatDuration(duration) : null;
                 })
                 return entries;
             })
         );
+    }
+
+    entryAction(entry: QueueEntry, action: EntryAction): Observable<boolean> {
+        if (VALID_ACTIONS[entry.STATUS].includes(action)) {
+            return this.post("api/entry-action", {id: entry.ID, action});
+        } else {
+            return of(false);
+        }
     }
 
     private get<T>(url: string, headers?: HttpHeaders): Observable<T> {

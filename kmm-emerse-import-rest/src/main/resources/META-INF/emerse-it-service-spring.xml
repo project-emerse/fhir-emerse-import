@@ -82,10 +82,7 @@
         <constructor-arg ref="solrServiceCredentials" />
     </bean>
 
-    <bean id="solrDaemonManager" class="edu.utah.kmm.emerse.solr.DaemonManager"
-        init-method="init" destroy-method="destroy">
-        <constructor-arg value="${solr.server.daemons:1}" />
-    </bean>
+    <bean id="solrDaemonManager" class="edu.utah.kmm.emerse.solr.DaemonManager" init-method="init" destroy-method="destroy"/>
 
     <bean id="solrQueue" class="edu.utah.kmm.emerse.solr.SolrQueue" />
 

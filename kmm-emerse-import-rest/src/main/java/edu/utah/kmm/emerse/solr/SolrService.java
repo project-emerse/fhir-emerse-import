@@ -9,6 +9,7 @@ import edu.utah.kmm.emerse.fhir.IdentifierType;
 import edu.utah.kmm.emerse.patient.PatientDTO;
 import edu.utah.kmm.emerse.patient.PatientService;
 import edu.utah.kmm.emerse.security.Credentials;
+import edu.utah.kmm.emerse.solr.IndexRequestDTO.IndexRequestStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -71,6 +72,7 @@ public class SolrService {
      */
     public IndexResult batchIndexImmediate(IndexRequestDTO request) {
         IndexResult result = new IndexResult();
+        request.start();
 
         for (String id: request) {
             id = id.trim();
@@ -84,6 +86,7 @@ public class SolrService {
             }
         }
 
+        request.close();
         databaseService.createOrUpdateIndexRequest(request);
         return result;
     }
@@ -172,7 +175,7 @@ public class SolrService {
      */
     public IndexResult index(IndexRequestDTO request) {
         IndexResult result = new IndexResult();
-        request.processing(true);
+        request.setStatus(IndexRequestStatus.RUNNING);
         databaseService.createOrUpdateIndexRequest(request);
 
         for (String id: request) {
@@ -181,9 +184,16 @@ public class SolrService {
             } catch (Exception e) {
                 request.setErrorText(e.getMessage());
             }
+
+            if (request.getStatus() != IndexRequestStatus.RUNNING) {
+                break;
+            }
         }
 
-        request.completed();
+        if (request.getStatus() == IndexRequestStatus.RUNNING) {
+            request.completed();
+        }
+
         databaseService.createOrUpdateIndexRequest(request);
         return result;
     }

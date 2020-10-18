@@ -1,6 +1,6 @@
 {
   "name": "@uukmm/emerse-it",
-  "version": "1.0.0-SNAPSHOT.1602788615477",
+  "version": "1.0.0-SNAPSHOT.1603039186334",
   "license": "UUKMM",
   "keywords": [
     "angular",
@@ -38,9 +38,9 @@
     "bootstrap": "^4.5.3",
     "classlist.js": "^1.1.0",
     "core-js": "^3.6.5",
+    "date-fns": "^2.16.1",
     "hammerjs": "^2.0.8",
     "jsonata": "^1.8.3",
-    "moment": "^2.29.1",
     "ngx-logger": "^4.1.9",
     "rxjs": "^6.6.3",
     "sockjs-client": "^1.5.0",
@@ -88,8 +88,8 @@
     "setupTestFrameworkScriptFile": "<rootDir>/src/setupJest.ts"
   },
   "git": {
-    "short": "f12f2eb",
-    "long": "f12f2eb31d1229a8f1c3d1e4315ff708cdf9fce2",
+    "short": "b4ac2a2",
+    "long": "b4ac2a2898a27859baad1d8a840303708272c0f1",
     "branch": "master"
   }
 }

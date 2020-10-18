@@ -17,14 +17,27 @@ import static edu.utah.kmm.emerse.util.MiscUtil.toIdentifierType;
 
 public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closeable {
 
+    /**
+     * Note: do not change the member order!
+     */
+    enum IndexRequestStatus {
+        COMPLETED,
+        QUEUED,
+        RUNNING,
+        SUSPENDED,
+        ABORTED,
+        ERROR
+    }
+
     private enum FieldType {
         COMPLETED,
+        ELAPSED,
         ERROR_TEXT,
         ID,
         IDENTIFIER_TYPE,
         IDENTIFIERS,
         PROCESSED,
-        PROCESSING_FLAG,
+        STATUS,
         SUBMITTED,
         TOTAL
     }
@@ -32,6 +45,8 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
     private boolean changed;
 
     private boolean initial;
+
+    private long started;
 
     private List<String> identifiers;
 
@@ -57,7 +72,8 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
         put(FieldType.COMPLETED, rs, Date.class);
         put(FieldType.TOTAL, rs, Integer.class);
         put(FieldType.PROCESSED, rs, Integer.class);
-        put(FieldType.PROCESSING_FLAG, rs, Boolean.class);
+        put(FieldType.STATUS, rs, Integer.class);
+        put(FieldType.ELAPSED, rs, Integer.class);
         put(FieldType.ERROR_TEXT, rs, String.class);
         put(FieldType.IDENTIFIER_TYPE, rs, String.class);
         put(FieldType.IDENTIFIERS, rs, String.class);
@@ -75,7 +91,8 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
         put(FieldType.SUBMITTED, now());
         put(FieldType.TOTAL, identifiers.size());
         put(FieldType.PROCESSED, 0);
-        put(FieldType.PROCESSING_FLAG, false);
+        put(FieldType.STATUS, 0);
+        put(FieldType.ELAPSED, 0);
         put(FieldType.ERROR_TEXT, null);
         put(FieldType.IDENTIFIER_TYPE, identifierType.name());
         put(FieldType.IDENTIFIERS, listToString(identifiers));
@@ -112,15 +129,26 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
 
     public void setErrorText(String errorText) {
         put(FieldType.ERROR_TEXT, errorText);
+        setStatus(IndexRequestStatus.ERROR);
+    }
+
+    public void start() {
+        started = System.currentTimeMillis();
+        setStatus(IndexRequestStatus.RUNNING);
     }
 
     public void completed() {
         put(FieldType.COMPLETED, now());
-        processing(false);
+        setStatus(IndexRequestStatus.COMPLETED);
     }
 
-    public void processing(boolean active) {
-        put(FieldType.PROCESSING_FLAG, active);
+    public IndexRequestStatus getStatus() {
+        Integer status = get(FieldType.STATUS, Integer.class);
+        return status == null ? null : IndexRequestStatus.values()[status];
+    }
+
+    public void setStatus(IndexRequestStatus status) {
+        put(FieldType.STATUS, status.ordinal());
     }
 
     public boolean initial() {
@@ -152,7 +180,7 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
                 processingFlag = processed < total;
 
                 if (!processingFlag) {
-                    put(FieldType.COMPLETED, now());
+                    completed();
                 }
 
                 return processingFlag;
@@ -167,7 +195,17 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
     }
 
     @Override
-    public void close() throws IOException {
-        processing(false);
+    public void close() {
+        if (getStatus() == IndexRequestStatus.RUNNING) {
+            setStatus(IndexRequestStatus.SUSPENDED);
+        }
+
+        if (started > 0) {
+            int elapsed = (int) (System.currentTimeMillis() - started);
+            Integer current = get(FieldType.ELAPSED, Integer.class);
+            elapsed += current == null ? 0 : current.intValue();
+            put(FieldType.ELAPSED, elapsed);
+            started = 0;
+        }
     }
 }

@@ -3,6 +3,7 @@ package edu.utah.kmm.emerse.solr;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -10,7 +11,7 @@ import java.util.List;
 
 public class DaemonManager {
 
-    private static Log log = LogFactory.getLog(DaemonManager.class);
+    private static final Log log = LogFactory.getLog(DaemonManager.class);
 
     @Autowired
     private SolrService solrService;
@@ -18,13 +19,10 @@ public class DaemonManager {
     @Autowired
     private SolrQueue solrQueue;
 
-    private final int maxDaemons;
+    @Value("${solr.server.daemons:1}")
+    private int maxDaemons;
 
     private final List<IndexDaemon> daemons = new ArrayList<>();
-
-    public DaemonManager(int maxDaemons) {
-        this.maxDaemons = maxDaemons;
-    }
 
     public void init() {
         startBackgroundProcessors();

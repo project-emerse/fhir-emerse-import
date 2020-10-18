@@ -57,10 +57,11 @@ export class MockRestService {
 
         const imp = text.substring(i + 2, j);
 
-        return combineLatest(
+        return combineLatest([
             of(text.substring(0, i)),
             this.getMockResource(imp),
-            of(text.substring(j + 2))).pipe(
+            of(text.substring(j + 2))
+        ]).pipe(
             switchMap(text => this.handleImport(text[0] + this.escapeText(text[1]) + text[2])
         ));
     }

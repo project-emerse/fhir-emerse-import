@@ -26,7 +26,6 @@
               "src/custom-theme.scss"
             ],
             "scripts": [
-              "node_modules/moment/moment.js",
               "node_modules/hammerjs/hammer.min.js"
             ]
           },

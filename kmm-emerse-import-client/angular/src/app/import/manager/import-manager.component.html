@@ -12,6 +12,10 @@
             <th mat-header-cell class="emerse-import-manager-completed" *matHeaderCellDef>Completed</th>
             <td mat-cell class="emerse-import-manager-completed" *matCellDef="let item"> {{item.COMPLETED_DATE?.toLocaleString()}} </td>
           </ng-container>
+           <ng-container matColumnDef="elapsed">
+            <th mat-header-cell class="emerse-import-manager-elapsed" *matHeaderCellDef>Elapsed</th>
+            <td mat-cell class="emerse-import-manager-elapsed" *matCellDef="let item"> {{item.ELAPSED_TEXT}} </td>
+          </ng-container>
            <ng-container matColumnDef="total">
             <th mat-header-cell class="emerse-import-manager-total" *matHeaderCellDef>Total</th>
             <td mat-cell class="emerse-import-manager-total" *matCellDef="let item"> {{item.TOTAL}} </td>
@@ -20,9 +24,9 @@
             <th mat-header-cell class="emerse-import-manager-processed" *matHeaderCellDef>Processed</th>
             <td mat-cell class="emerse-import-manager-processed" *matCellDef="let item"> {{item.PROCESSED}} </td>
           </ng-container>
-           <ng-container matColumnDef="processing_flag">
-            <th mat-header-cell class="emerse-import-manager-processing_flag" *matHeaderCellDef>Processing</th>
-            <td mat-cell class="emerse-import-manager-processing_flag" *matCellDef="let item"> {{!!item.PROCESSING_FLAG}} </td>
+           <ng-container matColumnDef="status">
+            <th mat-header-cell class="emerse-import-manager-status" *matHeaderCellDef>Status</th>
+            <td mat-cell class="emerse-import-manager-status" *matCellDef="let item"> {{item.STATUS_TEXT}} </td>
           </ng-container>
            <ng-container matColumnDef="identifier_type">
             <th mat-header-cell class="emerse-import-manager-identifier_type" *matHeaderCellDef>IdType</th>
@@ -43,17 +47,45 @@
         </table>
     </span>
     <mat-toolbar>
+        <button
+                class="text-warning"
+                mat-icon-button
+                tabindex="-1"
+                ngbTooltip="Refresh"
+                (click)="refresh()">
+            <mat-icon>refresh</mat-icon>
+        </button>
         <mat-paginator #paginator></mat-paginator>
         <span class="flex-fill">
             <span class="emerse-import-manager-message" *ngIf="loading">Fetching data...</span>
         </span>
-        <button
-            class="text-warning"
-            mat-icon-button
-            tabindex="-1"
-            ngbTooltip="Refresh"
-            (click)="refresh()">
-            <mat-icon>refresh</mat-icon>
+        <button *ngIf="supported(EntryAction.DELETE)"
+                class="text-danger"
+                mat-button
+                tabindex="-1"
+                (click)="action(EntryAction.DELETE, 'delete')">
+            Delete
         </button>
-    </mat-toolbar>
+        <button *ngIf="supported(EntryAction.ABORT)"
+                class="text-danger"
+                mat-button
+                tabindex="-1"
+                (click)="action(EntryAction.ABORT, 'abort')">
+            Abort
+        </button>
+        <button *ngIf="supported(EntryAction.RESUME)"
+                class="text-success"
+                mat-button
+                tabindex="-1"
+                (click)="action(EntryAction.RESUME, 'resume')">
+            Resume
+        </button>
+        <button *ngIf="supported(EntryAction.SUSPEND)"
+                class="text-warning"
+                mat-button
+                tabindex="-1"
+                (click)="action(EntryAction.SUSPEND, 'suspend')">
+            Suspend
+        </button>
+   </mat-toolbar>
 </div>

@@ -31,15 +31,15 @@ public class DatabaseService {
     private static final String QUEUE_TABLE = "INDEXING_QUEUE";
 
     private static final String[] QUEUE_UPDATE_FIELDS = {
-            "ID", "COMPLETED", "PROCESSED", "ERROR_TEXT", "PROCESSING_FLAG"
+            "ID", "COMPLETED", "PROCESSED", "ERROR_TEXT", "STATUS", "ELAPSED"
     };
 
     private static final String[] QUEUE_INSERT_FIELDS = {
-            "SUBMITTED", "TOTAL", "PROCESSED", "PROCESSING_FLAG", "IDENTIFIER_TYPE", "IDENTIFIERS"
+            "SUBMITTED", "TOTAL", "PROCESSED", "STATUS", "ELAPSED", "IDENTIFIER_TYPE", "IDENTIFIERS"
     };
 
     private static final String[] QUEUE_SUMMARY_FIELDS = {
-            "ID", "COMPLETED", "SUBMITTED", "TOTAL", "PROCESSED", "PROCESSING_FLAG", "IDENTIFIER_TYPE", "ERROR_TEXT"
+            "ID", "COMPLETED", "SUBMITTED", "TOTAL", "PROCESSED", "STATUS", "ELAPSED", "IDENTIFIER_TYPE", "ERROR_TEXT"
     };
 
     private static final String PATIENT_TABLE = "PATIENT";
@@ -56,7 +56,7 @@ public class DatabaseService {
             "CREATE_DATE", "CREATED_BY", "DELETED_FLAG"
     };
 
-    private static final String QUEUE_CHECK = "SELECT * FROM INDEXING_QUEUE WHERE COMPLETED IS NULL ORDER BY SUBMITTED ASC";
+    private static final String QUEUE_CHECK = "SELECT * FROM INDEXING_QUEUE WHERE COMPLETED IS NULL AND STATUS = 1 ORDER BY SUBMITTED ASC";
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 

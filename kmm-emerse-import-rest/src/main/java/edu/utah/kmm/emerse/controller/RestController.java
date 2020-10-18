@@ -163,7 +163,20 @@ public class RestController {
     @ResponseBody
     public IndexResult indexBatchImmediate(
             @RequestParam MultipartFile file) {
-        return solrService.batchIndexImmediate(new IndexRequestDTO(file.getResource()) );
+        return solrService.batchIndexImmediate(new IndexRequestDTO(file.getResource()));
+    }
+
+    /**
+     * Perform action on queue entry.
+     *
+     * @return The operation status.
+     */
+    @PostMapping("/entry-action")
+    @ResponseBody
+    public ResponseEntity entryAction(
+            @RequestParam String id,
+            @RequestParam int action) {
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     /**
