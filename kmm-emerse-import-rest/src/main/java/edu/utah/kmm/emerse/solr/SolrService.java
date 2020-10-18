@@ -104,7 +104,7 @@ public class SolrService {
     public IndexResult indexDocuments(Patient patient) {
         IndexResult result = new IndexResult();
         databaseService.createOrUpdatePatient(patient, false);
-        List<DocumentReference> documents = documentService.getDocumentsForPatient(patient.getId());
+        List<DocumentReference> documents = documentService.getDocumentsForPatient(patient.getId(), IdentifierType.PATID);
         String mrn = patientService.extractMRN(patient);
 
         for (DocumentReference document: documents) {

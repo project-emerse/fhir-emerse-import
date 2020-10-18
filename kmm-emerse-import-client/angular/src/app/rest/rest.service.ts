@@ -7,7 +7,13 @@ import {catchError, map, shareReplay, switchMap, tap} from "rxjs/operators";
 import {environment} from "../../environments/environment";
 import {v4 as uuid} from "uuid";
 import {IndexResult} from "../model/index-result.model";
-import {EntryAction, ENTRY_STATUS, QueueEntry, VALID_ACTIONS} from "../import/manager/queue-entry.model";
+import {
+    ENTRY_STATUS,
+    EntryAction,
+    IdentifierType,
+    QueueEntry,
+    VALID_ACTIONS
+} from "../import/manager/queue-entry.model";
 import {LoggerService, LoggerStopwatch} from "@uukmm/ng-logger";
 import {formatDuration, intervalToDuration} from 'date-fns';
 
@@ -51,16 +57,20 @@ export class RestService {
         )
     }
 
-    findPatient(mrn: string): Observable<Patient> {
-        return this.get(`api/patient?mrn=${mrn}`);
+    findPatient(id: string, idType: IdentifierType): Observable<Patient> {
+        return this.get("api/patient" + this.formatId(id, idType));
     }
 
-    getDocuments(patid: string): Observable<Document[]> {
-        return this.get(`api/documents?patid=${patid}`);
+    getDocuments(id: string, idType: IdentifierType): Observable<Document[]> {
+        return this.get("api/documents" + this.formatId(id, idType));
     }
 
-    singleIndex(mrn: string): Observable<IndexResult> {
-        return this.get(`api/index?mrn=${mrn}`);
+    singleIndex(id: string, idType: IdentifierType): Observable<IndexResult> {
+        return this.get("api/index" + this.formatId(id, idType));
+    }
+
+    private formatId(id: string, idType: IdentifierType): string {
+        return `?id=${id}&type=${idType}`
     }
 
     batchIndexForeground(formData): Observable<IndexResult> {

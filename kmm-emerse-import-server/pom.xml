@@ -35,6 +35,13 @@
         <artifactId>maven-war-plugin</artifactId>
         <configuration>
           <warName>emerse-it-server-${emerse-build}</warName>
+          <webResources>
+            <resource>
+              <directory>src/main/webresources</directory>
+              <filtering>true</filtering>
+            </resource>
+          </webResources>
+          <escapeString>\</escapeString>
         </configuration>
       </plugin>
     </plugins>

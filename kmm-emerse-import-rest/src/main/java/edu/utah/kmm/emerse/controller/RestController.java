@@ -80,17 +80,16 @@ public class RestController {
     /**
      * Fetch patient from FHIR service.
      *
-     * @param mrn The patient's MRN.
-     * @param patid The patient's FHIR id.
+     * @param id The patient's id.
+     * @param type The id type.
      * @return Serialized form of the Patient resource.
      */
     @GetMapping("/patient")
     @ResponseBody
     public String getPatient(
-            @RequestParam(required = false) String mrn,
-            @RequestParam(required = false) String patid) {
-        IdentifierType type = validateIdentifiers(mrn, patid);
-        return fhirService.serialize(patientService.getPatient(mrn != null ? mrn : patid, type));
+            @RequestParam String id,
+            @RequestParam IdentifierType type) {
+        return fhirService.serialize(patientService.getPatient(id, type));
     }
 
     /**
@@ -110,16 +109,18 @@ public class RestController {
     /**
      * Fetch a patient's documents.
      *
-     * @param patid The patient's FHIR id.
+     * @param id The patient's id.
+     * @param type The id type.
      * @return A list of documents.
      */
     @GetMapping("/documents")
     @ResponseBody
     public List<?> getDocuments(
-            @RequestParam String patid) {
+            @RequestParam String id,
+            @RequestParam IdentifierType type) {
         List<Map<String, Object>> docs = new ArrayList<>();
 
-        for (DocumentReference document: documentService.getDocumentsForPatient(patid)) {
+        for (DocumentReference document: documentService.getDocumentsForPatient(id, type)) {
             ContentDTO documentContent = documentService.getDocumentContent(document);
 
             if (documentContent != null) {
@@ -141,29 +142,16 @@ public class RestController {
     /**
      * Index a patient's documents.
      *
-     * @param mrn The patient's MRN.
-     * @param patid The patient's FHIR id.
+     * @param id The patient's id.
+     * @param type The id type.
      * @return Result of the indexing request.
      */
     @GetMapping("/index")
     @ResponseBody
     public IndexResult indexDocumentsByPatient(
-            @RequestParam(required = false) String mrn,
-            @RequestParam(required = false) String patid) {
-        return solrService.indexDocuments(mrn != null ? mrn : patid, validateIdentifiers(mrn, patid));
-    }
-
-    /**
-     * Run batch index in foreground.
-     *
-     * @param file File containing list of id's.
-     * @return The indexing result.
-     */
-    @PostMapping("/batch-fg")
-    @ResponseBody
-    public IndexResult indexBatchImmediate(
-            @RequestParam MultipartFile file) {
-        return solrService.batchIndexImmediate(new IndexRequestDTO(file.getResource()));
+            @RequestParam String id,
+            @RequestParam IdentifierType type) {
+        return solrService.indexDocuments(id, type);
     }
 
     /**
@@ -177,6 +165,19 @@ public class RestController {
             @RequestParam String id,
             @RequestParam int action) {
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    /**
+     * Run batch index in foreground.
+     *
+     * @param file File containing list of id's.
+     * @return The indexing result.
+     */
+    @PostMapping("/batch-fg")
+    @ResponseBody
+    public IndexResult indexBatchImmediate(
+            @RequestParam MultipartFile file) {
+        return solrService.batchIndexImmediate(new IndexRequestDTO(file.getResource()));
     }
 
     /**
@@ -219,4 +220,8 @@ public class RestController {
         return mrn != null ? IdentifierType.MRN : IdentifierType.PATID;
     }
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> onError(Exception ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 }

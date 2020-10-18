@@ -1,7 +1,9 @@
 package edu.utah.kmm.emerse.document;
 
 import edu.utah.kmm.emerse.fhir.FhirService;
+import edu.utah.kmm.emerse.fhir.IdentifierType;
 import edu.utah.kmm.emerse.patient.PatientService;
+import edu.utah.kmm.emerse.util.MiscUtil;
 import org.apache.commons.lang.StringUtils;
 import org.hl7.fhir.dstu3.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,16 +27,24 @@ public class DocumentService {
         return fhirService.readResource(DocumentReference.class, docid);
     }
 
-    public List<DocumentReference> getDocumentsForPatient(String patid) {
+    public List<DocumentReference> getDocumentsForPatient(
+            String id,
+            IdentifierType type) {
+        MiscUtil.validateIdentiferType(type, IdentifierType.MRN, IdentifierType.PATID);
+
+        if (type == IdentifierType.MRN) {
+            id = patientService.getPatientByMrn(id).getId();
+        }
+
         List<DocumentReference> documents = new ArrayList<>();
         Bundle bundle = fhirService.getGenericClient().search()
                 .forResource(DocumentReference.class)
-                .where(DocumentReference.PATIENT.hasId(patid))
+                .where(DocumentReference.PATIENT.hasId(id))
                 .where(DocumentReference.CLASS.exactly().code(documentClasses.replace(" ", "")))
                 .returnBundle(Bundle.class)
                 .execute();
 
-        for (Bundle.BundleEntryComponent entry: bundle.getEntry()) {
+        for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
             Resource resource = entry.getResource();
 
             if (resource instanceof DocumentReference) {

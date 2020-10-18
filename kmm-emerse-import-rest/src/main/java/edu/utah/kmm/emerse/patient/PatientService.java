@@ -2,6 +2,7 @@ package edu.utah.kmm.emerse.patient;
 
 import edu.utah.kmm.emerse.fhir.FhirService;
 import edu.utah.kmm.emerse.fhir.IdentifierType;
+import edu.utah.kmm.emerse.util.MiscUtil;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,7 @@ public class PatientService {
     public Patient getPatient(
             String id,
             IdentifierType type) {
-        Assert.isTrue(type == IdentifierType.MRN || type == IdentifierType.PATID, "Invalid identifier type");
+        MiscUtil.validateIdentiferType(type, IdentifierType.MRN, IdentifierType.PATID);
         return type == IdentifierType.MRN ? getPatientByMrn(id) : getPatientById(id);
     }
 

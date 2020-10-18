@@ -7,19 +7,17 @@ case "$1" in
 "")
   echo You must specify a build profile.
   echo For example: ./build.sh dev
-  echo Recognized profiles are: dev, prod
+  echo Recognized profiles are: dev, prd
   exit 1
 ;;
 
-"prod")
+"prd")
   config="production"
-  suffix=""
 ;;
 
 
 "dev")
   config="$1"
-  suffix="$1"
 ;;
 
 *)
@@ -34,13 +32,13 @@ echo Installing dependencies...
 cd angular
 npm install @uukmm/npm-auto-snapshot
 npm run clean-snapshots
-npm install $2
+npm install
 npm run snapshot
 npm run git-hash
 echo Building distribution...
-ng build --configuration=$config $3
+ng build --configuration=$config
 echo Building war...
 cd -
-mvn clean package -Dbuild.profile="$1" -Dwar.suffix="$suffix" $4
+mvn clean package -Dbuild.profile="$1"
 
 

@@ -21,13 +21,13 @@ public class PatientDTO extends BaseDTO {
         map.put("MIDDLE_NAME", null);
         map.put("LAST_NAME", truncate(name.getFamily(), 75));
         map.put("BIRTH_DATE", patient.getBirthDate());
-        map.put("SEX_CD", truncate(patient.getGender().toCode(), 50));
+        map.put("SEX_CD", truncate(patient.hasGender() ? patient.getGender().toCode() : null, 50));
         map.put("DECEASED_FLAG", deceased ? 1 : 0);
         map.put("LANGUAGE_CD", truncate(patient.getLanguage(), 50));
         map.put("RACE_CD", null);
         map.put("ETHNICITY_CD", null);
-        map.put("MARITAL_STATUS_CD", truncate(patient.getMaritalStatus().getCodingFirstRep().getCode(), 50));
+        map.put("MARITAL_STATUS_CD", truncate(patient.hasMaritalStatus() ? patient.getMaritalStatus().getCodingFirstRep().getCode() : null, 50));
         map.put("RELIGION_CD", null);
-        map.put("ZIP_CD", truncate(patient.getAddressFirstRep().getPostalCode(), 10));
+        map.put("ZIP_CD", truncate(patient.hasAddress() ? patient.getAddressFirstRep().getPostalCode() : null, 10));
     }
 }

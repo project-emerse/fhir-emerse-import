@@ -6,6 +6,7 @@ import {Document} from "../../model/document.model";
 import {PatientDemographics} from "../../model/patient-demographics.model";
 import {ConfigService} from "../../config/config.service";
 import {IndexResultUtil} from "../../model/index-result.model";
+import {IdentifierType} from '../manager/queue-entry.model';
 
 @Component({
     selector: 'emerse-import-single',
@@ -42,7 +43,7 @@ export class ImportSingleComponent {
         this.clear();
         this.message = "Searching for patient...";
         this.busy = true;
-        this.restService.findPatient(this.mrn)
+        this.restService.findPatient(this.mrn, IdentifierType.MRN)
             .pipe(
                 tap(patient => {
                     this.message = patient == null ? "No patient found.  Please try again." : null;
@@ -53,7 +54,7 @@ export class ImportSingleComponent {
                     this.extractDemographics(patient);
                     this.message = "Searching for documents..."
                 }),
-                switchMap(patient => this.restService.getDocuments(patient.id)),
+                switchMap(patient => this.restService.getDocuments(patient.id, IdentifierType.PATID)),
                 tap(() => {
                     this.message = null;
                     this.busy = false;
@@ -76,7 +77,7 @@ export class ImportSingleComponent {
         this.message = null;
         this.busy = true;
         this.message = "Indexing documents..."
-        this.restService.singleIndex(this.mrn).pipe(
+        this.restService.singleIndex(this.mrn, IdentifierType.MRN).pipe(
             tap(() => {
                 this.message = null;
                 this.busy = false;
