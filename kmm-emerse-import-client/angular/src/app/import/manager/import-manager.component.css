@@ -46,7 +46,7 @@ th.emerse-import-manager-identifier_type {
     text-align: center !important;
 }
 
-.emerse-import-manager-message {
-    width: 100%;
-    text-align: center;
+.emerse-import-manager .mat-footer-cell {
+    color: red;
+    font-weight: bold;
 }
