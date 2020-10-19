@@ -62,13 +62,17 @@
 
     <bean class="edu.utah.kmm.emerse.oauth.OAuth2Authenticator" />
 
-    <bean id="configService" class="edu.utah.kmm.emerse.config.ClientConfigService" />
-
     <!-- Service Registries -->
 
     <bean id="authenticatorRegistry" class="edu.utah.kmm.emerse.auth.AuthenticatorRegistry" />
 
     <bean id="patientLookupRegistry" class="edu.utah.kmm.emerse.patient.PatientLookupRegistry" />
+
+    <!-- Client Configuration -->
+
+    <bean id="configService" class="edu.utah.kmm.emerse.config.ClientConfigService" init-method="init">
+        <constructor-arg value="@project.version@" />
+    </bean>
 
     <!-- SOLR Configuration -->
 

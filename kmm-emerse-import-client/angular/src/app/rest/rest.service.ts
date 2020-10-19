@@ -7,11 +7,7 @@ import {catchError, map, shareReplay, switchMap, tap} from "rxjs/operators";
 import {environment} from "../../environments/environment";
 import {v4 as uuid} from "uuid";
 import {IndexResult} from "../model/index-result.model";
-import {
-    EntryAction,
-    IdentifierType, isValidAction,
-    QueueEntry, statusText
-} from "../model/queue-entry.model";
+import {EntryAction, IdentifierType, isValidAction, QueueEntry, statusText} from "../model/queue-entry.model";
 import {LoggerService, LoggerStopwatch} from "@uukmm/ng-logger";
 import {formatDuration, intervalToDuration} from 'date-fns';
 
@@ -36,6 +32,10 @@ export class RestService {
 
     getServerConfig(): Observable<any> {
         return this.get("api/config").pipe(shareReplay(1));
+    }
+
+    getClientInfo(): Observable<any> {
+        return this.httpClient.get("assets/about.json", {responseType: "json"}).pipe(shareReplay(1));
     }
 
     login(username: string, password: string): Observable<boolean> {

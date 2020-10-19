@@ -1,0 +1,40 @@
+<div class="emerse-import-about">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>{{get("app.name")}}</td>
+            <td>{{get("app.description")}}</td>
+        </tr>
+        <tr>
+            <td>Copyright</td>
+            <td>&copy;{{get("app.copyright")}}</td>
+        </tr>
+        <tr>
+            <td>{{get("app.author")}}</td>
+            <td><a target="emerse" href="{{get('app.url')}}">{{get("app.url")}}</a></td>
+        </tr>
+        <tr>
+            <td>Contact</td>
+            <td><a href="mailto:{{get('app.email')}}">{{get('app.email')}}</a></td>
+        </tr>
+        <tr>
+            <td>Client version</td>
+            <td>{{get("client.version")}}</td>
+        </tr>
+        <tr>
+            <td>Server version</td>
+            <td>{{get("server.version")}}</td>
+        </tr>
+        <tr>
+            <td>Indexing threads</td>
+            <td>{{get("solr.server.daemons")}}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>

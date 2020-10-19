@@ -24,6 +24,19 @@ public class ClientConfigService {
     @Value("${solr.server.daemons:1}")
     private String s4;
 
+    @Value("${server.version:}")
+    private String version;
+
+    private final String serverVersion;
+
+    private ClientConfigService(String serverVersion) {
+        this.serverVersion = serverVersion;
+    }
+
+    public void init() {
+        this.version = StringUtils.firstNonBlank(this.version, serverVersion);
+    }
+
     public Map<String, String> getConfig() {
         Map<String, String> config = new HashMap<>();
         ReflectionUtils.doWithLocalFields(getClass(), field -> {
@@ -31,6 +44,7 @@ public class ClientConfigService {
 
             if (annot != null) {
                 String key = StringUtils.substringBetween(annot.value(), "{", "}");
+                key = StringUtils.substringBefore(key, ":");
                 config.put(key, (String) field.get(this));
             }
         });

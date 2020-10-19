@@ -16,6 +16,8 @@ export enum EntryAction {
     ABORT = 3
 }
 
+const ACTION_TEXT: string[] = ['Deleting', 'Resuming', 'Suspending', 'Aborting'];
+
 const VALID_ACTIONS: {[status: number] : EntryAction[]} = {
     [EntryStatus.QUEUED]: [EntryAction.DELETE, EntryAction.SUSPEND, EntryAction.ABORT],
     [EntryStatus.RUNNING]: [EntryAction.SUSPEND, EntryAction.ABORT],
@@ -49,4 +51,8 @@ export function isValidAction(status: EntryStatus, action: EntryAction): boolean
 
 export function statusText(status: EntryStatus): string {
     return status == null ? null : STATUS_TEXT[status];
+}
+
+export function actionText(action: EntryAction): string {
+    return action == null ? null : ACTION_TEXT[action];
 }

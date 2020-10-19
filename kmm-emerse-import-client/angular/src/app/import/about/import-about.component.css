@@ -1,0 +1,16 @@
+.emerse-import-about td {
+    font-size: 1.5em;
+    vertical-align: middle;
+}
+
+.emerse-import-about td:first-child {
+    font-weight: bold;
+}
+
+.emerse-import-about a {
+    font-size: 1.1em;
+}
+
+.emerse-import-about th:first-child {
+    width: 25%;
+}

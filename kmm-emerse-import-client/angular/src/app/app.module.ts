@@ -20,6 +20,7 @@ import {MaterialModule} from '@uukmm/ng-widget-toolkit';
 import {LoggerModule} from "@uukmm/ng-logger";
 import {APP_BASE_HREF} from "@angular/common";
 import {NgbTooltipModule} from '@ng-bootstrap/ng-bootstrap';
+import {ImportAboutComponent} from './import/about/import-about.component';
 
 // Import plugin modules here:
 
@@ -29,6 +30,7 @@ import {NgbTooltipModule} from '@ng-bootstrap/ng-bootstrap';
         HomeComponent,
         LoginComponent,
         ImportComponent,
+        ImportAboutComponent,
         ImportSingleComponent,
         ImportBatchComponent,
         ImportManagerComponent
@@ -37,6 +39,7 @@ import {NgbTooltipModule} from '@ng-bootstrap/ng-bootstrap';
         HomeComponent,
         LoginComponent,
         ImportComponent,
+        ImportAboutComponent,
         ImportSingleComponent,
         ImportBatchComponent,
         ImportManagerComponent

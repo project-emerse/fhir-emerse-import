@@ -1,7 +1,7 @@
 import {Injectable} from "@angular/core";
 import {RestService} from "../rest/rest.service";
-import {Observable, of} from "rxjs";
-import {switchMap, take} from "rxjs/operators";
+import {combineLatest, Observable, of} from "rxjs";
+import {map, switchMap, take} from "rxjs/operators";
 import {AlertDialogService, AlertSeverity} from '@uukmm/ng-widget-toolkit';
 
 const ERROR_TITLE = "Cannot Continue";
@@ -23,12 +23,14 @@ export class ConfigService {
     constructor(
         restService: RestService,
         alertDialogService: AlertDialogService) {
-        this.config$ = restService.getServerConfig().pipe(take(1));
+        this.config$ = combineLatest([restService.getServerConfig(), restService.getClientInfo()]).pipe(
+            map(([serverConfig, clientInfo]) => Object.assign({}, clientInfo, serverConfig)),
+            take(1));
         this.config$.subscribe(
-            config => this.config = config,
-            () => {
-                alertDialogService.show({title: ERROR_TITLE, message: ERROR_TEXT, severity: AlertSeverity.FATAL});
-            });
+                config => this.config = config,
+                () => {
+                    alertDialogService.show({title: ERROR_TITLE, message: ERROR_TEXT, severity: AlertSeverity.FATAL});
+                });
     }
 
     isLoaded(): boolean {

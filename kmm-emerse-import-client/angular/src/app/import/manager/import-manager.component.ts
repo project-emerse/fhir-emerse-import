@@ -3,7 +3,7 @@ import {RestService} from "../../rest/rest.service";
 import {MatTableDataSource} from '@angular/material/table';
 import {MatPaginator} from '@angular/material/paginator';
 import {PromptDialogService} from '@uukmm/ng-widget-toolkit';
-import {EntryAction, isValidAction, QueueEntry} from '../../model/queue-entry.model';
+import {actionText, EntryAction, isValidAction, QueueEntry} from '../../model/queue-entry.model';
 import {timer} from 'rxjs';
 
 @Component({
@@ -59,7 +59,7 @@ export class ImportManagerComponent implements AfterViewInit{
 
     private doAction(action: EntryAction): void {
         const selected: QueueEntry = this.selected;
-        this.clear("Performing selected operation...");
+        this.clear(actionText(action) + " selected entry, please wait...");
         this.restService.entryAction(selected, action).subscribe(
             () => this.refresh(),
             error => this.refresh(error));
