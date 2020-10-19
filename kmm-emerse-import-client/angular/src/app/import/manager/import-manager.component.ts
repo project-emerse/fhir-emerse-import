@@ -22,7 +22,7 @@ export class ImportManagerComponent implements AfterViewInit{
 
     columns = ['submitted', 'completed', 'elapsed', 'total', 'processed', 'status', 'identifier_type', 'error_text'];
 
-    loading = true;
+    busy = true;
 
     selected: QueueEntry = null;
 
@@ -45,7 +45,7 @@ export class ImportManagerComponent implements AfterViewInit{
     }
 
     setSelection(entry: QueueEntry) {
-        this.selected = this.loading ? null : entry;
+        this.selected = entry;
     }
 
     action(action: EntryAction, warn: string = null): void {
@@ -59,6 +59,7 @@ export class ImportManagerComponent implements AfterViewInit{
 
     private doAction(action: EntryAction): void {
         const selected: QueueEntry = this.selected;
+        this.busy = true;
         this.clear(actionText(action) + " selected entry, please wait...");
         this.restService.entryAction(selected, action).subscribe(
             () => this.refresh(),
@@ -77,12 +78,12 @@ export class ImportManagerComponent implements AfterViewInit{
 
     refresh(message?: any): void {
         this.clear(message || "Fetching data...");
-        this.loading = true;
+        this.busy = true;
         this.restService.fetchQueue().subscribe(entries => {
             this.message = null;
             this.dataSource.data = entries;
             this.dataSource._updateChangeSubscription();
-            this.loading = false;
+            this.busy = false;
         });
     }
 }

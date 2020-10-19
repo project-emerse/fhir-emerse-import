@@ -84,6 +84,7 @@
                 mat-icon-button
                 tabindex="-1"
                 ngbTooltip="Refresh"
+                [disabled]="busy"
                 (click)="refresh()">
             <mat-icon>refresh</mat-icon>
         </button>
