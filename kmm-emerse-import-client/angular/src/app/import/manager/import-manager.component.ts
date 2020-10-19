@@ -1,10 +1,10 @@
 import {AfterViewInit, Component, ViewChild, ViewEncapsulation} from "@angular/core";
 import {RestService} from "../../rest/rest.service";
-import {EntryAction, QueueEntry, VALID_ACTIONS} from "./queue-entry.model";
 import {MatTableDataSource} from '@angular/material/table';
 import {MatPaginator} from '@angular/material/paginator';
-import {SelectionChange, SelectionModel} from '@angular/cdk/collections';
 import {PromptDialogService} from '@uukmm/ng-widget-toolkit';
+import {EntryAction, isValidAction, QueueEntry} from '../../model/queue-entry.model';
+import {timer} from 'rxjs';
 
 @Component({
     selector: 'emerse-import-manager',
@@ -22,11 +22,11 @@ export class ImportManagerComponent implements AfterViewInit{
 
     columns = ['submitted', 'completed', 'elapsed', 'total', 'processed', 'status', 'identifier_type', 'error_text'];
 
-    selection = new SelectionModel<QueueEntry>(false, []);
-
     loading = true;
 
-    selected: QueueEntry;
+    selected: QueueEntry = null;
+
+    message: string;
 
     actionLabel: string;
 
@@ -37,16 +37,15 @@ export class ImportManagerComponent implements AfterViewInit{
 
     ngAfterViewInit(): void {
         this.dataSource.paginator = this.paginator;
-        this.selection.changed.asObservable().subscribe(onselect => this.onSelect(onselect))
-        this.refresh();
+        timer().subscribe(() => this.refresh());
     }
 
     trackBy(index: number, entry: QueueEntry): string {
         return entry.ID;
     }
 
-    onSelect(selection: SelectionChange<QueueEntry>): void {
-        this.selected = selection.added[0];
+    setSelection(entry: QueueEntry) {
+        this.selected = this.loading ? null : entry;
     }
 
     action(action: EntryAction, warn: string = null): void {
@@ -59,18 +58,28 @@ export class ImportManagerComponent implements AfterViewInit{
     }
 
     private doAction(action: EntryAction): void {
-        this.restService.entryAction(this.selected, action);
-        this.refresh();
+        const selected: QueueEntry = this.selected;
+        this.clear("Performing selected operation...");
+        this.restService.entryAction(selected, action).subscribe(
+            () => this.refresh(),
+            error => this.refresh(error));
     }
 
     supported(action: EntryAction): boolean {
-        return this.selected && VALID_ACTIONS[this.selected.STATUS].includes(action)
+        return this.selected && isValidAction(this.selected.STATUS, action);
     }
 
-    refresh(): void {
+    clear(message?: any): void {
+        this.message = message;
+        this.selected = null;
         this.dataSource.data = [];
+    }
+
+    refresh(message?: any): void {
+        this.clear(message || "Fetching data...");
         this.loading = true;
         this.restService.fetchQueue().subscribe(entries => {
+            this.message = null;
             this.dataSource.data = entries;
             this.dataSource._updateChangeSubscription();
             this.loading = false;

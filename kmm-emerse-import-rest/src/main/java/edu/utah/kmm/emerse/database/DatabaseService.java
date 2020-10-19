@@ -5,6 +5,7 @@ import edu.utah.kmm.emerse.patient.PatientDTO;
 import edu.utah.kmm.emerse.patient.PatientService;
 import edu.utah.kmm.emerse.security.Credentials;
 import edu.utah.kmm.emerse.solr.IndexRequestDTO;
+import edu.utah.kmm.emerse.solr.IndexRequestDTO.IndexRequestStatus;
 import edu.utah.kmm.emerse.solr.SolrService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -42,6 +43,12 @@ public class DatabaseService {
             "ID", "COMPLETED", "SUBMITTED", "TOTAL", "PROCESSED", "STATUS", "ELAPSED", "IDENTIFIER_TYPE", "ERROR_TEXT"
     };
 
+    private static final String QUEUE_FETCH_REQUEST = "SELECT * FROM " + QUEUE_TABLE + " WHERE ID=:ID";
+
+    private static final String QUEUE_SCAN = "SELECT ID FROM " + QUEUE_TABLE + " WHERE COMPLETED IS NULL AND STATUS = 0 ORDER BY SUBMITTED ASC";
+
+    private static final String QUEUE_DELETE_REQUEST = "DELETE FROM " + QUEUE_TABLE + " WHERE ID=:ID";
+
     private static final String PATIENT_TABLE = "PATIENT";
 
     private static final String[] PATIENT_UPDATE_FIELDS = {
@@ -55,8 +62,6 @@ public class DatabaseService {
             "LANGUAGE_CD", "RACE_CD", "ETHNICITY_CD", "MARITAL_STATUS_CD", "RELIGION_CD", "ZIP_CD",
             "CREATE_DATE", "CREATED_BY", "DELETED_FLAG"
     };
-
-    private static final String QUEUE_CHECK = "SELECT * FROM INDEXING_QUEUE WHERE COMPLETED IS NULL AND STATUS = 1 ORDER BY SUBMITTED ASC";
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
@@ -166,16 +171,23 @@ public class DatabaseService {
         return getUpdateSQL(QUEUE_TABLE, QUEUE_UPDATE_FIELDS);
     }
 
-    public IndexRequestDTO queueRequest(List<String> ids, IdentifierType type) {
-        return createOrUpdateIndexRequest(new IndexRequestDTO(ids, type));
+    public IndexRequestDTO fetchRequest(String id) {
+        return jdbcTemplate.queryForObject(QUEUE_FETCH_REQUEST, Collections.singletonMap("ID", id), (rs, i) -> new IndexRequestDTO(rs));
     }
 
-    public IndexRequestDTO createOrUpdateIndexRequest(IndexRequestDTO request) {
-        if (request.changed()) {
-            String SQL = request.initial() ? getQueueInsertSQL() : getQueueUpdateSQL();
+    public IndexRequestDTO queueRequest(
+            List<String> ids,
+            IdentifierType type) {
+        return updateIndexRequest(new IndexRequestDTO(ids, type));
+    }
 
+    public IndexRequestDTO updateIndexRequest(IndexRequestDTO request) {
+        if (request.changed()) {
+            boolean delete = request.getStatus() == IndexRequestStatus.DELETED;
+            String SQL = delete ? QUEUE_DELETE_REQUEST : request.initial() ? getQueueInsertSQL() : getQueueUpdateSQL();
+            Map<String, Object> map = delete ? Collections.singletonMap("ID", request.getId()) : request.getMap();
             try {
-                jdbcTemplate.update(SQL, request.getMap());
+                jdbcTemplate.update(SQL, map);
                 request.clearChanged();
             } catch (DataAccessException e) {
                 throw new RuntimeException(e);
@@ -185,7 +197,7 @@ public class DatabaseService {
     }
 
     public void refreshQueue(RowMapper<?> rowMapper) {
-        jdbcTemplate.query(QUEUE_CHECK, rowMapper);
+        jdbcTemplate.query(QUEUE_SCAN, rowMapper);
     }
 
     public List<Map<String, Object>> fetchQueueEntries() {

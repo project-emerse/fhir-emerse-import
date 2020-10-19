@@ -17,6 +17,7 @@ import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.common.SolrInputDocument;
+import org.codehaus.janino.util.Producer;
 import org.hl7.fhir.dstu3.model.DocumentReference;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,8 @@ public class SolrService {
 
     private final String solrPassword;
 
+    private final Map<String, IndexRequestDTO> processing = new HashMap<>();
+
     @Autowired
     private DocumentService documentService;
 
@@ -55,7 +58,12 @@ public class SolrService {
     @Autowired
     private DatabaseService databaseService;
 
-    public SolrService(String solrServerRoot, Credentials solrServiceCredentials) {
+    @Autowired
+    private IndexRequestQueue indexRequestQueue;
+
+    public SolrService(
+            String solrServerRoot,
+            Credentials solrServiceCredentials) {
         solrUsername = solrServiceCredentials.getUsername();
         solrPassword = solrServiceCredentials.getPassword();
         solrClient = new HttpSolrClient.Builder(solrServerRoot)
@@ -82,17 +90,61 @@ public class SolrService {
             }
 
             if (result.getTotal() % 100 == 0) {
-                databaseService.createOrUpdateIndexRequest(request);
+                databaseService.updateIndexRequest(request);
             }
         }
 
         request.close();
-        databaseService.createOrUpdateIndexRequest(request);
+        databaseService.updateIndexRequest(request);
         return result;
     }
 
+    private boolean lockProcessing(Producer<Boolean> operation) {
+        synchronized (processing) {
+            return operation.produce();
+        }
+    }
+
     public void batchIndexQueued(IndexRequestDTO request) {
-        databaseService.createOrUpdateIndexRequest(request);
+        databaseService.updateIndexRequest(request);
+        indexRequestQueue.refreshNow();
+    }
+
+    public void indexRequestAction(IndexRequestAction action) {
+        if (lockProcessing(() -> {
+            IndexRequestDTO request = processing.get(action.id);
+
+            if (request != null) {
+                indexRequestAction(request, action);
+            }
+
+            return request != null;
+        })) {
+            return;
+        }
+
+        IndexRequestDTO request = databaseService.fetchRequest(action.id);
+        indexRequestAction(request, action);
+        databaseService.updateIndexRequest(request);
+    }
+
+    private void indexRequestAction(
+            IndexRequestDTO request,
+            IndexRequestAction action) {
+        switch (action.action) {
+            case ABORT:
+                request.abort();
+                break;
+            case RESUME:
+                request.resume();
+                break;
+            case SUSPEND:
+                request.suspend();
+                break;
+            case DELETE:
+                request.delete();
+                break;
+        }
     }
 
     /**
@@ -167,34 +219,61 @@ public class SolrService {
         return result.success(indexDTO(new DocumentDTO(document, map), COLLECTION_DOCUMENTS));
     }
 
+    public IndexResult indexRequest(String requestId) {
+        return indexRequest(databaseService.fetchRequest(requestId));
+    }
+
     /**
      * Service an index request.
      *
      * @param request The index request.
      * @return The indexing result.
      */
-    public IndexResult index(IndexRequestDTO request) {
+    public IndexResult indexRequest(IndexRequestDTO request) {
         IndexResult result = new IndexResult();
-        request.setStatus(IndexRequestStatus.RUNNING);
-        databaseService.createOrUpdateIndexRequest(request);
 
-        for (String id: request) {
-            try {
-                result.combine(indexDocuments(id, request.getIdentifierType()));
-            } catch (Exception e) {
-                request.setErrorText(e.getMessage());
+        if (!lockProcessing(() -> {
+            if (processing.containsKey(request.getId())) {
+                return false;
+            } else {
+                processing.put(request.getId(), request);
+                return true;
             }
-
-            if (request.getStatus() != IndexRequestStatus.RUNNING) {
-                break;
-            }
+        })) {
+            return result;
         }
 
-        if (request.getStatus() == IndexRequestStatus.RUNNING) {
-            request.completed();
+        try {
+            if (request.getStatus() != IndexRequestStatus.QUEUED) {
+                databaseService.updateIndexRequest(request);
+                return result;
+            }
+
+            processing.put(request.getId(), request);
+            request.start();
+            databaseService.updateIndexRequest(request);
+
+            for (String id : request) {
+                try {
+                    if (request.getStatus() != IndexRequestStatus.RUNNING) {
+                        break;
+                    }
+
+                    result.combine(indexDocuments(id, request.getIdentifierType()));
+                } catch (Exception e) {
+                    request.error(e.getMessage());
+                }
+            }
+
+            if (request.getStatus() == IndexRequestStatus.RUNNING) {
+                request.completed();
+            }
+
+            databaseService.updateIndexRequest(request);
+        } finally {
+            lockProcessing(() -> processing.remove(request.getId()) != null);
         }
 
-        databaseService.createOrUpdateIndexRequest(request);
         return result;
     }
 

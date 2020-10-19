@@ -3,6 +3,7 @@ package edu.utah.kmm.emerse.patient;
 import edu.utah.kmm.emerse.fhir.FhirService;
 import edu.utah.kmm.emerse.fhir.IdentifierType;
 import edu.utah.kmm.emerse.util.MiscUtil;
+import org.apache.zookeeper.data.Id;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,5 +64,8 @@ public class PatientService {
         return null;
     }
 
+    public Identifier createMRN(String mrn) {
+        return new Identifier().setSystem(mrnSystem).setValue(mrn);
+    }
 
 }

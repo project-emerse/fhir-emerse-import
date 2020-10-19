@@ -36,9 +36,9 @@ public class EpicPatientLookup implements IPatientLookup {
     }
 
     @Override
-    public Patient lookupByMRN(String id) {
+    public Patient lookupByMRN(String mrn) {
         Map<String, String> body = new HashMap<>();
-        body.put("PatientID", id);
+        body.put("PatientID", mrn);
         body.put("PatientIDType", "EPICMRN");
         body.put("UserID", userid);
         body.put("UserIDType", "EXTERNAL");
@@ -50,7 +50,13 @@ public class EpicPatientLookup implements IPatientLookup {
 
             if ("FHIR STU3".equals(type)) {
                 String patid = entry.get("ID");
-                return patientService.getPatientById(patid);
+                Patient patient = patientService.getPatientById(patid);
+
+                if (patientService.extractMRN(patient) == null) {
+                    patient.addIdentifier(patientService.createMRN(mrn));
+                }
+
+                return patient;
             }
         }
 

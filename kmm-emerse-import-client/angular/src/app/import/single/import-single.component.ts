@@ -6,7 +6,7 @@ import {Document} from "../../model/document.model";
 import {PatientDemographics} from "../../model/patient-demographics.model";
 import {ConfigService} from "../../config/config.service";
 import {IndexResultUtil} from "../../model/index-result.model";
-import {IdentifierType} from '../manager/queue-entry.model';
+import {IdentifierType} from '../../model/queue-entry.model';
 
 @Component({
     selector: 'emerse-import-single',

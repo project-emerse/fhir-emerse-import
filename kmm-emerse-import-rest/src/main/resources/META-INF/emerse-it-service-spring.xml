@@ -82,9 +82,9 @@
         <constructor-arg ref="solrServiceCredentials" />
     </bean>
 
-    <bean id="solrDaemonManager" class="edu.utah.kmm.emerse.solr.DaemonManager" init-method="init" destroy-method="destroy"/>
+    <bean id="daemonManager" class="edu.utah.kmm.emerse.solr.DaemonManager" init-method="init" destroy-method="destroy"/>
 
-    <bean id="solrQueue" class="edu.utah.kmm.emerse.solr.SolrQueue" />
+    <bean id="indexRequestQueue" class="edu.utah.kmm.emerse.solr.IndexRequestQueue" />
 
     <!-- FHIR Configuration -->
 

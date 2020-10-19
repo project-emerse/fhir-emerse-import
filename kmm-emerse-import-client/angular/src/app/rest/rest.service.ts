@@ -1,19 +1,17 @@
 import {Injectable} from "@angular/core";
 import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {Patient} from "@uukmm/ng-fhir-model/stu3";
-import {Observable, of} from "rxjs";
+import {Observable, of, throwError} from "rxjs";
 import {Document} from "../model/document.model";
 import {catchError, map, shareReplay, switchMap, tap} from "rxjs/operators";
 import {environment} from "../../environments/environment";
 import {v4 as uuid} from "uuid";
 import {IndexResult} from "../model/index-result.model";
 import {
-    ENTRY_STATUS,
     EntryAction,
-    IdentifierType,
-    QueueEntry,
-    VALID_ACTIONS
-} from "../import/manager/queue-entry.model";
+    IdentifierType, isValidAction,
+    QueueEntry, statusText
+} from "../model/queue-entry.model";
 import {LoggerService, LoggerStopwatch} from "@uukmm/ng-logger";
 import {formatDuration, intervalToDuration} from 'date-fns';
 
@@ -87,7 +85,7 @@ export class RestService {
                 entries.forEach(entry => {
                     entry.COMPLETED_DATE = entry.COMPLETED ? new Date(entry.COMPLETED) : null;
                     entry.SUBMITTED_DATE = entry.SUBMITTED ? new Date(entry.SUBMITTED) : null;
-                    entry.STATUS_TEXT = entry.STATUS != null ? ENTRY_STATUS[entry.STATUS] : null;
+                    entry.STATUS_TEXT = statusText(entry.STATUS);
                     const duration: Duration = entry.ELAPSED == null ? null : intervalToDuration({start: 0, end: entry.ELAPSED});
                     entry.ELAPSED_TEXT = duration ? formatDuration(duration) : null;
                 })
@@ -97,7 +95,7 @@ export class RestService {
     }
 
     entryAction(entry: QueueEntry, action: EntryAction): Observable<boolean> {
-        if (VALID_ACTIONS[entry.STATUS].includes(action)) {
+        if (isValidAction(entry.STATUS, action)) {
             return this.post("api/entry-action", {id: entry.ID, action});
         } else {
             return of(false);
@@ -139,7 +137,7 @@ export class RestService {
 
     private catchError(error): Observable<any> {
         console.log(error);
-        return of(null);
+        return throwError(error);
     }
 
 }

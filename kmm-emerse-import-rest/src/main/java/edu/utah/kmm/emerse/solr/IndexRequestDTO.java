@@ -20,13 +20,14 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
     /**
      * Note: do not change the member order!
      */
-    enum IndexRequestStatus {
-        COMPLETED,
+    public enum IndexRequestStatus {
         QUEUED,
         RUNNING,
         SUSPENDED,
+        COMPLETED,
         ABORTED,
-        ERROR
+        ERROR,
+        DELETED
     }
 
     private enum FieldType {
@@ -114,12 +115,16 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
         }
     }
 
-    private void put(FieldType field, Object value) {
+    private void put(
+            FieldType field,
+            Object value) {
         changed = true;
         map.put(field.name(), value);
     }
 
-    private <T> T get(FieldType field, Class<T> clazz) {
+    private <T> T get(
+            FieldType field,
+            Class<T> clazz) {
         return (T) map.get(field.name());
     }
 
@@ -127,19 +132,53 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
         return new Date();
     }
 
-    public void setErrorText(String errorText) {
+    public String getId() {
+        return get(FieldType.ID, String.class);
+    }
+
+    public void error(String errorText) {
         put(FieldType.ERROR_TEXT, errorText);
         setStatus(IndexRequestStatus.ERROR);
     }
 
     public void start() {
         started = System.currentTimeMillis();
+        put(FieldType.COMPLETED, null);
         setStatus(IndexRequestStatus.RUNNING);
     }
 
     public void completed() {
-        put(FieldType.COMPLETED, now());
-        setStatus(IndexRequestStatus.COMPLETED);
+        if (hasStatus(IndexRequestStatus.RUNNING)) {
+            stop(IndexRequestStatus.COMPLETED);
+        }
+    }
+
+    public void abort() {
+        if (!hasStatus(IndexRequestStatus.COMPLETED)) {
+            stop(IndexRequestStatus.ABORTED);
+        }
+    }
+
+    public void suspend() {
+        if (hasStatus(IndexRequestStatus.RUNNING)) {
+            stop(IndexRequestStatus.SUSPENDED);
+        }
+    }
+
+    public void resume() {
+        if (!hasStatus(IndexRequestStatus.RUNNING, IndexRequestStatus.COMPLETED)) {
+            setStatus(IndexRequestStatus.QUEUED);
+        }
+    }
+
+    public void delete() {
+        stop(IndexRequestStatus.DELETED);
+    }
+
+    private void stop(IndexRequestStatus status) {
+        put(FieldType.COMPLETED, status == IndexRequestStatus.SUSPENDED ? null : now());
+        setStatus(status);
+        close();
     }
 
     public IndexRequestStatus getStatus() {
@@ -147,7 +186,15 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
         return status == null ? null : IndexRequestStatus.values()[status];
     }
 
-    public void setStatus(IndexRequestStatus status) {
+    public boolean hasStatus(IndexRequestStatus... statuses) {
+        return Arrays.stream(statuses)
+                .filter(status -> getStatus() == status)
+                .findFirst()
+                .map(status -> true)
+                .orElse(false);
+    }
+
+    private void setStatus(IndexRequestStatus status) {
         put(FieldType.STATUS, status.ordinal());
     }
 
@@ -171,8 +218,10 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
     @Override
     public Iterator<String> iterator() {
         return new Iterator<String>() {
-            int total = get(FieldType.TOTAL, Integer.class);
+            final int total = get(FieldType.TOTAL, Integer.class);
+
             int processed = get(FieldType.PROCESSED, Integer.class);
+
             boolean processingFlag;
 
             @Override
@@ -203,7 +252,7 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
         if (started > 0) {
             int elapsed = (int) (System.currentTimeMillis() - started);
             Integer current = get(FieldType.ELAPSED, Integer.class);
-            elapsed += current == null ? 0 : current.intValue();
+            elapsed += current == null ? 0 : current;
             put(FieldType.ELAPSED, elapsed);
             started = 0;
         }

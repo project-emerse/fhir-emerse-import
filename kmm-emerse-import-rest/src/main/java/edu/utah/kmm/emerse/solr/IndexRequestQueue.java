@@ -5,22 +5,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class SolrQueue implements RowMapper {
+public class IndexRequestQueue implements RowMapper<String> {
 
     @Autowired
     private DatabaseService databaseService;
 
-    private Queue<IndexRequestDTO> queue = new LinkedBlockingQueue<>();
+    private final Queue<String> queue = new LinkedBlockingQueue<>();
 
     private long nextRefresh;
 
-    public SolrQueue() {
+    public IndexRequestQueue() {
     }
 
-    IndexRequestDTO nextRequest() {
+    String nextRequest() {
         synchronized (queue) {
             long currentTime = System.currentTimeMillis();
 
@@ -33,10 +34,20 @@ public class SolrQueue implements RowMapper {
         }
     }
 
+    public void refreshNow() {
+        this.nextRefresh = 0;
+    }
+
     @Override
-    public IndexRequestDTO mapRow(ResultSet rs, int i) {
-        IndexRequestDTO entry = new IndexRequestDTO(rs);
-        queue.add(entry);
-        return entry;
+    public String mapRow(
+            ResultSet rs,
+            int i) {
+        try {
+            String id = rs.getString("ID");
+            queue.add(id);
+            return id;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

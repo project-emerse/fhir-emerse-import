@@ -9,7 +9,7 @@ public class IndexDaemon implements Runnable {
 
     private static int daemonCounter;
 
-    private final SolrQueue solrQueue;
+    private final IndexRequestQueue indexRequestQueue;
 
     private final SolrService solrService;
 
@@ -21,11 +21,11 @@ public class IndexDaemon implements Runnable {
 
     private boolean running;
 
-    IndexDaemon(SolrQueue solrQueue, SolrService solrService) {
-        this.solrQueue = solrQueue;
+    IndexDaemon(IndexRequestQueue indexRequestQueue, SolrService solrService) {
+        this.indexRequestQueue = indexRequestQueue;
         this.solrService = solrService;
         thread = new Thread(this);
-        thread.setName("Solr indexing daemon #" + daemonId);
+        thread.setName("EMERSE-IT indexing daemon #" + daemonId);
         thread.start();
     }
 
@@ -47,7 +47,7 @@ public class IndexDaemon implements Runnable {
         running = true;
 
         while (!terminated && !thread.isInterrupted()) {
-            IndexRequestDTO request = solrQueue.nextRequest();
+            String request = indexRequestQueue.nextRequest();
 
             if (request == null) {
                 try {
@@ -56,7 +56,7 @@ public class IndexDaemon implements Runnable {
                     terminated = true;
                 }
             } else {
-                solrService.index(request);
+                solrService.indexRequest(request);
             }
         }
 

@@ -7,6 +7,7 @@ import edu.utah.kmm.emerse.document.DocumentService;
 import edu.utah.kmm.emerse.fhir.FhirService;
 import edu.utah.kmm.emerse.fhir.IdentifierType;
 import edu.utah.kmm.emerse.patient.PatientService;
+import edu.utah.kmm.emerse.solr.IndexRequestAction;
 import edu.utah.kmm.emerse.solr.IndexRequestDTO;
 import edu.utah.kmm.emerse.solr.IndexResult;
 import edu.utah.kmm.emerse.solr.SolrService;
@@ -161,9 +162,8 @@ public class RestController {
      */
     @PostMapping("/entry-action")
     @ResponseBody
-    public ResponseEntity entryAction(
-            @RequestParam String id,
-            @RequestParam int action) {
+    public ResponseEntity entryAction(@RequestBody IndexRequestAction action) {
+        solrService.indexRequestAction(action);
         return new ResponseEntity(HttpStatus.OK);
     }
 

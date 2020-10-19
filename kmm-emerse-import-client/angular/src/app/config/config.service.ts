@@ -2,6 +2,11 @@ import {Injectable} from "@angular/core";
 import {RestService} from "../rest/rest.service";
 import {Observable, of} from "rxjs";
 import {switchMap, take} from "rxjs/operators";
+import {AlertDialogService, AlertSeverity} from '@uukmm/ng-widget-toolkit';
+
+const ERROR_TITLE = "Cannot Continue";
+
+const ERROR_TEXT = "Unable to retrieve configuration information.  The EMERSE-IT server may be down."
 
 /**
  * Retrieve client settings from the server.
@@ -15,9 +20,15 @@ export class ConfigService {
 
     private readonly config$: Observable<any>;
 
-    constructor(restService: RestService) {
+    constructor(
+        restService: RestService,
+        alertDialogService: AlertDialogService) {
         this.config$ = restService.getServerConfig().pipe(take(1));
-        this.config$.subscribe(config => this.config = config);
+        this.config$.subscribe(
+            config => this.config = config,
+            () => {
+                alertDialogService.show({title: ERROR_TITLE, message: ERROR_TEXT, severity: AlertSeverity.FATAL});
+            });
     }
 
     isLoaded(): boolean {
@@ -32,4 +43,7 @@ export class ConfigService {
         return this.config[name];
     }
 
+    error(error: any): void {
+
+    }
 }

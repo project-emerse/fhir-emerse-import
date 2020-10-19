@@ -1,22 +1,22 @@
 export enum EntryStatus {
-    COMPLETED = 0,
-    QUEUED = 1,
-    RUNNING = 2,
-    SUSPENDED = 3,
+    QUEUED = 0,
+    RUNNING = 1,
+    SUSPENDED = 2,
+    COMPLETED = 3,
     ABORTED = 4,
     ERROR = 5
 }
 
-export const ENTRY_STATUS: string[] = ['completed', 'queued', 'running', 'suspended', 'aborted', 'error'];
+const STATUS_TEXT: string[] = ['queued', 'running', 'suspended', 'completed', 'aborted', 'error'];
 
 export enum EntryAction {
     DELETE = 0,
-    SUSPEND = 1,
-    RESUME = 3,
-    ABORT = 4
+    RESUME = 1,
+    SUSPEND = 2,
+    ABORT = 3
 }
 
-export const VALID_ACTIONS: {[status: number] : EntryAction[]} = {
+const VALID_ACTIONS: {[status: number] : EntryAction[]} = {
     [EntryStatus.QUEUED]: [EntryAction.DELETE, EntryAction.SUSPEND, EntryAction.ABORT],
     [EntryStatus.RUNNING]: [EntryAction.SUSPEND, EntryAction.ABORT],
     [EntryStatus.SUSPENDED]: [EntryAction.DELETE, EntryAction.RESUME, EntryAction.ABORT],
@@ -42,3 +42,11 @@ export interface QueueEntry {
 }
 
 export enum IdentifierType {MRN= 'MRN', PATID = 'PATID', DOCID = 'DOCID'}
+
+export function isValidAction(status: EntryStatus, action: EntryAction): boolean {
+    return VALID_ACTIONS[status].includes(action);
+}
+
+export function statusText(status: EntryStatus): string {
+    return status == null ? null : STATUS_TEXT[status];
+}

@@ -17,7 +17,7 @@ public class DaemonManager {
     private SolrService solrService;
 
     @Autowired
-    private SolrQueue solrQueue;
+    private IndexRequestQueue solrQueue;
 
     @Value("${solr.server.daemons:1}")
     private int maxDaemons;

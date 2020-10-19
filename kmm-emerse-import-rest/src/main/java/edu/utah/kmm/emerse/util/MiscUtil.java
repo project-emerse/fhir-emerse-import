@@ -3,7 +3,6 @@ package edu.utah.kmm.emerse.util;
 import edu.utah.kmm.emerse.fhir.IdentifierType;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.bouncycastle.util.Arrays;
 import org.springframework.util.Assert;
 
 import java.text.SimpleDateFormat;

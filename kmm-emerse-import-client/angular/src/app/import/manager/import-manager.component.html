@@ -7,6 +7,7 @@
            <ng-container matColumnDef="submitted">
             <th mat-header-cell class="emerse-import-manager-submitted" *matHeaderCellDef>Submitted</th>
             <td mat-cell class="emerse-import-manager-submitted" *matCellDef="let item"> {{item.SUBMITTED_DATE?.toLocaleString()}} </td>
+            <td mat-footer-cell [attr.colspan]="columns.length" *matFooterCellDef>{{message}}</td>
           </ng-container>
            <ng-container matColumnDef="completed">
             <th mat-header-cell class="emerse-import-manager-completed" *matHeaderCellDef>Completed</th>
@@ -40,25 +41,16 @@
           <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
           <tr mat-row
               *matRowDef="let row; columns: columns"
-              (click)="selection.toggle(row)"
-              [ngClass]="{hovered: row.hovered, highlighted: selection.isSelected(row)}"
+              (click)="setSelection(row)"
+              [ngClass]="{hovered: row.hovered, highlighted: selected === row}"
               (mouseover)="row.hovered = true"
               (mouseout)="row.hovered = false"></tr>
+           <tr mat-footer-row *matFooterRowDef="message ? [columns[0]] : []"></tr>
         </table>
     </span>
     <mat-toolbar>
-        <button
-                class="text-warning"
-                mat-icon-button
-                tabindex="-1"
-                ngbTooltip="Refresh"
-                (click)="refresh()">
-            <mat-icon>refresh</mat-icon>
-        </button>
         <mat-paginator #paginator></mat-paginator>
-        <span class="flex-fill">
-            <span class="emerse-import-manager-message" *ngIf="loading">Fetching data...</span>
-        </span>
+        <span class="flex-fill"></span>
         <button *ngIf="supported(EntryAction.DELETE)"
                 class="text-danger"
                 mat-button
@@ -86,6 +78,14 @@
                 tabindex="-1"
                 (click)="action(EntryAction.SUSPEND, 'suspend')">
             Suspend
+        </button>
+        <button
+                class="text-warning"
+                mat-icon-button
+                tabindex="-1"
+                ngbTooltip="Refresh"
+                (click)="refresh()">
+            <mat-icon>refresh</mat-icon>
         </button>
    </mat-toolbar>
 </div>

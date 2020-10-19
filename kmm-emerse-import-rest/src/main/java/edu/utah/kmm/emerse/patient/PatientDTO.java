@@ -16,6 +16,11 @@ public class PatientDTO extends BaseDTO {
     public PatientDTO(Patient patient, Map<String, Object> additionalParams) {
         super(additionalParams);
         HumanName name = patient.getNameFirstRep();
+
+        if (!name.hasFamily()) {
+            name.setFamily("UNSPECIFIED");
+        }
+
         boolean deceased = patient.hasDeceasedDateTimeType() || (patient.hasDeceasedBooleanType() && patient.getDeceasedBooleanType().getValue());
         map.put("FIRST_NAME", truncate(name.getGivenAsSingleString(), 65));
         map.put("MIDDLE_NAME", null);

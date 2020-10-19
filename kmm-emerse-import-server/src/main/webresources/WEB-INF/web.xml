@@ -4,7 +4,7 @@
 
 <web-app>
 
-  <display-name>EMERSE Import Tool (@build.profile@)</display-name>
+  <display-name>EMERSE Import Tool Server (@build.profile@)</display-name>
 
   <servlet>
     <servlet-name>emerse-it</servlet-name>
