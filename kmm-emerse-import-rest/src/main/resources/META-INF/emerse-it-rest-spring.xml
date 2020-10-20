@@ -20,7 +20,7 @@
             ignore-resource-not-found="true"
             location="
             file:\${user.home}/.emerse/emerse-it.properties,
-            file:\${EMERSE_HOME}/.emerse/emerse-it.properties" />
+            file:\${EMERSE_HOME}/emerse-it.properties" />
 
     <!-- Servlet Configuration -->
 

@@ -19,3 +19,7 @@
 .emerse-import-about th {
     border-bottom: 2px solid black!important;
 }
+
+.emerse-import-about thead > tr {
+    background: azure;
+}
