@@ -163,8 +163,10 @@ public class RestController {
     @PostMapping("/entry-action")
     @ResponseBody
     public ResponseEntity entryAction(@RequestBody IndexRequestAction action) {
-        solrService.indexRequestAction(action);
-        return new ResponseEntity(HttpStatus.OK);
+        IndexRequestDTO request = solrService.indexRequestAction(action);
+        Map<String, Object> result = new HashMap<>(request.getMap());
+        result.remove("IDENTIFIERS");
+        return new ResponseEntity(result, HttpStatus.OK);
     }
 
     /**

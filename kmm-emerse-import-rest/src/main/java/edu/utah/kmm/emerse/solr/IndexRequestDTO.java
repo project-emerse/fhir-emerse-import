@@ -3,7 +3,7 @@ package edu.utah.kmm.emerse.solr;
 import edu.utah.kmm.emerse.database.BaseDTO;
 import edu.utah.kmm.emerse.fhir.IdentifierType;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
@@ -137,7 +137,7 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
     }
 
     public void error(String errorText) {
-        put(FieldType.ERROR_TEXT, errorText);
+        put(FieldType.ERROR_TEXT, StringUtils.truncate(errorText, 200));
         setStatus(IndexRequestStatus.ERROR);
     }
 
@@ -160,7 +160,7 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
     }
 
     public void suspend() {
-        if (hasStatus(IndexRequestStatus.RUNNING)) {
+        if (hasStatus(IndexRequestStatus.RUNNING, IndexRequestStatus.QUEUED)) {
             stop(IndexRequestStatus.SUSPENDED);
         }
     }

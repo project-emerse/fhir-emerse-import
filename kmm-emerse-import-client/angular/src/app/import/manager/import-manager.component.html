@@ -2,8 +2,7 @@
     <span>
         <table mat-table class="table-striped"
                [dataSource]="dataSource"
-               [trackBy]="trackBy"
-               paginator = "">
+               [trackBy]="trackBy">
            <ng-container matColumnDef="submitted">
             <th mat-header-cell class="emerse-import-manager-submitted" *matHeaderCellDef>Submitted</th>
             <td mat-cell class="emerse-import-manager-submitted" *matCellDef="let item"> {{item.SUBMITTED_DATE?.toLocaleString()}} </td>

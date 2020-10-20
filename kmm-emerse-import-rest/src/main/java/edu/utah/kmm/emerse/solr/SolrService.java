@@ -99,7 +99,7 @@ public class SolrService {
         return result;
     }
 
-    private boolean lockProcessing(Producer<Boolean> operation) {
+    private <T> T lockProcessing(Producer<T> operation) {
         synchronized (processing) {
             return operation.produce();
         }
@@ -110,22 +110,24 @@ public class SolrService {
         indexRequestQueue.refreshNow();
     }
 
-    public void indexRequestAction(IndexRequestAction action) {
-        if (lockProcessing(() -> {
-            IndexRequestDTO request = processing.get(action.id);
+    public IndexRequestDTO indexRequestAction(IndexRequestAction action) {
+        IndexRequestDTO request = lockProcessing(() -> {
+            IndexRequestDTO req = processing.get(action.id);
 
-            if (request != null) {
-                indexRequestAction(request, action);
+            if (req != null) {
+                indexRequestAction(req, action);
             }
 
-            return request != null;
-        })) {
-            return;
+            return req;
+        });
+
+        if (request == null) {
+            request = databaseService.fetchRequest(action.id);
+            indexRequestAction(request, action);
+            databaseService.updateIndexRequest(request);
         }
 
-        IndexRequestDTO request = databaseService.fetchRequest(action.id);
-        indexRequestAction(request, action);
-        databaseService.updateIndexRequest(request);
+        return request;
     }
 
     private void indexRequestAction(

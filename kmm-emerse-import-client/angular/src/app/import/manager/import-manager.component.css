@@ -46,6 +46,10 @@ th.emerse-import-manager-identifier_type {
     text-align: center !important;
 }
 
+td.emerse-import-manager-error_text {
+    overflow: auto;
+}
+
 .emerse-import-manager .mat-footer-cell {
     color: red;
     font-weight: bold;

@@ -51,12 +51,16 @@ public class IndexDaemon implements Runnable {
 
             if (request == null) {
                 try {
-                    thread.sleep(5000);
+                    Thread.sleep(5000);
                 } catch (InterruptedException e) {
                     terminated = true;
                 }
             } else {
-                solrService.indexRequest(request);
+                try {
+                    solrService.indexRequest(request);
+                } catch (Exception e) {
+                    log.error(e);
+                }
             }
         }
 

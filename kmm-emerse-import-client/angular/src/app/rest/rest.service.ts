@@ -82,23 +82,28 @@ export class RestService {
     fetchQueue(): Observable<QueueEntry[]> {
         return this.get("api/queue").pipe(
             map((entries: QueueEntry[]) => {
-                entries.forEach(entry => {
-                    entry.COMPLETED_DATE = entry.COMPLETED ? new Date(entry.COMPLETED) : null;
-                    entry.SUBMITTED_DATE = entry.SUBMITTED ? new Date(entry.SUBMITTED) : null;
-                    entry.STATUS_TEXT = statusText(entry.STATUS);
-                    const duration: Duration = entry.ELAPSED == null ? null : intervalToDuration({start: 0, end: entry.ELAPSED});
-                    entry.ELAPSED_TEXT = duration ? formatDuration(duration) : null;
-                })
+                entries.forEach(entry => this.populateEntry(entry))
                 return entries;
             })
         );
     }
 
-    entryAction(entry: QueueEntry, action: EntryAction): Observable<boolean> {
+    private populateEntry(entry: QueueEntry): QueueEntry {
+        entry.COMPLETED_DATE = entry.COMPLETED ? new Date(entry.COMPLETED) : null;
+        entry.SUBMITTED_DATE = entry.SUBMITTED ? new Date(entry.SUBMITTED) : null;
+        entry.STATUS_TEXT = statusText(entry.STATUS);
+        const duration: Duration = entry.ELAPSED == null ? null : intervalToDuration({start: 0, end: entry.ELAPSED});
+        entry.ELAPSED_TEXT = duration ? formatDuration(duration) : null;
+        return entry;
+    }
+
+    entryAction(entry: QueueEntry, action: EntryAction): Observable<QueueEntry> {
         if (isValidAction(entry.STATUS, action)) {
-            return this.post("api/entry-action", {id: entry.ID, action});
+            return this.post("api/entry-action", {id: entry.ID, action}).pipe(
+                map((ent: QueueEntry) => this.populateEntry(ent))
+            );
         } else {
-            return of(false);
+            return of(null);
         }
     }
 

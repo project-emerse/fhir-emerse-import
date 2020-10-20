@@ -3,8 +3,8 @@ import {RestService} from "../../rest/rest.service";
 import {MatTableDataSource} from '@angular/material/table';
 import {MatPaginator} from '@angular/material/paginator';
 import {PromptDialogService} from '@uukmm/ng-widget-toolkit';
-import {actionText, EntryAction, isValidAction, QueueEntry} from '../../model/queue-entry.model';
-import {timer} from 'rxjs';
+import {actionText, EntryAction, EntryStatus, isValidAction, QueueEntry} from '../../model/queue-entry.model';
+import {noop, timer} from 'rxjs';
 
 @Component({
     selector: 'emerse-import-manager',
@@ -45,7 +45,7 @@ export class ImportManagerComponent implements AfterViewInit{
     }
 
     setSelection(entry: QueueEntry) {
-        this.selected = entry;
+        this.selected = this.busy ? this.selected : entry;
     }
 
     action(action: EntryAction, warn: string = null): void {
@@ -59,11 +59,28 @@ export class ImportManagerComponent implements AfterViewInit{
 
     private doAction(action: EntryAction): void {
         const selected: QueueEntry = this.selected;
+        const data: QueueEntry[] = this.dataSource.data;
         this.busy = true;
         this.clear(actionText(action) + " selected entry, please wait...");
         this.restService.entryAction(selected, action).subscribe(
-            () => this.refresh(),
+            entry => this.update(data, entry),
             error => this.refresh(error));
+    }
+
+    private update(data: QueueEntry[], entry: QueueEntry): void {
+        const index = entry == null ? -1 : data.findIndex(value => value.ID === entry.ID);
+        const deleted = entry == null || entry.STATUS === EntryStatus.DELETED;
+
+        if (index === -1) {
+            deleted ? noop() : data.push(entry);
+        } else {
+            deleted ? data.splice(index, 1) : data[index] = entry;
+        }
+
+        this.dataSource.data = data;
+        this.selected = entry;
+        this.message = null;
+        this.busy = false;
     }
 
     supported(action: EntryAction): boolean {

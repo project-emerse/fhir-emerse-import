@@ -4,10 +4,11 @@ export enum EntryStatus {
     SUSPENDED = 2,
     COMPLETED = 3,
     ABORTED = 4,
-    ERROR = 5
+    ERROR = 5,
+    DELETED = 6
 }
 
-const STATUS_TEXT: string[] = ['queued', 'running', 'suspended', 'completed', 'aborted', 'error'];
+const STATUS_TEXT: string[] = ['queued', 'running', 'suspended', 'completed', 'aborted', 'error', 'deleted'];
 
 export enum EntryAction {
     DELETE = 0,
@@ -24,7 +25,8 @@ const VALID_ACTIONS: {[status: number] : EntryAction[]} = {
     [EntryStatus.SUSPENDED]: [EntryAction.DELETE, EntryAction.RESUME, EntryAction.ABORT],
     [EntryStatus.ABORTED]: [EntryAction.DELETE, EntryAction.RESUME],
     [EntryStatus.ERROR]: [EntryAction.DELETE, EntryAction.RESUME],
-    [EntryStatus.COMPLETED]: [EntryAction.DELETE]
+    [EntryStatus.COMPLETED]: [EntryAction.DELETE],
+    [EntryStatus.DELETED]: []
 }
 
 export interface QueueEntry {
