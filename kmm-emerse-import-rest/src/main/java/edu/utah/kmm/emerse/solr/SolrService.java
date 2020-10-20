@@ -10,13 +10,19 @@ import edu.utah.kmm.emerse.patient.PatientDTO;
 import edu.utah.kmm.emerse.patient.PatientService;
 import edu.utah.kmm.emerse.security.Credentials;
 import edu.utah.kmm.emerse.solr.IndexRequestDTO.IndexRequestStatus;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.impl.XMLResponseParser;
+import org.apache.solr.client.solrj.request.GenericSolrRequest;
 import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.MapSolrParams;
+import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.common.util.NamedList;
 import org.codehaus.janino.util.Producer;
 import org.hl7.fhir.dstu3.model.DocumentReference;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -24,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,6 +77,21 @@ public class SolrService {
                 .withResponseParser(new XMLResponseParser())
                 .allowCompression(true)
                 .build();
+    }
+
+    public String getSolrVersion() {
+        try {
+            SolrParams params = new MapSolrParams(Collections.singletonMap("wt", "xml"));
+            GenericSolrRequest request = new GenericSolrRequest(SolrRequest.METHOD.GET, "/admin/info/system", params);
+            NamedList<?> result = solrClient.httpUriRequest(request).future.get();
+            NamedList<String> versions = (NamedList<String>) result.get("lucene");
+            String version = versions.get("solr-impl-version");
+            return String.format("Apache Solr Release %s - %s",
+                    StringUtils.substringBefore(version, " "),
+                    StringUtils.substringAfterLast(version, " - "));
+        } catch (Exception e) {
+            return "Unavailable";
+        }
     }
 
     /**

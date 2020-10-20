@@ -1,6 +1,9 @@
 package edu.utah.kmm.emerse.config;
 
+import edu.utah.kmm.emerse.database.DatabaseService;
+import edu.utah.kmm.emerse.solr.SolrService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.ReflectionUtils;
 
@@ -11,6 +14,11 @@ import java.util.Map;
  * Returns selected configuration data to send to client.
  */
 public class ClientConfigService {
+
+    private final String _serverVersion;
+
+    @Autowired
+    private DatabaseService databaseService;
 
     @Value("${fhir.mrn.system}")
     private String s1;
@@ -24,17 +32,26 @@ public class ClientConfigService {
     @Value("${solr.server.daemons:1}")
     private String s4;
 
-    @Value("${server.version:}")
-    private String version;
+    @Autowired
+    private SolrService solrService;
 
-    private final String serverVersion;
+    @Value("${server.version:}")
+    private String serverVersion;
+
+    @Value("${solr.version:}")
+    private String solrVersion;
+
+    @Value("${database.version:}")
+    private String databaseVersion;
 
     private ClientConfigService(String serverVersion) {
-        this.serverVersion = serverVersion;
+        this._serverVersion = serverVersion;
     }
 
     public void init() {
-        this.version = StringUtils.firstNonBlank(this.version, serverVersion);
+        serverVersion = StringUtils.firstNonBlank(serverVersion, _serverVersion);
+        solrVersion = solrService.getSolrVersion();
+        databaseVersion = databaseService.getDatabaseVersion();
     }
 
     public Map<String, String> getConfig() {

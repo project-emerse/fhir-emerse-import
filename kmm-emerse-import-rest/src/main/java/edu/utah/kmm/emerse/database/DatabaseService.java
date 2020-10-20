@@ -63,6 +63,8 @@ public class DatabaseService {
             "CREATE_DATE", "CREATED_BY", "DELETED_FLAG"
     };
 
+    private static final String ORACLE_VERSION = "SELECT BANNER FROM v$version WHERE BANNER LIKE 'Oracle%'";
+
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -73,13 +75,25 @@ public class DatabaseService {
     @Autowired
     private PatientService patientService;
 
-    public DatabaseService(DriverManagerDataSource dataSource, Credentials dbCredentials) {
+    public DatabaseService(
+            DriverManagerDataSource dataSource,
+            Credentials dbCredentials) {
         dataSource.setUsername(dbCredentials.getUsername());
         dataSource.setPassword(dbCredentials.getPassword());
         jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
     }
 
-    public boolean authenticate(String username, String password) {
+    public String getDatabaseVersion() {
+        try {
+            return jdbcTemplate.queryForObject(ORACLE_VERSION, Collections.emptyMap(), String.class);
+        } catch (Exception e) {
+            return "Unavailable";
+        }
+    }
+
+    public boolean authenticate(
+            String username,
+            String password) {
         try {
             MapSqlParameterSource params = new MapSqlParameterSource();
             params.addValue("USERNAME", username);

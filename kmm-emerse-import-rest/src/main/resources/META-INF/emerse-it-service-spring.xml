@@ -16,7 +16,11 @@
 
     <context:component-scan base-package="edu.utah.kmm.emerse" />
 
-    <context:property-placeholder location="file:${user.home}/.emerse/emerse-it.properties" />
+    <context:property-placeholder
+            ignore-resource-not-found="true"
+            location="
+            file:\${user.home}/.emerse/emerse-it.properties,
+            file:\${EMERSE_HOME}/.emerse/emerse-it.properties" />
 
     <!-- Servlet Configuration -->
 

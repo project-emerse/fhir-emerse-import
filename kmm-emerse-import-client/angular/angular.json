@@ -17,13 +17,11 @@
             "main": "src/main.ts",
             "tsConfig": "src/tsconfig.app.json",
             "polyfills": "src/polyfills.ts",
-            "assets": [
-              "src/assets",
-              "src/favicon.ico"
-            ],
             "styles": [
               "src/styles.scss",
-              "src/custom-theme.scss"
+              "src/custom-theme.scss",
+              "src/google-fonts-ie.css",
+              "node_modules/bootstrap/dist/css/bootstrap.min.css"
             ],
             "scripts": [
               "node_modules/hammerjs/hammer.min.js"
@@ -109,11 +107,6 @@
             "styles": [
               "src/styles.scss",
               "src/custom-theme.scss"
-            ],
-            "assets": [
-              "src/assets",
-              "src/launch",
-              "src/favicon.ico"
             ]
           }
         },

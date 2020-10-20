@@ -2,21 +2,21 @@
     <table class="table table-striped">
         <thead>
             <tr>
-                <th></th>
-                <th></th>
+                <th>{{get("app.name")}}</th>
+                <th>{{get("app.description")}}</th>
             </tr>
         </thead>
         <tbody>
         <tr>
-            <td>{{get("app.name")}}</td>
-            <td>{{get("app.description")}}</td>
+            <td>Author</td>
+            <td>{{get("app.author")}}</td>
         </tr>
         <tr>
             <td>Copyright</td>
             <td>&copy;{{get("app.copyright")}}</td>
         </tr>
         <tr>
-            <td>{{get("app.author")}}</td>
+            <td>Website</td>
             <td><a target="emerse" href="{{get('app.url')}}">{{get("app.url")}}</a></td>
         </tr>
         <tr>
@@ -25,11 +25,19 @@
         </tr>
         <tr>
             <td>Client version</td>
-            <td>{{get("client.version")}}</td>
+            <td>EMERSE-IT Client {{get("client.version")}}</td>
         </tr>
         <tr>
             <td>Server version</td>
-            <td>{{get("server.version")}}</td>
+            <td>EMERSE-IT Server {{get("server.version")}}</td>
+        </tr>
+        <tr>
+            <td>Solr version</td>
+            <td>{{get("solr.version")}}</td>
+        </tr>
+        <tr>
+            <td>Database version</td>
+            <td>{{get("database.version")}}</td>
         </tr>
         <tr>
             <td>Indexing threads</td>

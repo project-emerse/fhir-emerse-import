@@ -2,7 +2,7 @@
   "app.name": "EMERSE-IT",
   "app.description": "EMERSE Import Tool",
   "app.copyright": "2020, All Rights Reserved",
-  "app.author": "University of Utah",
+  "app.author": "ReImagineEHR Team, University of Utah",
   "app.url": "https://reimagineehr.utah.edu",
   "app.email": "ReImagineEHR@utah.edu",
   "client.version": "@project.version@"
