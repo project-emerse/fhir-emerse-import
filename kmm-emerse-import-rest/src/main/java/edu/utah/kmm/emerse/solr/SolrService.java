@@ -147,7 +147,7 @@ public class SolrService {
                 request.delete();
                 break;
             case RESTART:
-                request.resume();
+                request.restart();
                 break;
         }
     }
