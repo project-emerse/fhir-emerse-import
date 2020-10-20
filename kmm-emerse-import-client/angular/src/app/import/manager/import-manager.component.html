@@ -71,6 +71,13 @@
                 (click)="action(EntryAction.RESUME, 'resume')">
             Resume
         </button>
+        <button *ngIf="supported(EntryAction.RESTART)"
+                class="text-success"
+                mat-button
+                tabindex="-1"
+                (click)="action(EntryAction.RESTART, 'restart')">
+            Restart
+        </button>
         <button *ngIf="supported(EntryAction.SUSPEND)"
                 class="text-warning"
                 mat-button

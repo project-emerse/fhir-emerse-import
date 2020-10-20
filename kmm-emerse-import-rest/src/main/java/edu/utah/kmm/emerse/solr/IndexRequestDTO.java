@@ -137,48 +137,67 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
     }
 
     public void error(String errorText) {
-        put(FieldType.ERROR_TEXT, StringUtils.truncate(errorText, 200));
-        setStatus(IndexRequestStatus.ERROR);
+        errorText = StringUtils.truncate(StringUtils.trimToNull(errorText), 200);
+        put(FieldType.ERROR_TEXT, errorText);
+
+        if (errorText != null) {
+            setStatus(IndexRequestStatus.ERROR);
+        }
     }
 
     public void start() {
         started = System.currentTimeMillis();
+        error(null);
         put(FieldType.COMPLETED, null);
         setStatus(IndexRequestStatus.RUNNING);
     }
 
-    public void completed() {
-        if (hasStatus(IndexRequestStatus.RUNNING)) {
-            stop(IndexRequestStatus.COMPLETED);
+    public boolean completed() {
+        return hasStatus(IndexRequestStatus.RUNNING) && stop(IndexRequestStatus.COMPLETED);
+    }
+
+    public boolean abort() {
+        return !hasStatus(IndexRequestStatus.COMPLETED)
+                && stop(IndexRequestStatus.ABORTED);
+    }
+
+    public boolean suspend() {
+        return hasStatus(IndexRequestStatus.RUNNING, IndexRequestStatus.QUEUED)
+                && stop(IndexRequestStatus.SUSPENDED);
+    }
+
+    public boolean resume() {
+        return !hasStatus(IndexRequestStatus.RUNNING, IndexRequestStatus.COMPLETED)
+                && requeue(false);
+   }
+
+    public boolean restart() {
+        return !hasStatus(IndexRequestStatus.RUNNING)
+                && requeue(true);
+    }
+
+    private boolean requeue(boolean resetCount) {
+        error(null);
+        setStatus(IndexRequestStatus.QUEUED);
+        put(FieldType.COMPLETED, null);
+        put(FieldType.SUBMITTED, now());
+
+        if (resetCount) {
+            put(FieldType.PROCESSED, 0);
         }
+
+        return true;
     }
 
-    public void abort() {
-        if (!hasStatus(IndexRequestStatus.COMPLETED)) {
-            stop(IndexRequestStatus.ABORTED);
-        }
+    public boolean delete() {
+        return stop(IndexRequestStatus.DELETED);
     }
 
-    public void suspend() {
-        if (hasStatus(IndexRequestStatus.RUNNING, IndexRequestStatus.QUEUED)) {
-            stop(IndexRequestStatus.SUSPENDED);
-        }
-    }
-
-    public void resume() {
-        if (!hasStatus(IndexRequestStatus.RUNNING, IndexRequestStatus.COMPLETED)) {
-            setStatus(IndexRequestStatus.QUEUED);
-        }
-    }
-
-    public void delete() {
-        stop(IndexRequestStatus.DELETED);
-    }
-
-    private void stop(IndexRequestStatus status) {
+    private boolean stop(IndexRequestStatus status) {
         put(FieldType.COMPLETED, status == IndexRequestStatus.SUSPENDED ? null : now());
         setStatus(status);
         close();
+        return true;
     }
 
     public IndexRequestStatus getStatus() {
@@ -218,21 +237,18 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
     @Override
     public Iterator<String> iterator() {
         return new Iterator<String>() {
-            final int total = get(FieldType.TOTAL, Integer.class);
-
             int processed = get(FieldType.PROCESSED, Integer.class);
-
-            boolean processingFlag;
+            boolean more;
 
             @Override
             public boolean hasNext() {
-                processingFlag = processed < total;
+                more = processed < identifiers.size();
 
-                if (!processingFlag) {
+                if (!more) {
                     completed();
                 }
 
-                return processingFlag;
+                return more;
             }
 
             @Override

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class IndexRequestAction {
 
     public enum Action {
-        DELETE, RESUME, SUSPEND, ABORT
+        DELETE, RESUME, SUSPEND, ABORT, RESTART
     }
 
     @JsonProperty(required = true)

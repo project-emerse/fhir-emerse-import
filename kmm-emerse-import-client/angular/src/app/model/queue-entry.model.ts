@@ -14,18 +14,19 @@ export enum EntryAction {
     DELETE = 0,
     RESUME = 1,
     SUSPEND = 2,
-    ABORT = 3
+    ABORT = 3,
+    RESTART = 4
 }
 
-const ACTION_TEXT: string[] = ['Deleting', 'Resuming', 'Suspending', 'Aborting'];
+const ACTION_TEXT: string[] = ['Deleting', 'Resuming', 'Suspending', 'Aborting', 'Restarting'];
 
 const VALID_ACTIONS: {[status: number] : EntryAction[]} = {
     [EntryStatus.QUEUED]: [EntryAction.DELETE, EntryAction.SUSPEND, EntryAction.ABORT],
     [EntryStatus.RUNNING]: [EntryAction.SUSPEND, EntryAction.ABORT],
-    [EntryStatus.SUSPENDED]: [EntryAction.DELETE, EntryAction.RESUME, EntryAction.ABORT],
-    [EntryStatus.ABORTED]: [EntryAction.DELETE, EntryAction.RESUME],
-    [EntryStatus.ERROR]: [EntryAction.DELETE, EntryAction.RESUME],
-    [EntryStatus.COMPLETED]: [EntryAction.DELETE],
+    [EntryStatus.SUSPENDED]: [EntryAction.DELETE, EntryAction.RESUME, EntryAction.ABORT, EntryAction.RESTART],
+    [EntryStatus.ABORTED]: [EntryAction.DELETE, EntryAction.RESUME, EntryAction.RESTART],
+    [EntryStatus.ERROR]: [EntryAction.DELETE, EntryAction.RESUME, EntryAction.RESTART],
+    [EntryStatus.COMPLETED]: [EntryAction.DELETE, EntryAction.RESTART],
     [EntryStatus.DELETED]: []
 }
 
