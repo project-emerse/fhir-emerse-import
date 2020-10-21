@@ -118,14 +118,16 @@
         <constructor-arg value="${datasource.password}" />
     </bean>
 
-    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-        <property name="driverClassName" value="${datasource.driver.class}" />
-        <property name="url" value="${datasource.url}" />
+    <bean id="dataSourceFactory" class="edu.utah.kmm.emerse.database.DataSourceFactory">
+        <constructor-arg value="${datasource.driver.class}" />
+        <constructor-arg value="${datasource.url}" />
+        <constructor-arg ref="dataSourceCredentials" />
     </bean>
+
+    <bean id="dataSource" factory-bean="dataSourceFactory" factory-method="getDataSource" />
 
     <bean id="databaseService" class="edu.utah.kmm.emerse.database.DatabaseService">
         <constructor-arg ref="dataSource" />
-        <constructor-arg ref="dataSourceCredentials" />
     </bean>
 
     <!-- JWT Service -->

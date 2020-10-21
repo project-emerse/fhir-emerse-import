@@ -2,7 +2,6 @@ package edu.utah.kmm.emerse.database;
 
 import edu.utah.kmm.emerse.patient.PatientDTO;
 import edu.utah.kmm.emerse.patient.PatientService;
-import edu.utah.kmm.emerse.security.Credentials;
 import edu.utah.kmm.emerse.solr.IndexRequestDTO;
 import edu.utah.kmm.emerse.solr.IndexRequestDTO.IndexRequestStatus;
 import edu.utah.kmm.emerse.solr.SolrService;
@@ -16,12 +15,10 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -76,11 +73,7 @@ public class DatabaseService {
     @Autowired
     private PatientService patientService;
 
-    public DatabaseService(
-            DriverManagerDataSource dataSource,
-            Credentials dbCredentials) {
-        dataSource.setUsername(dbCredentials.getUsername());
-        dataSource.setPassword(dbCredentials.getPassword());
+    public DatabaseService(DataSource dataSource) {
         jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
     }
 
