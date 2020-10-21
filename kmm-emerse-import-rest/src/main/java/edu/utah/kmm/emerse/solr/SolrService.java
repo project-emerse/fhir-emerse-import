@@ -86,11 +86,9 @@ public class SolrService {
             NamedList<?> result = solrClient.httpUriRequest(request).future.get();
             NamedList<String> versions = (NamedList<String>) result.get("lucene");
             String version = versions.get("solr-impl-version");
-            return String.format("Apache Solr Release %s - %s",
-                    StringUtils.substringBefore(version, " "),
-                    StringUtils.substringAfterLast(version, " - "));
+            return version == null ? null : ("Solr Release " + version);
         } catch (Exception e) {
-            return "Unavailable";
+            return null;
         }
     }
 

@@ -3,6 +3,7 @@ package edu.utah.kmm.emerse.config;
 import edu.utah.kmm.emerse.database.DatabaseService;
 import edu.utah.kmm.emerse.solr.SolrService;
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.janino.util.Producer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.ReflectionUtils;
@@ -48,13 +49,10 @@ public class ClientConfigService {
         this._serverVersion = serverVersion;
     }
 
-    public void init() {
-        serverVersion = StringUtils.firstNonBlank(serverVersion, _serverVersion);
-        solrVersion = solrService.getSolrVersion();
-        databaseVersion = databaseService.getDatabaseVersion();
-    }
-
     public Map<String, String> getConfig() {
+        serverVersion = StringUtils.firstNonBlank(serverVersion, _serverVersion);
+        solrVersion = firstNonBlank(solrVersion, () -> solrService.getSolrVersion());
+        databaseVersion = firstNonBlank(databaseVersion, () -> databaseService.getDatabaseVersion());
         Map<String, String> config = new HashMap<>();
         ReflectionUtils.doWithLocalFields(getClass(), field -> {
             Value annot = field.getAnnotation(Value.class);
@@ -67,6 +65,12 @@ public class ClientConfigService {
         });
 
         return config;
+    }
+
+    private String firstNonBlank(
+            String value,
+            Producer<String> producer) {
+        return StringUtils.isBlank(value) ? producer.produce() : value;
     }
 
 }

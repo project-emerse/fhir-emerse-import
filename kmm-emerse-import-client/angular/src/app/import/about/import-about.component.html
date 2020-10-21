@@ -33,11 +33,11 @@
         </tr>
         <tr>
             <td>Solr version</td>
-            <td>{{get("solr.version")}}</td>
+            <td>{{get("solr.version") || "unavailable"}}</td>
         </tr>
         <tr>
             <td>Database version</td>
-            <td>{{get("database.version")}}</td>
+            <td>{{get("database.version") || "unavailable"}}</td>
         </tr>
         <tr>
             <td>Indexing threads</td>

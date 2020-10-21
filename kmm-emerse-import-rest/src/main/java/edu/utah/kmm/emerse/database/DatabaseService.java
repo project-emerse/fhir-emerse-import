@@ -20,6 +20,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.sql.DatabaseMetaData;
 import java.util.*;
 
 /**
@@ -63,8 +64,6 @@ public class DatabaseService {
             "CREATE_DATE", "CREATED_BY", "DELETED_FLAG"
     };
 
-    private static final String ORACLE_VERSION = "SELECT BANNER FROM v$version WHERE BANNER LIKE 'Oracle%'";
-
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -85,9 +84,10 @@ public class DatabaseService {
 
     public String getDatabaseVersion() {
         try {
-            return jdbcTemplate.queryForObject(ORACLE_VERSION, Collections.emptyMap(), String.class);
+            DatabaseMetaData metaData = jdbcTemplate.getJdbcTemplate().getDataSource().getConnection().getMetaData();
+            return metaData.getDatabaseProductVersion();
         } catch (Exception e) {
-            return "Unavailable";
+            return null;
         }
     }
 

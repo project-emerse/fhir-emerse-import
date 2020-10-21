@@ -25,6 +25,7 @@
 .emerse-import-manager .mat-toolbar {
     border-top: 1px solid gray;
     height: 40px;
+    margin-bottom: 1px;
 }
 
 .emerse-import-manager .mat-paginator {

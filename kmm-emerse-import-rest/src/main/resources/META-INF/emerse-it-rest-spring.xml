@@ -74,7 +74,7 @@
 
     <!-- Client Configuration -->
 
-    <bean id="configService" class="edu.utah.kmm.emerse.config.ClientConfigService" init-method="init">
+    <bean id="configService" class="edu.utah.kmm.emerse.config.ClientConfigService">
         <constructor-arg value="@project.version@" />
     </bean>
 
