@@ -90,7 +90,7 @@
         <constructor-arg ref="solrServiceCredentials" />
     </bean>
 
-    <bean id="daemonManager" class="edu.utah.kmm.emerse.solr.DaemonManager" init-method="init" destroy-method="destroy"/>
+    <bean id="daemonManager" class="edu.utah.kmm.emerse.solr.DaemonManager" />
 
     <bean id="indexRequestQueue" class="edu.utah.kmm.emerse.solr.IndexRequestQueue" />
 
@@ -103,7 +103,7 @@
 
     <bean id="fhirContext" class="ca.uhn.fhir.context.FhirContext" factory-method="forDstu3" />
 
-    <bean id="fhirClient" class="edu.utah.kmm.emerse.fhir.FhirService" init-method="init" />
+    <bean id="fhirClient" class="edu.utah.kmm.emerse.fhir.FhirService" />
 
     <bean id="patientService" class="edu.utah.kmm.emerse.patient.PatientService" />
 

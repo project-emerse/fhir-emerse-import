@@ -15,7 +15,11 @@ import java.util.*;
 
 import static edu.utah.kmm.emerse.util.MiscUtil.toIdentifierType;
 
-public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closeable {
+public class IndexRequestDTO extends BaseDTO implements Closeable {
+
+    public interface ICloseCallback {
+        void onClose(IndexRequestDTO request);
+    }
 
     /**
      * Note: do not change the member order!
@@ -43,6 +47,8 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
         TOTAL
     }
 
+    private final List<ICloseCallback> closeCallbacks = new ArrayList<>();
+
     private boolean changed;
 
     private boolean initial;
@@ -53,18 +59,14 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
 
     private IdentifierType identifierType;
 
-    public IndexRequestDTO(Resource source) {
+    IndexRequestDTO(Resource source) {
         try {
             List<String> identifiers = IOUtils.readLines(source.getInputStream(), "UTF-8");
             IdentifierType identifierType = toIdentifierType(identifiers.isEmpty() ? "" : identifiers.remove(0).trim());
             init(identifiers, identifierType);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getMessage(), e);
         }
-    }
-
-    public IndexRequestDTO(List<String> identifiers, IdentifierType identifierType) {
-        init(identifiers, identifierType);
     }
 
     public IndexRequestDTO(ResultSet rs) {
@@ -111,7 +113,7 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
         try {
             put(type, rs.getObject(type.name(), clazz));
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
@@ -136,6 +138,15 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
         return get(FieldType.ID, String.class);
     }
 
+    public List<String> getIdentifiers(boolean unprocessed) {
+        if (unprocessed) {
+            int processed = get(FieldType.PROCESSED, Integer.class);
+            return Collections.unmodifiableList(identifiers.subList(processed, identifiers.size()));
+        } else {
+            return Collections.unmodifiableList(identifiers);
+        }
+    }
+
     public void error(String errorText) {
         errorText = StringUtils.truncate(StringUtils.trimToNull(errorText), 200);
         put(FieldType.ERROR_TEXT, errorText);
@@ -145,11 +156,12 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
         }
     }
 
-    public void start() {
+    public IndexRequestDTO start() {
         started = System.currentTimeMillis();
         error(null);
         put(FieldType.COMPLETED, null);
         setStatus(IndexRequestStatus.RUNNING);
+        return this;
     }
 
     public boolean completed() {
@@ -234,29 +246,8 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
         return identifierType;
     }
 
-    @Override
-    public Iterator<String> iterator() {
-        return new Iterator<String>() {
-            int processed = get(FieldType.PROCESSED, Integer.class);
-            boolean more;
-
-            @Override
-            public boolean hasNext() {
-                more = processed < identifiers.size();
-
-                if (!more) {
-                    completed();
-                }
-
-                return more;
-            }
-
-            @Override
-            public String next() {
-                put(FieldType.PROCESSED, processed + 1);
-                return identifiers.get(processed++);
-            }
-        };
+    public void registerCloseCallback(ICloseCallback callback) {
+        closeCallbacks.add(callback);
     }
 
     @Override
@@ -272,5 +263,15 @@ public class IndexRequestDTO extends BaseDTO implements Iterable<String>, Closea
             put(FieldType.ELAPSED, elapsed);
             started = 0;
         }
+
+        closeCallbacks.forEach(cb -> {
+            try {
+                cb.onClose(this);
+            } catch (Exception e) {
+                // NOP
+            }
+        });
+
+        closeCallbacks.clear();
     }
 }

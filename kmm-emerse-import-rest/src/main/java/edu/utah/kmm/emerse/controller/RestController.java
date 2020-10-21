@@ -179,7 +179,7 @@ public class RestController {
     @ResponseBody
     public IndexResult indexBatchImmediate(
             @RequestParam MultipartFile file) {
-        return solrService.batchIndexImmediate(new IndexRequestDTO(file.getResource()));
+        return solrService.batchIndexImmediate(file.getResource());
     }
 
     /**
@@ -192,7 +192,7 @@ public class RestController {
     @ResponseBody
     public ResponseEntity indexBatchQueued(
             @RequestParam MultipartFile file) {
-        solrService.batchIndexQueued(new IndexRequestDTO(file.getResource()));
+        solrService.batchIndexQueued(file.getResource());
         return new ResponseEntity(HttpStatus.OK);
     }
 

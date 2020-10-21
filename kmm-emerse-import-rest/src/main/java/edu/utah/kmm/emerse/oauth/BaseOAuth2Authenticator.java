@@ -60,7 +60,7 @@ public abstract class BaseOAuth2Authenticator implements IAuthenticator {
         try {
             return URLEncoder.encode(value, "ASCII");
         } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 

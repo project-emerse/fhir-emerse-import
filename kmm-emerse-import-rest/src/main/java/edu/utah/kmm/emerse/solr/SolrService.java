@@ -10,7 +10,6 @@ import edu.utah.kmm.emerse.patient.PatientDTO;
 import edu.utah.kmm.emerse.patient.PatientService;
 import edu.utah.kmm.emerse.security.Credentials;
 import edu.utah.kmm.emerse.solr.IndexRequestDTO.IndexRequestStatus;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrRequest;
@@ -27,13 +26,11 @@ import org.codehaus.janino.util.Producer;
 import org.hl7.fhir.dstu3.model.DocumentReference;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Solr-related services.
@@ -84,38 +81,54 @@ public class SolrService {
             SolrParams params = new MapSolrParams(Collections.singletonMap("wt", "xml"));
             GenericSolrRequest request = new GenericSolrRequest(SolrRequest.METHOD.GET, "/admin/info/system", params);
             NamedList<?> result = solrClient.httpUriRequest(request).future.get();
-            NamedList<String> versions = (NamedList<String>) result.get("lucene");
-            String version = versions.get("solr-impl-version");
+            NamedList<?> versions = (NamedList<?>) result.get("lucene");
+            String version = Objects.toString(versions.get("solr-impl-version"));
             return version == null ? null : ("Solr Release " + version);
         } catch (Exception e) {
             return null;
         }
     }
 
+    public IndexRequestDTO createIndexRequest(Resource resource) {
+        return addCloseCallbacks(new IndexRequestDTO(resource));
+    }
+
+    public IndexRequestDTO createIndexRequest(String requestId) {
+        return addCloseCallbacks(databaseService.fetchRequest(requestId));
+    }
+
+    private IndexRequestDTO addCloseCallbacks(IndexRequestDTO request) {
+        request.registerCloseCallback(req -> databaseService.updateIndexRequest(req));
+        request.registerCloseCallback(req -> lockProcessing(() -> processing.remove(req.getId())));
+        return request;
+    }
+
     /**
      * Service an index request.
      *
-     * @param request The index request.
+     * @param resource The resource containing the serialized index request.
      * @return The indexing result.
      */
-    public IndexResult batchIndexImmediate(IndexRequestDTO request) {
+    public IndexResult batchIndexImmediate(Resource resource) {
         IndexResult result = new IndexResult();
-        request.start();
 
-        for (String id: request) {
-            id = id.trim();
+        try (IndexRequestDTO request = new IndexRequestDTO(resource).start()) {
 
-            if (!id.isEmpty()) {
-                result.combine(indexDocuments(id, request.getIdentifierType()));
+            for (String id : request.getIdentifiers(true)) {
+                id = id.trim();
+
+                if (!id.isEmpty()) {
+                    result.combine(indexDocuments(id, request.getIdentifierType()));
+                }
+
+                if (result.getTotal() % 50 == 0) {
+                    databaseService.updateIndexRequest(request);
+                }
             }
 
-            if (result.getTotal() % 100 == 0) {
-                databaseService.updateIndexRequest(request);
-            }
+            request.completed();
         }
 
-        request.close();
-        databaseService.updateIndexRequest(request);
         return result;
     }
 
@@ -125,8 +138,9 @@ public class SolrService {
         }
     }
 
-    public void batchIndexQueued(IndexRequestDTO request) {
-        databaseService.updateIndexRequest(request);
+    public void batchIndexQueued(Resource resource) {
+        IndexRequestDTO request = createIndexRequest(resource);
+        request.close();
         indexRequestQueue.refreshNow();
     }
 
@@ -142,9 +156,9 @@ public class SolrService {
         });
 
         if (request == null) {
-            request = databaseService.fetchRequest(action.id);
+            request = createIndexRequest(action.id);
             indexRequestAction(request, action);
-            databaseService.updateIndexRequest(request);
+            request.close();
         }
 
         return request;
@@ -238,14 +252,13 @@ public class SolrService {
             return result.success(false);
         }
 
-        Map<String, Object> map = new HashMap<>();
-        map.putAll(content.getMap());
+        Map<String, Object> map = new HashMap<>(content.getMap());
         map.put("MRN", mrn);
         return result.success(indexDTO(new DocumentDTO(document, map), COLLECTION_DOCUMENTS));
     }
 
     public IndexResult indexRequest(String requestId) {
-        return indexRequest(databaseService.fetchRequest(requestId));
+        return indexRequest(createIndexRequest(requestId));
     }
 
     /**
@@ -270,7 +283,7 @@ public class SolrService {
 
         try {
             if (request.getStatus() != IndexRequestStatus.QUEUED) {
-                databaseService.updateIndexRequest(request);
+                request.close();
                 return result;
             }
 
@@ -278,7 +291,7 @@ public class SolrService {
             request.start();
             databaseService.updateIndexRequest(request);
 
-            for (String id : request) {
+            for (String id : request.getIdentifiers(true)) {
                 try {
                     if (request.getStatus() != IndexRequestStatus.RUNNING) {
                         break;
@@ -308,7 +321,7 @@ public class SolrService {
             solrClient.commit(COLLECTION_PATIENT);
             solrClient.commit(COLLECTION_SLAVE);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 

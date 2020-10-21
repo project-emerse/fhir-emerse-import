@@ -1,6 +1,5 @@
 package edu.utah.kmm.emerse.database;
 
-import edu.utah.kmm.emerse.fhir.IdentifierType;
 import edu.utah.kmm.emerse.patient.PatientDTO;
 import edu.utah.kmm.emerse.patient.PatientService;
 import edu.utah.kmm.emerse.security.Credentials;
@@ -20,7 +19,10 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -66,7 +68,7 @@ public class DatabaseService {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
-    private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Autowired
     private SolrService solrService;
@@ -84,8 +86,7 @@ public class DatabaseService {
 
     public String getDatabaseVersion() {
         try {
-            DatabaseMetaData metaData = jdbcTemplate.getJdbcTemplate().getDataSource().getConnection().getMetaData();
-            return metaData.getDatabaseProductVersion();
+            return getConnection().getMetaData().getDatabaseProductVersion();
         } catch (Exception e) {
             return null;
         }
@@ -103,6 +104,14 @@ public class DatabaseService {
         } catch (Exception e) {
             log.error("Error while attempting user authentication.", e);
             return false;
+        }
+    }
+
+    private Connection getConnection() {
+        try {
+            return jdbcTemplate.getJdbcTemplate().getDataSource().getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
@@ -162,7 +171,7 @@ public class DatabaseService {
             jdbcTemplate.update(SQL, patientDTO.getMap());
             solrService.indexPatient(patientDTO);
         } catch (DataAccessException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getMessage(), e);
         }
 
     }
@@ -189,13 +198,7 @@ public class DatabaseService {
         return jdbcTemplate.queryForObject(QUEUE_FETCH_REQUEST, Collections.singletonMap("ID", id), (rs, i) -> new IndexRequestDTO(rs));
     }
 
-    public IndexRequestDTO queueRequest(
-            List<String> ids,
-            IdentifierType type) {
-        return updateIndexRequest(new IndexRequestDTO(ids, type));
-    }
-
-    public IndexRequestDTO updateIndexRequest(IndexRequestDTO request) {
+    public void updateIndexRequest(IndexRequestDTO request) {
         if (request.changed()) {
             boolean delete = request.getStatus() == IndexRequestStatus.DELETED;
             String SQL = delete ? QUEUE_DELETE_REQUEST : request.initial() ? getQueueInsertSQL() : getQueueUpdateSQL();
@@ -204,10 +207,9 @@ public class DatabaseService {
                 jdbcTemplate.update(SQL, map);
                 request.clearChanged();
             } catch (DataAccessException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException(e.getMessage(), e);
             }
         }
-        return request;
     }
 
     public void refreshQueue(RowMapper<?> rowMapper) {

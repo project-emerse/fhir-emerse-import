@@ -2,9 +2,12 @@ package edu.utah.kmm.emerse.solr;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.restlet.resource.Post;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -24,14 +27,7 @@ public class DaemonManager {
 
     private final List<IndexDaemon> daemons = new ArrayList<>();
 
-    public void init() {
-        startBackgroundProcessors();
-    }
-
-    public void destroy() {
-        stopBackgroundProcessors();
-    }
-
+    @PostConstruct
     public int startBackgroundProcessors() {
         log.info("Starting indexing daemon(s).");
 
@@ -46,6 +42,7 @@ public class DaemonManager {
         return count;
     }
 
+    @PreDestroy
     public int stopBackgroundProcessors() {
         Iterator<IndexDaemon> daemons = this.daemons.iterator();
         int count = 0;
