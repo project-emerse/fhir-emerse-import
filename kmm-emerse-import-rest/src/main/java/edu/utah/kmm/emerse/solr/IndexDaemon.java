@@ -47,9 +47,9 @@ public class IndexDaemon implements Runnable {
         running = true;
 
         while (!terminated && !thread.isInterrupted()) {
-            String request = indexRequestQueue.nextRequest();
+            String requestId = indexRequestQueue.nextRequest();
 
-            if (request == null) {
+            if (requestId == null) {
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
@@ -57,7 +57,7 @@ public class IndexDaemon implements Runnable {
                 }
             } else {
                 try {
-                    solrService.indexRequest(request);
+                    solrService.processRequest(requestId);
                 } catch (Exception e) {
                     log.error(e);
                 }

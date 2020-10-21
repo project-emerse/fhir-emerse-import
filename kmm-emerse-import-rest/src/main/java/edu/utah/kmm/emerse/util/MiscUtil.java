@@ -14,7 +14,11 @@ public class MiscUtil {
     public static final SimpleDateFormat dateTimeParser = new SimpleDateFormat("yyyy-MM-dd hh:mm a");
 
     public static IdentifierType toIdentifierType(String value) {
-        return IdentifierType.valueOf(value.toUpperCase());
+        try {
+            return IdentifierType.valueOf(value.toUpperCase());
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid or missing identifier type: " + value);
+        }
     }
 
     public static void validateIdentiferType(IdentifierType value, IdentifierType... allowed) {

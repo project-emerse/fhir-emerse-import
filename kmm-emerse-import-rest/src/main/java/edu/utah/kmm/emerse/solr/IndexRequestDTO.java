@@ -5,7 +5,6 @@ import edu.utah.kmm.emerse.fhir.IdentifierType;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
-import org.springframework.util.Assert;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -55,15 +54,24 @@ public class IndexRequestDTO extends BaseDTO implements Closeable {
 
     private long started;
 
-    private List<String> identifiers;
+    private final List<String> identifiers;
 
-    private IdentifierType identifierType;
+    private final IdentifierType identifierType;
 
     IndexRequestDTO(Resource source) {
         try {
-            List<String> identifiers = IOUtils.readLines(source.getInputStream(), "UTF-8");
-            IdentifierType identifierType = toIdentifierType(identifiers.isEmpty() ? "" : identifiers.remove(0).trim());
-            init(identifiers, identifierType);
+            this.identifiers = IOUtils.readLines(source.getInputStream(), "UTF-8");
+            this.identifierType = toIdentifierType(identifiers.isEmpty() ? "" : identifiers.remove(0).trim());
+            this.initial = true;
+            put(FieldType.ID, UUID.randomUUID().toString());
+            put(FieldType.SUBMITTED, now());
+            put(FieldType.TOTAL, identifiers.size());
+            put(FieldType.PROCESSED, 0);
+            put(FieldType.STATUS, 0);
+            put(FieldType.ELAPSED, 0);
+            put(FieldType.ERROR_TEXT, null);
+            put(FieldType.IDENTIFIER_TYPE, identifierType.name());
+            put(FieldType.IDENTIFIERS, listToString(identifiers));
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -85,22 +93,6 @@ public class IndexRequestDTO extends BaseDTO implements Closeable {
         changed = false;
     }
 
-    private void init(List<String> identifiers, IdentifierType identifierType) {
-        Assert.notNull(identifierType, "You must specify a valid identifier type");
-        this.initial = true;
-        this.identifiers = identifiers;
-        this.identifierType = identifierType;
-        put(FieldType.ID, UUID.randomUUID().toString());
-        put(FieldType.SUBMITTED, now());
-        put(FieldType.TOTAL, identifiers.size());
-        put(FieldType.PROCESSED, 0);
-        put(FieldType.STATUS, 0);
-        put(FieldType.ELAPSED, 0);
-        put(FieldType.ERROR_TEXT, null);
-        put(FieldType.IDENTIFIER_TYPE, identifierType.name());
-        put(FieldType.IDENTIFIERS, listToString(identifiers));
-    }
-
     private List<String> stringToList(String value) {
         return Arrays.asList(value.split("\n"));
     }
@@ -120,8 +112,12 @@ public class IndexRequestDTO extends BaseDTO implements Closeable {
     private void put(
             FieldType field,
             Object value) {
-        changed = true;
-        map.put(field.name(), value);
+        String name = field.name();
+
+        if (!map.containsKey(name) || !Objects.equals(value, map.get(name))) {
+            changed = true;
+            map.put(name, value);
+        }
     }
 
     private <T> T get(
@@ -134,17 +130,23 @@ public class IndexRequestDTO extends BaseDTO implements Closeable {
         return new Date();
     }
 
+    public int getProcessed() {
+        return get(FieldType.PROCESSED, Integer.class);
+    }
+
+    public void processed() {
+        put(FieldType.PROCESSED, getProcessed() + 1);
+    }
+
     public String getId() {
         return get(FieldType.ID, String.class);
     }
 
     public List<String> getIdentifiers(boolean unprocessed) {
-        if (unprocessed) {
-            int processed = get(FieldType.PROCESSED, Integer.class);
-            return Collections.unmodifiableList(identifiers.subList(processed, identifiers.size()));
-        } else {
-            return Collections.unmodifiableList(identifiers);
-        }
+        List<String> list = unprocessed
+                ? identifiers.subList(getProcessed(), identifiers.size())
+                : identifiers;
+        return Collections.unmodifiableList(list);
     }
 
     public void error(String errorText) {

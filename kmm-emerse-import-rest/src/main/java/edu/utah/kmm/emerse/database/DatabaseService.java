@@ -207,6 +207,7 @@ public class DatabaseService {
                 jdbcTemplate.update(SQL, map);
                 request.clearChanged();
             } catch (DataAccessException e) {
+                log.error(e.getMessage(), e);
                 throw new RuntimeException(e.getMessage(), e);
             }
         }

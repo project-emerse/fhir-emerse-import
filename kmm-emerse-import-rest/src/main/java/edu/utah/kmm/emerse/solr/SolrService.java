@@ -51,7 +51,7 @@ public class SolrService {
 
     private final String solrPassword;
 
-    private final Map<String, IndexRequestDTO> processing = new HashMap<>();
+    private final Map<String, Producer<IndexRequestDTO>> processing = new HashMap<>();
 
     @Autowired
     private DocumentService documentService;
@@ -110,26 +110,7 @@ public class SolrService {
      * @return The indexing result.
      */
     public IndexResult batchIndexImmediate(Resource resource) {
-        IndexResult result = new IndexResult();
-
-        try (IndexRequestDTO request = new IndexRequestDTO(resource).start()) {
-
-            for (String id : request.getIdentifiers(true)) {
-                id = id.trim();
-
-                if (!id.isEmpty()) {
-                    result.combine(indexDocuments(id, request.getIdentifierType()));
-                }
-
-                if (result.getTotal() % 50 == 0) {
-                    databaseService.updateIndexRequest(request);
-                }
-            }
-
-            request.completed();
-        }
-
-        return result;
+        return processRequest(createIndexRequest(resource));
     }
 
     private <T> T lockProcessing(Producer<T> operation) {
@@ -139,14 +120,14 @@ public class SolrService {
     }
 
     public void batchIndexQueued(Resource resource) {
-        IndexRequestDTO request = createIndexRequest(resource);
-        request.close();
+        createIndexRequest(resource).close();
         indexRequestQueue.refreshNow();
     }
 
     public IndexRequestDTO indexRequestAction(IndexRequestAction action) {
         IndexRequestDTO request = lockProcessing(() -> {
-            IndexRequestDTO req = processing.get(action.id);
+            Producer<IndexRequestDTO> producer = processing.get(action.id);
+            IndexRequestDTO req = producer == null ? null : producer.produce();
 
             if (req != null) {
                 indexRequestAction(req, action);
@@ -257,39 +238,45 @@ public class SolrService {
         return result.success(indexDTO(new DocumentDTO(document, map), COLLECTION_DOCUMENTS));
     }
 
-    public IndexResult indexRequest(String requestId) {
-        return indexRequest(createIndexRequest(requestId));
+    public void processRequest(String requestId) {
+        Producer<IndexRequestDTO> producer = lockProcessing(() -> {
+            if (processing.containsKey(requestId)) {
+                return null;
+            }
+
+            Producer<IndexRequestDTO> prod = new Producer<IndexRequestDTO>() {
+                private IndexRequestDTO request;
+
+                @Override
+                public IndexRequestDTO produce() {
+                    return request == null ? request = createIndexRequest(requestId) : request;
+                }
+            };
+
+            processing.put(requestId, prod);
+            return prod;
+        });
+
+        if (producer != null) {
+            processRequest(producer.produce());
+        }
     }
 
     /**
      * Service an index request.
      *
-     * @param request The index request.
-     * @return The indexing result.
+     * @param indexRequestDTO The index request.
      */
-    public IndexResult indexRequest(IndexRequestDTO request) {
+    private IndexResult processRequest(IndexRequestDTO indexRequestDTO) {
         IndexResult result = new IndexResult();
 
-        if (!lockProcessing(() -> {
-            if (processing.containsKey(request.getId())) {
-                return false;
-            } else {
-                processing.put(request.getId(), request);
-                return true;
-            }
-        })) {
-            return result;
-        }
-
-        try {
+        try (IndexRequestDTO request = indexRequestDTO) {
             if (request.getStatus() != IndexRequestStatus.QUEUED) {
-                request.close();
                 return result;
             }
 
-            processing.put(request.getId(), request);
             request.start();
-            databaseService.updateIndexRequest(request);
+            IdentifierType identifierType = request.getIdentifierType();
 
             for (String id : request.getIdentifiers(true)) {
                 try {
@@ -297,7 +284,13 @@ public class SolrService {
                         break;
                     }
 
-                    result.combine(indexDocuments(id, request.getIdentifierType()));
+                    if (result.getTotal() % 50 == 0) {
+                        databaseService.updateIndexRequest(request);
+                    }
+
+                    result.combine(indexDocuments(id, identifierType));
+                    request.processed();
+
                 } catch (Exception e) {
                     request.error(e.getMessage());
                 }
@@ -306,10 +299,6 @@ public class SolrService {
             if (request.getStatus() == IndexRequestStatus.RUNNING) {
                 request.completed();
             }
-
-            databaseService.updateIndexRequest(request);
-        } finally {
-            lockProcessing(() -> processing.remove(request.getId()) != null);
         }
 
         return result;
@@ -353,7 +342,4 @@ public class SolrService {
         indexDTO(patientDTO, COLLECTION_SLAVE);
     }
 
-    public void indexDocument(DocumentDTO documentDTO) {
-        indexDTO(documentDTO, COLLECTION_DOCUMENTS);
-    }
 }
