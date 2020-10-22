@@ -2,7 +2,6 @@ package edu.utah.kmm.emerse.solr;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.restlet.resource.Post;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -22,6 +21,9 @@ public class DaemonManager {
     @Autowired
     private IndexRequestQueue solrQueue;
 
+    @Autowired
+    private DaemonThreadPool daemonThreadPool;
+
     @Value("${solr.server.daemons:1}")
     private int maxDaemons;
 
@@ -34,11 +36,11 @@ public class DaemonManager {
         int count = 0;
 
         for (int i = daemons.size(); i < maxDaemons; i++) {
-            daemons.add(new IndexDaemon(solrQueue, solrService));
             count++;
+            daemonThreadPool.execute(new IndexDaemon(i + 1, solrQueue, solrService));
         }
 
-        log.info("Started " + count + "indexing daemon(s).");
+        log.info("Started " + count + " indexing daemon(s).");
         return count;
     }
 

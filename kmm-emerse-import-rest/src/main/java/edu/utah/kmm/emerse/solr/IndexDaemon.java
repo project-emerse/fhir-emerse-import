@@ -7,44 +7,30 @@ public class IndexDaemon implements Runnable {
 
     private static Log log = LogFactory.getLog(IndexDaemon.class);
 
-    private static int daemonCounter;
-
     private final IndexRequestQueue indexRequestQueue;
 
     private final SolrService solrService;
 
-    private final Thread thread;
-
-    private final int daemonId = ++daemonCounter;
+    private final int daemonId;
 
     private boolean terminated;
 
-    private boolean running;
-
-    IndexDaemon(IndexRequestQueue indexRequestQueue, SolrService solrService) {
+    IndexDaemon(int daemonId, IndexRequestQueue indexRequestQueue, SolrService solrService) {
+        this.daemonId = daemonId;
         this.indexRequestQueue = indexRequestQueue;
         this.solrService = solrService;
-        thread = new Thread(this);
-        thread.setName("EMERSE-IT indexing daemon #" + daemonId);
-        thread.start();
     }
 
     public void terminate() {
         this.terminated = true;
     }
 
-    public boolean isTerminated() {
-        return terminated;
-    }
-
-    public boolean isRunning() {
-        return running;
-    }
-
     @Override
     public void run() {
-        log.info("Started indexing daemon #" + daemonId);
-        running = true;
+        Thread thread = Thread.currentThread();
+        String threadName = "EMERSE-IT indexing daemon #" + daemonId;
+        thread.setName(threadName);
+        log.info("Started " + threadName);
 
         while (!terminated && !thread.isInterrupted()) {
             String requestId = indexRequestQueue.nextRequest();
@@ -64,8 +50,7 @@ public class IndexDaemon implements Runnable {
             }
         }
 
-        running = false;
-        log.info("Stopped indexing daemon #" + daemonId);
+        log.info("Stopped " + threadName);
     }
 
 }

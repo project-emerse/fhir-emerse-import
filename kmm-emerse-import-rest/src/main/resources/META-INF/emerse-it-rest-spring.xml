@@ -90,6 +90,8 @@
         <constructor-arg ref="solrServiceCredentials" />
     </bean>
 
+    <bean id="daemonThreadPool" class="edu.utah.kmm.emerse.solr.DaemonThreadPool" />
+
     <bean id="daemonManager" class="edu.utah.kmm.emerse.solr.DaemonManager" />
 
     <bean id="indexRequestQueue" class="edu.utah.kmm.emerse.solr.IndexRequestQueue" />
@@ -118,7 +120,7 @@
         <constructor-arg value="${datasource.password}" />
     </bean>
 
-    <bean id="dataSourceFactory" class="edu.utah.kmm.emerse.database.DataSourceFactory">
+    <bean id="dataSourceFactory" class="edu.utah.kmm.emerse.database.DataSourceFactory5">
         <constructor-arg value="${datasource.driver.class}" />
         <constructor-arg value="${datasource.url}" />
         <constructor-arg ref="dataSourceCredentials" />
@@ -144,4 +146,5 @@
         <constructor-arg value="${decryptor.master:EMERSE_MASTER}" />
         <constructor-arg value="${decryptor.algorithm:PBEWITHSHA256AND128BITAES-CBC-BC}" />
     </bean>
+
 </beans>

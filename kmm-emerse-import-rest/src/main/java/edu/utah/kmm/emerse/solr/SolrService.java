@@ -154,6 +154,7 @@ public class SolrService {
                 break;
             case RESUME:
                 request.resume();
+                indexRequestQueue.refreshNow();
                 break;
             case SUSPEND:
                 request.suspend();
@@ -163,6 +164,7 @@ public class SolrService {
                 break;
             case RESTART:
                 request.restart();
+                indexRequestQueue.refreshNow();
                 break;
         }
     }

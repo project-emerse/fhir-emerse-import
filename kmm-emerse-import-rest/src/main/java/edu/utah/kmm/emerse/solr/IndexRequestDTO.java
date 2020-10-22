@@ -198,6 +198,7 @@ public class IndexRequestDTO extends BaseDTO implements Closeable {
 
         if (resetCount) {
             put(FieldType.PROCESSED, 0);
+            put(FieldType.ELAPSED, 0);
         }
 
         return true;

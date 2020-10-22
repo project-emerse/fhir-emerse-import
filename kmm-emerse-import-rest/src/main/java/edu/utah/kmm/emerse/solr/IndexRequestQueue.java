@@ -25,7 +25,7 @@ public class IndexRequestQueue implements RowMapper<String> {
 
     private final Queue<String> queue = new LinkedBlockingQueue<>();
 
-    private long nextRefresh;
+    private volatile long nextRefresh;
 
     public IndexRequestQueue() {
     }
