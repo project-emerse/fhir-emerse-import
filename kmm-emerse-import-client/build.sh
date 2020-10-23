@@ -36,7 +36,7 @@ npm install
 npm run snapshot
 npm run git-hash
 echo Building distribution...
-ng build --configuration=$config --base-href "/emerse-it-client-$1/"
+ng build --configuration=$config --base-href "./" --deploy-url "./"
 echo Building war...
 cd -
 mvn clean package -Dbuild.profile="$1"
