@@ -96,6 +96,8 @@
 
     <bean id="indexRequestQueue" class="edu.utah.kmm.emerse.solr.IndexRequestQueue" />
 
+    <bean id="indexRequestFactory" class="edu.utah.kmm.emerse.solr.IndexRequestFactory" />
+
     <!-- FHIR Configuration -->
 
     <bean id="fhirServiceCredentials" class="edu.utah.kmm.emerse.security.Credentials">

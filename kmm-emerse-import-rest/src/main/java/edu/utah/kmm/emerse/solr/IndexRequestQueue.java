@@ -20,10 +20,13 @@ public class IndexRequestQueue implements RowMapper<String> {
     @Autowired
     private DatabaseService databaseService;
 
+    private final Queue<IndexRequestWrapper> queue = new LinkedBlockingQueue<>();
+
+    @Autowired
+    private IndexRequestFactory indexRequestFactory;
+
     @Value("${solr.queue.refresh.interval:60000}")
     private int refreshInterval;
-
-    private final Queue<String> queue = new LinkedBlockingQueue<>();
 
     private volatile long nextRefresh;
 
@@ -38,7 +41,7 @@ public class IndexRequestQueue implements RowMapper<String> {
         }
     }
 
-    String nextRequest() {
+    IndexRequestWrapper nextRequest() {
         synchronized (queue) {
             long currentTime = System.currentTimeMillis();
 
@@ -61,7 +64,7 @@ public class IndexRequestQueue implements RowMapper<String> {
             int i) {
         try {
             String id = rs.getString("ID");
-            queue.add(id);
+            queue.add(indexRequestFactory.create(id, true));
             return id;
         } catch (SQLException e) {
             throw new RuntimeException(e.getMessage(), e);

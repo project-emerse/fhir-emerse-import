@@ -190,6 +190,23 @@ public class IndexRequestDTO extends BaseDTO implements Closeable {
                 && requeue(true);
     }
 
+    public boolean performAction(IndexRequestAction.Action action) {
+        switch (action) {
+            case ABORT:
+                return abort();
+            case RESUME:
+                return resume();
+            case SUSPEND:
+                return suspend();
+            case DELETE:
+                return delete();
+            case RESTART:
+                return restart();
+            default:
+                return false;
+        }
+    }
+
     private boolean requeue(boolean resetCount) {
         error(null);
         setStatus(IndexRequestStatus.QUEUED);

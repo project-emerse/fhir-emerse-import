@@ -22,7 +22,6 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.MapSolrParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
-import org.codehaus.janino.util.Producer;
 import org.hl7.fhir.dstu3.model.DocumentReference;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,8 +50,6 @@ public class SolrService {
 
     private final String solrPassword;
 
-    private final Map<String, Producer<IndexRequestDTO>> processing = new HashMap<>();
-
     @Autowired
     private DocumentService documentService;
 
@@ -61,6 +58,9 @@ public class SolrService {
 
     @Autowired
     private DatabaseService databaseService;
+
+    @Autowired
+    private IndexRequestFactory indexRequestFactory;
 
     @Autowired
     private IndexRequestQueue indexRequestQueue;
@@ -89,20 +89,6 @@ public class SolrService {
         }
     }
 
-    public IndexRequestDTO createIndexRequest(Resource resource) {
-        return addCloseCallbacks(new IndexRequestDTO(resource));
-    }
-
-    public IndexRequestDTO createIndexRequest(String requestId) {
-        return addCloseCallbacks(databaseService.fetchRequest(requestId));
-    }
-
-    private IndexRequestDTO addCloseCallbacks(IndexRequestDTO request) {
-        request.registerCloseCallback(req -> databaseService.updateIndexRequest(req));
-        request.registerCloseCallback(req -> lockProcessing(() -> processing.remove(req.getId())));
-        return request;
-    }
-
     /**
      * Service an index request.
      *
@@ -110,63 +96,25 @@ public class SolrService {
      * @return The indexing result.
      */
     public IndexResult batchIndexImmediate(Resource resource) {
-        return processRequest(createIndexRequest(resource));
-    }
-
-    private <T> T lockProcessing(Producer<T> operation) {
-        synchronized (processing) {
-            return operation.produce();
-        }
+        return processRequest(indexRequestFactory.create(resource).get());
     }
 
     public void batchIndexQueued(Resource resource) {
-        createIndexRequest(resource).close();
+        indexRequestFactory.create(resource).get().close();
         indexRequestQueue.refreshNow();
     }
 
     public IndexRequestDTO indexRequestAction(IndexRequestAction action) {
-        IndexRequestDTO request = lockProcessing(() -> {
-            Producer<IndexRequestDTO> producer = processing.get(action.id);
-            IndexRequestDTO req = producer == null ? null : producer.produce();
+        IndexRequestWrapper wrapper = indexRequestFactory.create(action.id, true);
+        boolean hydrated = wrapper.isHydrated();
+        IndexRequestDTO request = wrapper.get();
 
-            if (req != null) {
-                indexRequestAction(req, action);
-            }
-
-            return req;
-        });
-
-        if (request == null) {
-            request = createIndexRequest(action.id);
-            indexRequestAction(request, action);
+        if (request.performAction(action.action) && hydrated) {
             request.close();
+            indexRequestQueue.refreshNow();
         }
 
         return request;
-    }
-
-    private void indexRequestAction(
-            IndexRequestDTO request,
-            IndexRequestAction action) {
-        switch (action.action) {
-            case ABORT:
-                request.abort();
-                break;
-            case RESUME:
-                request.resume();
-                indexRequestQueue.refreshNow();
-                break;
-            case SUSPEND:
-                request.suspend();
-                break;
-            case DELETE:
-                request.delete();
-                break;
-            case RESTART:
-                request.restart();
-                indexRequestQueue.refreshNow();
-                break;
-        }
     }
 
     /**
@@ -241,26 +189,10 @@ public class SolrService {
     }
 
     public void processRequest(String requestId) {
-        Producer<IndexRequestDTO> producer = lockProcessing(() -> {
-            if (processing.containsKey(requestId)) {
-                return null;
-            }
+        IndexRequestWrapper wrapper = indexRequestFactory.create(requestId, true);
 
-            Producer<IndexRequestDTO> prod = new Producer<IndexRequestDTO>() {
-                private IndexRequestDTO request;
-
-                @Override
-                public IndexRequestDTO produce() {
-                    return request == null ? request = createIndexRequest(requestId) : request;
-                }
-            };
-
-            processing.put(requestId, prod);
-            return prod;
-        });
-
-        if (producer != null) {
-            processRequest(producer.produce());
+        if (!wrapper.isHydrated()) {
+            processRequest(wrapper.get());
         }
     }
 
@@ -269,7 +201,7 @@ public class SolrService {
      *
      * @param indexRequestDTO The index request.
      */
-    private IndexResult processRequest(IndexRequestDTO indexRequestDTO) {
+    public IndexResult processRequest(IndexRequestDTO indexRequestDTO) {
         IndexResult result = new IndexResult();
 
         try (IndexRequestDTO request = indexRequestDTO) {
