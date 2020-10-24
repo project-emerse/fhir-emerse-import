@@ -31,22 +31,22 @@ const VALID_ACTIONS: {[status: number] : EntryAction[]} = {
 }
 
 export interface QueueEntry {
-    ID: string;
-    SUBMITTED: number;
-    SUBMITTED_DATE: Date;
-    COMPLETED: number;
-    COMPLETED_DATE: Date;
-    ELAPSED: number;
-    ELAPSED_TEXT: string;
-    TOTAL: number;
-    PROCESSED: number;
-    ERROR_TEXT: string;
-    STATUS: EntryStatus;
-    STATUS_TEXT: string;
-    IDENTIFIER_TYPE: IdentifierType;
+    id: string;
+    submitted: number;
+    submitted_date: Date;
+    completed: number;
+    completed_date: Date;
+    elapsed: number;
+    elapsed_text: string;
+    total: number;
+    processed: number;
+    error_text: string;
+    status: EntryStatus;
+    status_text: string;
+    identifier_type: IdentifierType;
 }
 
-export enum IdentifierType {MRN= 'MRN', PATID = 'PATID', DOCID = 'DOCID'}
+export enum IdentifierType {MRN = 'MRN', PATID = 'PATID', DOCID = 'DOCID'}
 
 export function isValidAction(status: EntryStatus, action: EntryAction): boolean {
     return VALID_ACTIONS[status].includes(action);

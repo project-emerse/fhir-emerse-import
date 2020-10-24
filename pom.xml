@@ -29,12 +29,11 @@
     <jackson.version>2.9.9</jackson.version>
     <jasypt.version>1.9.2</jasypt.version>
     <bouncycastle.version>1.66</bouncycastle.version>
-<!--    <hapi-fhir.version>3.8.0</hapi-fhir.version>-->
     <log4j.version>2.11.2</log4j.version>
     <junit.version>4.12</junit.version>
     <spring.version>5.2.3.RELEASE</spring.version>
     <spring.security.version>5.2.1.RELEASE</spring.security.version>
-    <spring.ws.core.version>3.0.7.RELEASE</spring.ws.core.version>
+    <spring.hibernate.version>5.2.9.RELEASE</spring.hibernate.version>
     <cglib-nodep.version>3.2.10</cglib-nodep.version>
     <objenesis.version>3.0.1</objenesis.version>
     <jjwt.version>0.11.2</jjwt.version>
@@ -62,17 +61,6 @@
         <artifactId>commons-dbcp2</artifactId>
         <version>2.8.0</version>
       </dependency>
-      <!-- HAPI FHIR -->
-<!--      <dependency>-->
-<!--        <groupId>ca.uhn.hapi.fhir</groupId>-->
-<!--        <artifactId>hapi-fhir-client</artifactId>-->
-<!--        <version>${hapi-fhir.version}</version>-->
-<!--      </dependency>-->
-<!--      <dependency>-->
-<!--        <groupId>ca.uhn.hapi.fhir</groupId>-->
-<!--        <artifactId>hapi-fhir-structures-dstu3</artifactId>-->
-<!--        <version>${hapi-fhir.version}</version>-->
-<!--      </dependency>-->
       <!-- SOLR/Lucene -->
       <dependency>
         <groupId>org.apache.solr</groupId>
@@ -157,6 +145,12 @@
         <groupId>org.springframework.security</groupId>
         <artifactId>spring-security-web</artifactId>
         <version>${spring.security.version}</version>
+      </dependency>
+      <!-- Hibernate -->
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-orm</artifactId>
+        <version>${spring.hibernate.version}</version>
       </dependency>
       <!-- General security -->
       <dependency>

@@ -211,7 +211,7 @@ public class DatabaseService {
     }
 
     public List<Map<String, Object>> fetchQueueEntries() {
-        String sql = "SELECT " + StringUtils.join(QUEUE_SUMMARY_FIELDS, ",") + " FROM " + QUEUE_TABLE;
+        String sql = "SELECT " + StringUtils.join(QUEUE_SUMMARY_FIELDS, ",") + " FROM " + QUEUE_TABLE + " ORDER BY SUBMITTED DESC";
         return jdbcTemplate.queryForList(sql, Collections.emptyMap());
     }
 }

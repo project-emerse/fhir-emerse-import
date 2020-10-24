@@ -5,20 +5,27 @@ import edu.utah.kmm.emerse.security.Credentials;
 
 import javax.sql.DataSource;
 
-public class DataSourceFactory5 {
+public class DataSourceFactory5 extends AbstractDataSourceFactory {
 
-    private final DataSource datasource;
+    private DataSource datasource;
 
     public DataSourceFactory5(
             String driverClass,
             String connectionUrl,
             Credentials credentials
-    ) throws Exception {
+    ) {
+        super(driverClass, connectionUrl, credentials);
+    }
+
+    @Override
+    protected void init(int connectionPoolSize) throws Exception {
         ComboPooledDataSource ds = new ComboPooledDataSource();
         ds.setDriverClass(driverClass);
         ds.setJdbcUrl(connectionUrl);
         ds.setUser(credentials.getUsername());
         ds.setPassword(credentials.getPassword());
+        ds.setInitialPoolSize(connectionPoolSize);
+        ds.setMaxPoolSize(connectionPoolSize);
         ds.setAutoCommitOnClose(true);
         datasource = ds;
     }

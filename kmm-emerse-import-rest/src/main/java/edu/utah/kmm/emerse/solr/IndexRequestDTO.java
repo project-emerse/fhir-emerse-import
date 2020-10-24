@@ -5,6 +5,7 @@ import edu.utah.kmm.emerse.fhir.IdentifierType;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
+import org.springframework.util.Assert;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -51,6 +52,8 @@ public class IndexRequestDTO extends BaseDTO implements Closeable {
     private boolean changed;
 
     private boolean initial;
+
+    private boolean closed;
 
     private long started;
 
@@ -159,6 +162,7 @@ public class IndexRequestDTO extends BaseDTO implements Closeable {
     }
 
     public IndexRequestDTO start() {
+        assertNotClosed();
         started = System.currentTimeMillis();
         error(null);
         put(FieldType.COMPLETED, null);
@@ -208,6 +212,7 @@ public class IndexRequestDTO extends BaseDTO implements Closeable {
     }
 
     private boolean requeue(boolean resetCount) {
+        assertNotClosed();
         error(null);
         setStatus(IndexRequestStatus.QUEUED);
         put(FieldType.COMPLETED, null);
@@ -226,6 +231,7 @@ public class IndexRequestDTO extends BaseDTO implements Closeable {
     }
 
     private boolean stop(IndexRequestStatus status) {
+        assertNotClosed();
         put(FieldType.COMPLETED, status == IndexRequestStatus.SUSPENDED ? null : now());
         setStatus(status);
         close();
@@ -270,8 +276,18 @@ public class IndexRequestDTO extends BaseDTO implements Closeable {
         closeCallbacks.add(callback);
     }
 
+    private void assertNotClosed() {
+        Assert.state(!closed, () -> "Index request '" + getId() + "' has already been closed");
+    }
+
     @Override
     public void close() {
+        if (closed) {
+            return;
+        }
+
+        closed = true;
+
         if (getStatus() == IndexRequestStatus.RUNNING) {
             setStatus(IndexRequestStatus.SUSPENDED);
         }

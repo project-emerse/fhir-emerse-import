@@ -21,7 +21,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -205,21 +204,6 @@ public class RestController {
     @ResponseBody
     public List<?> fetchQueueEntries() {
         return databaseService.fetchQueueEntries();
-    }
-
-    /**
-     * Validates that a single identifier is present.
-     *
-     * @param mrn The MRN.
-     * @param patid The FHIR id.
-     * @return The identifier type.
-     * @throws IllegalArgumentException if both identifiers are null or both are non-null.
-     */
-    private IdentifierType validateIdentifiers(String mrn, String patid) {
-        Assert.isTrue(mrn != null ^ patid != null, () -> mrn == null
-                ? "You must specify an identifier (mrn or patid)"
-                : "You may specify one and only one identifier (mrn or patid)");
-        return mrn != null ? IdentifierType.MRN : IdentifierType.PATID;
     }
 
     @ExceptionHandler(Exception.class)

@@ -5,24 +5,26 @@ import org.apache.commons.dbcp2.BasicDataSource;
 
 import javax.sql.DataSource;
 
-public class DataSourceFactory4 {
+public class DataSourceFactory4 extends AbstractDataSourceFactory {
 
-    private final DataSource datasource;
+    private DataSource datasource;
 
     public DataSourceFactory4(
             String driverClass,
             String connectionUrl,
             Credentials credentials
     ) {
+        super(driverClass, connectionUrl, credentials);
+    }
+
+    @Override
+    protected void init(int connectionPoolSize) {
         BasicDataSource ds = new BasicDataSource();
         ds.setDriverClassName(driverClass);
         ds.setUrl(connectionUrl);
         ds.setUsername(credentials.getUsername());
         ds.setPassword(credentials.getPassword());
-        ds.setMinIdle(5);
-        ds.setMaxIdle(10);
-        ds.setMaxOpenPreparedStatements(100);
-        ds.setAutoCommitOnReturn(true);
+        ds.setInitialSize(connectionPoolSize);
         datasource = ds;
     }
 

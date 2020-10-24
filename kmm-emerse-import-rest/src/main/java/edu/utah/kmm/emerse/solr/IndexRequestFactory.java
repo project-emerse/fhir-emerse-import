@@ -15,8 +15,11 @@ public class IndexRequestFactory {
     private DatabaseService databaseService;
 
     private final IndexRequestDTO.ICloseCallback teardown = request -> {
-        request.registerCloseCallback(req -> databaseService.updateIndexRequest(request));
-        request.registerCloseCallback(req -> remove(req.getId()));
+        try {
+            databaseService.updateIndexRequest(request);
+        } finally {
+            remove(request.getId());
+        }
     };
 
     public synchronized IndexRequestWrapper create(Resource resource) {

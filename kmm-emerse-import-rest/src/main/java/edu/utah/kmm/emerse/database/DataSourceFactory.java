@@ -5,15 +5,19 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import javax.sql.DataSource;
 
-public class DataSourceFactory {
+public class DataSourceFactory extends AbstractDataSourceFactory {
 
-    private final DataSource datasource;
+    private DataSource datasource;
 
     public DataSourceFactory(
             String driverClass,
             String connectionUrl,
             Credentials credentials
     ) {
+        super(driverClass, connectionUrl, credentials);
+    }
+
+    protected void init(int connectionPoolSize) {
         DriverManagerDataSource ds = new DriverManagerDataSource();
         ds.setDriverClassName(driverClass);
         ds.setUrl(connectionUrl);

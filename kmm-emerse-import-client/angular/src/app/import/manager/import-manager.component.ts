@@ -41,7 +41,7 @@ export class ImportManagerComponent implements AfterViewInit{
     }
 
     trackBy(index: number, entry: QueueEntry): string {
-        return entry.ID;
+        return entry.id;
     }
 
     setSelection(entry: QueueEntry) {
@@ -68,8 +68,8 @@ export class ImportManagerComponent implements AfterViewInit{
     }
 
     private update(data: QueueEntry[], entry: QueueEntry): void {
-        const index = entry == null ? -1 : data.findIndex(value => value.ID === entry.ID);
-        const deleted = entry == null || entry.STATUS === EntryStatus.DELETED;
+        const index = entry == null ? -1 : data.findIndex(value => value.id === entry.id);
+        const deleted = entry == null || entry.status === EntryStatus.DELETED;
 
         if (index === -1) {
             deleted ? noop() : data.push(entry);
@@ -84,7 +84,7 @@ export class ImportManagerComponent implements AfterViewInit{
     }
 
     supported(action: EntryAction): boolean {
-        return this.selected && isValidAction(this.selected.STATUS, action);
+        return this.selected && isValidAction(this.selected.status, action);
     }
 
     clear(message?: any): void {
