@@ -34,6 +34,8 @@ export class ImportSingleComponent {
 
     private target: any;
 
+    private error = error => this.setMessage("An error occurred: " + error, false);
+
     constructor(
         private readonly restService: RestService,
         private readonly configService: ConfigService) {
@@ -41,24 +43,23 @@ export class ImportSingleComponent {
 
     search(): void {
         this.clear();
-        this.message = "Searching for patient...";
-        this.busy = true;
+        this.setMessage("Searching for patient...", true);
         this.restService.findPatient(this.mrn, IdentifierType.MRN)
             .pipe(
                 tap(patient => {
                     this.message = patient == null ? "No patient found.  Please try again." : null;
                     this.busy = patient != null;
-                }),
+                }, this.error),
                 filter(patient => patient != null),
                 tap(patient => {
                     this.extractDemographics(patient);
                     this.message = "Searching for documents..."
-                }),
+                }, this.error),
                 switchMap(patient => this.restService.getDocuments(patient.id, IdentifierType.PATID)),
                 tap(() => {
                     this.message = null;
                     this.busy = false;
-                })).subscribe(docs => this.documents = docs);
+                }, this.error)).subscribe(docs => this.documents = docs);
     }
 
     private extractDemographics(patient: Patient): PatientDemographics {
@@ -74,15 +75,15 @@ export class ImportSingleComponent {
     }
 
     index(): void {
-        this.message = null;
-        this.busy = true;
-        this.message = "Indexing documents..."
-        this.restService.singleIndex(this.mrn, IdentifierType.MRN).pipe(
-            tap(() => {
-                this.message = null;
-                this.busy = false;
-            })
-        ).subscribe(result => this.message = IndexResultUtil.toString(result));
+        this.setMessage("Indexing documents...", true);
+        this.restService.singleIndex(this.mrn, IdentifierType.MRN).subscribe(
+            result => this.setMessage(IndexResultUtil.toString(result), false),
+            this.error);
+    }
+
+    private setMessage(message: string, busy = this.busy): void {
+        this.message = message;
+        this.busy = busy;
     }
 
     clear(): void {
@@ -90,7 +91,7 @@ export class ImportSingleComponent {
         this.htmlBody = null;
         this.documents = null;
         this.demographics = null;
-        this.message = null;
+        this.setMessage(null, false);
     }
 
     documentSelected(event: any, document: Document): void {
