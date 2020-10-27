@@ -13,6 +13,6 @@ export class ImportAboutComponent {
     }
 
     get(setting: string): string {
-        return this.configService.getSetting(setting);
+        return this.configService.getSetting(setting) || "unavailable";
     }
 }

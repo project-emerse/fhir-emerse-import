@@ -26,8 +26,9 @@ public class IndexRequestWrapper {
 
     IndexRequestWrapper(
             Resource resource,
+            String serverId,
             ICloseCallback teardown) {
-        indexRequestDTO = new IndexRequestDTO(resource);
+        indexRequestDTO = new IndexRequestDTO(resource, serverId);
         this.indexRequestId = indexRequestDTO.getId();
         this.teardown = teardown;
         this.factory = null;

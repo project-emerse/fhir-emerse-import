@@ -38,43 +38,40 @@ public class FhirService {
     @Autowired
     private AuthenticatorRegistry authenticatorRegistry;
 
-    private IGenericClient genericClient;
-
-    private IAuthenticator authenticator;
+    private volatile IGenericClient genericClient;
 
     private CapabilityStatement capabilityStatement;
 
     public FhirService() {
     }
 
-    @PostConstruct
-    private void init() {
-        initGenericClient();
-        authenticator = authenticatorRegistry.get(authenticationType);
-        Assert.notNull(authenticator, () -> "Unrecognized authentication scheme: " + authenticationType);
-        authenticator.initialize(this);
-    }
+    private synchronized IGenericClient initGenericClient() {
+        if (genericClient == null) {
+            genericClient = fhirContext.newRestfulGenericClient(fhirRoot);
+            genericClient.setEncoding(EncodingEnum.JSON);
 
-    private void initGenericClient() {
-        genericClient = fhirContext.newRestfulGenericClient(fhirRoot);
-        genericClient.setEncoding(EncodingEnum.JSON);
+            if (!extraHeaders.isEmpty()) {
+                AdditionalRequestHeadersInterceptor interceptor = new AdditionalRequestHeadersInterceptor();
 
-        if (!extraHeaders.isEmpty()) {
-            AdditionalRequestHeadersInterceptor interceptor = new AdditionalRequestHeadersInterceptor();
+                for (String header : extraHeaders.split("\\n")) {
+                    String[] pcs = header.split("\\:", 2);
+                    interceptor.addHeaderValue(pcs[0].trim(), pcs.length == 2 ? pcs[1].trim() : "");
+                }
 
-            for(String header: extraHeaders.split("\\n")) {
-                String[] pcs = header.split("\\:", 2);
-                interceptor.addHeaderValue(pcs[0].trim(), pcs.length == 2 ? pcs[1].trim() : "");
+                genericClient.registerInterceptor(interceptor);
             }
 
-            genericClient.registerInterceptor(interceptor);
+            capabilityStatement = genericClient.capabilities().ofType(CapabilityStatement.class).execute();
+            IAuthenticator authenticator = authenticatorRegistry.get(authenticationType);
+            Assert.notNull(authenticator, () -> "Unrecognized authentication scheme: " + authenticationType);
+            authenticator.initialize(this);
         }
 
-        capabilityStatement = genericClient.capabilities().ofType(CapabilityStatement.class).execute();
+        return genericClient;
     }
 
     public IGenericClient getGenericClient() {
-        return genericClient;
+        return genericClient == null ? initGenericClient() : genericClient;
     }
 
     public Credentials getCredentials() {
@@ -82,12 +79,13 @@ public class FhirService {
     }
 
     public CapabilityStatement getCapabilityStatement() {
+        getGenericClient();
         return capabilityStatement;
     }
 
     public <T extends IBaseResource> T readResource(Class<T> type, String fhirId) {
         try {
-            return genericClient.read()
+            return getGenericClient().read()
                     .resource(type)
                     .withId(fhirId)
                     .execute();
@@ -97,11 +95,11 @@ public class FhirService {
     }
 
     public String serialize(IBaseResource resource) {
-        return resource == null ? null : genericClient.getFhirContext().newJsonParser().encodeResourceToString(resource);
+        return resource == null ? null : getGenericClient().getFhirContext().newJsonParser().encodeResourceToString(resource);
     }
 
     public <T extends IBaseResource> T deserialize(String data, Class<T> resourceType) {
-        return data == null ? null : (T) genericClient.getFhirContext().newJsonParser().parseResource(data);
+        return data == null ? null : (T) getGenericClient().getFhirContext().newJsonParser().parseResource(data);
     }
 
 }

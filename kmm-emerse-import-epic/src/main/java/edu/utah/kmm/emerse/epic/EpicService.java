@@ -20,6 +20,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.annotation.PostConstruct;
 import java.net.URI;
 
 public class EpicService {
@@ -37,7 +38,8 @@ public class EpicService {
 
     private RestTemplate restTemplateNone;
 
-    public void init() {
+    @PostConstruct
+    private void init() {
         restTemplateNone = buildRestTemplate();
         restTemplateBasic = buildRestTemplate();
         BasicAuthenticationInterceptor interceptor = new BasicAuthenticationInterceptor(epicServiceCredentials.getUsername(), epicServiceCredentials.getPassword());

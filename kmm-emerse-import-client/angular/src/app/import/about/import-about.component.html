@@ -24,20 +24,24 @@
             <td><a href="mailto:{{get('app.email')}}">{{get('app.email')}}</a></td>
         </tr>
         <tr>
-            <td>Client version</td>
-            <td>EMERSE-IT Client {{get("client.version")}}</td>
+            <td>Server identifier</td>
+            <td>{{get("server.uuid")}}</td>
         </tr>
         <tr>
             <td>Server version</td>
             <td>EMERSE-IT Server {{get("server.version")}}</td>
         </tr>
         <tr>
+            <td>Client version</td>
+            <td>EMERSE-IT Client {{get("client.version")}}</td>
+        </tr>
+        <tr>
             <td>Solr version</td>
-            <td>{{get("solr.version") || "unavailable"}}</td>
+            <td>{{get("solr.version")}}</td>
         </tr>
         <tr>
             <td>Database version</td>
-            <td>{{get("database.version") || "unavailable"}}</td>
+            <td>{{get("database.version")}}</td>
         </tr>
         <tr>
             <td>Indexing threads</td>

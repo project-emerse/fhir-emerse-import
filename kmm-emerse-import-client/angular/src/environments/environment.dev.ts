@@ -16,6 +16,6 @@ const loggerConfig: LoggerConfig = {
 
 export const environment = {
   production: false,
-  serverEndpoint: "http://localhost:9080/emerse-it-server-dev",
+  serverEndpoint: "../emerse-it-server-dev",
   loggerConfig
 };

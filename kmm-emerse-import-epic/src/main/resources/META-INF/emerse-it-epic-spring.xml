@@ -14,8 +14,8 @@
         <constructor-arg value="${epic.server.password}" />
     </bean>
 
-    <bean id="epicService" class="edu.utah.kmm.emerse.epic.EpicService" init-method="init" />
+    <bean id="epicService" class="edu.utah.kmm.emerse.epic.EpicService" />
 
-    <bean class="edu.utah.kmm.emerse.epic.EpicPatientLookup" init-method="init" />
+    <bean class="edu.utah.kmm.emerse.epic.EpicPatientLookup" />
 
 </beans>

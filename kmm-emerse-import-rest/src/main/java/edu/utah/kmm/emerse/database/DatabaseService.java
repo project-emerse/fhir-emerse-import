@@ -4,15 +4,16 @@ import edu.utah.kmm.emerse.patient.PatientDTO;
 import edu.utah.kmm.emerse.patient.PatientService;
 import edu.utah.kmm.emerse.solr.IndexRequestDTO;
 import edu.utah.kmm.emerse.solr.IndexRequestDTO.IndexRequestStatus;
+import edu.utah.kmm.emerse.solr.IndexRequestQueue;
 import edu.utah.kmm.emerse.solr.SolrService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -36,7 +37,7 @@ public class DatabaseService {
     };
 
     private static final String[] QUEUE_INSERT_FIELDS = {
-            "SUBMITTED", "TOTAL", "PROCESSED", "STATUS", "ELAPSED", "IDENTIFIER_TYPE", "IDENTIFIERS"
+            "SERVER_ID", "SUBMITTED", "TOTAL", "PROCESSED", "STATUS", "ELAPSED", "IDENTIFIER_TYPE", "IDENTIFIERS"
     };
 
     private static final String[] QUEUE_SUMMARY_FIELDS = {
@@ -45,7 +46,8 @@ public class DatabaseService {
 
     private static final String QUEUE_FETCH_REQUEST = "SELECT * FROM " + QUEUE_TABLE + " WHERE ID=:ID";
 
-    private static final String QUEUE_SCAN = "SELECT ID FROM " + QUEUE_TABLE + " WHERE COMPLETED IS NULL AND STATUS = 0 ORDER BY SUBMITTED ASC";
+    private static final String QUEUE_SCAN = "SELECT ID FROM " + QUEUE_TABLE
+            + " WHERE SERVER_ID=:SERVER_ID AND COMPLETED IS NULL AND STATUS = 0 ORDER BY SUBMITTED ASC";
 
     private static final String QUEUE_DELETE_REQUEST = "DELETE FROM " + QUEUE_TABLE + " WHERE ID=:ID";
 
@@ -66,6 +68,9 @@ public class DatabaseService {
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    @Value("${server.uuid}")
+    private String serverId;
 
     @Autowired
     private SolrService solrService;
@@ -206,12 +211,16 @@ public class DatabaseService {
         }
     }
 
-    public void refreshQueue(RowMapper<?> rowMapper) {
-        jdbcTemplate.query(QUEUE_SCAN, rowMapper);
+    public void refreshQueue(IndexRequestQueue queue) {
+        jdbcTemplate.query(QUEUE_SCAN, Collections.singletonMap("SERVER_ID", serverId), queue);
     }
 
     public List<Map<String, Object>> fetchQueueEntries() {
-        String sql = "SELECT " + StringUtils.join(QUEUE_SUMMARY_FIELDS, ",") + " FROM " + QUEUE_TABLE + " ORDER BY SUBMITTED DESC";
-        return jdbcTemplate.queryForList(sql, Collections.emptyMap());
+        String sql = "SELECT " + StringUtils.join(QUEUE_SUMMARY_FIELDS, ",")
+                + " FROM " + QUEUE_TABLE
+                + " WHERE SERVER_ID=:SERVER_ID"
+                + " ORDER BY SUBMITTED DESC";
+        return jdbcTemplate.queryForList(sql, Collections.singletonMap("SERVER_ID", serverId));
     }
+
 }

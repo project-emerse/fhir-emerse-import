@@ -39,7 +39,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
         <configuration>
-          <warName>emerse-it-server-${emerse-build}</warName>
+          <warName>emerse-it-server-${build.profile}</warName>
           <webResources>
             <resource>
               <directory>src/main/webresources</directory>

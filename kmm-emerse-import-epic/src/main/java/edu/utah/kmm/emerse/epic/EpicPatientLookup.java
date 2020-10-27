@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,8 @@ public class EpicPatientLookup implements IPatientLookup {
         return "EPIC";
     }
 
-    public void init() {
+    @PostConstruct
+    private void init() {
         userid = StringUtils.substringAfter(epicService.getCredentials().getUsername(), "emp$");
     }
 

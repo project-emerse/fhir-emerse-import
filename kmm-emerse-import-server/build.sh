@@ -7,11 +7,11 @@ case "$1" in
 "")
   echo You must specify a build profile.
   echo For example: ./build.sh dev
-  echo Recognized profiles are: dev, prd
+  echo Recognized profiles are: dev, tst
   exit 1
 ;;
 
-"prd" | "dev")
+"dev" | "tst")
 ;;
 
 *)

@@ -44,7 +44,8 @@ public class IndexRequestDTO extends BaseDTO implements Closeable {
         PROCESSED,
         STATUS,
         SUBMITTED,
-        TOTAL
+        TOTAL,
+        SERVER_ID
     }
 
     private final List<ICloseCallback> closeCallbacks = new ArrayList<>();
@@ -61,12 +62,13 @@ public class IndexRequestDTO extends BaseDTO implements Closeable {
 
     private final IdentifierType identifierType;
 
-    IndexRequestDTO(Resource source) {
+    IndexRequestDTO(Resource source, String serverId) {
         try {
             this.identifiers = IOUtils.readLines(source.getInputStream(), "UTF-8");
             this.identifierType = toIdentifierType(identifiers.isEmpty() ? "" : identifiers.remove(0).trim());
             this.initial = true;
             put(FieldType.ID, UUID.randomUUID().toString());
+            put(FieldType.SERVER_ID, serverId);
             put(FieldType.SUBMITTED, now());
             put(FieldType.TOTAL, identifiers.size());
             put(FieldType.PROCESSED, 0);
@@ -82,6 +84,7 @@ public class IndexRequestDTO extends BaseDTO implements Closeable {
 
     public IndexRequestDTO(ResultSet rs) {
         put(FieldType.ID, rs, String.class);
+        put(FieldType.SERVER_ID, rs, String.class);
         put(FieldType.SUBMITTED, rs, Date.class);
         put(FieldType.COMPLETED, rs, Date.class);
         put(FieldType.TOTAL, rs, Integer.class);

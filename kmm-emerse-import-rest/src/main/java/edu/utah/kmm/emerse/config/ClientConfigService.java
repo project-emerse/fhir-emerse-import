@@ -21,6 +21,9 @@ public class ClientConfigService {
     @Autowired
     private DatabaseService databaseService;
 
+    @Autowired
+    private SolrService solrService;
+
     @Value("${fhir.mrn.system}")
     private String s1;
 
@@ -33,8 +36,8 @@ public class ClientConfigService {
     @Value("${solr.server.daemons:1}")
     private String s4;
 
-    @Autowired
-    private SolrService solrService;
+    @Value("${server.uuid}")
+    private String s5;
 
     @Value("${server.version:}")
     private String serverVersion;

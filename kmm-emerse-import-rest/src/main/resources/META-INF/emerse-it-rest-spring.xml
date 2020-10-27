@@ -14,13 +14,13 @@
         http://www.springframework.org/schema/security
 	    https://www.springframework.org/schema/security/spring-security.xsd">
 
-    <context:component-scan base-package="edu.utah.kmm.emerse" />
-
     <context:property-placeholder
             ignore-resource-not-found="true"
             location="
             file:\${user.home}/.emerse/emerse-it.properties,
             file:\${EMERSE_HOME}/emerse-it.properties" />
+
+    <context:component-scan base-package="edu.utah.kmm.emerse" />
 
     <!-- Servlet Configuration -->
 
@@ -107,7 +107,7 @@
 
     <bean id="fhirContext" class="ca.uhn.fhir.context.FhirContext" factory-method="forDstu3" />
 
-    <bean id="fhirClient" class="edu.utah.kmm.emerse.fhir.FhirService" />
+    <bean id="fhirService" class="edu.utah.kmm.emerse.fhir.FhirService" />
 
     <bean id="patientService" class="edu.utah.kmm.emerse.patient.PatientService" />
 
