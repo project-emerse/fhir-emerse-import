@@ -3,7 +3,14 @@ import {RestService} from "../../rest/rest.service";
 import {MatTableDataSource} from '@angular/material/table';
 import {MatPaginator} from '@angular/material/paginator';
 import {PromptDialogService} from '@uukmm/ng-widget-toolkit';
-import {actionText, EntryAction, EntryStatus, isValidAction, QueueEntry} from '../../model/queue-entry.model';
+import {
+    actionText,
+    EntryAction,
+    EntryStatus,
+    isValidAction,
+    QueueEntry,
+    STATUS_TEXT
+} from '../../model/queue-entry.model';
 import {noop, timer} from 'rxjs';
 
 @Component({
@@ -14,9 +21,13 @@ import {noop, timer} from 'rxjs';
 })
 export class ImportManagerComponent implements AfterViewInit{
 
+    readonly STATUS_TEXT = STATUS_TEXT.slice(0, EntryStatus.DELETED);
+
     @ViewChild('paginator') paginator: MatPaginator;
 
     readonly EntryAction = EntryAction;
+
+    readonly filters: Set<EntryStatus> = new Set();
 
     dataSource = new MatTableDataSource<QueueEntry>();
 
@@ -37,6 +48,8 @@ export class ImportManagerComponent implements AfterViewInit{
 
     ngAfterViewInit(): void {
         this.dataSource.paginator = this.paginator;
+        this.dataSource.filterPredicate = data => this.includeEntry(data);
+        this.dataSource.filter = "dummy";
         timer().subscribe(() => this.refresh());
     }
 
@@ -55,6 +68,24 @@ export class ImportManagerComponent implements AfterViewInit{
 
         this.promptDialogService.confirm(`Are you sure you want to ${warn} this entry?`, "Confirm Action")
             .subscribe(response => response ? this.doAction(action) : null);
+    }
+
+    private includeEntry(entry: QueueEntry): boolean {
+        return this.filters.size === 0 || this.filters.has(entry.status);
+    }
+
+    hasFilter(status: EntryStatus): boolean {
+        return this.filters.has(status);
+    }
+
+    updateFilter(status: EntryStatus, add: boolean): void {
+        add ? this.filters.add(status) : this.filters.delete(status);
+        this.dataSource._updateChangeSubscription();
+    }
+
+    clearFilters(): void {
+        this.filters.clear();
+        this.dataSource._updateChangeSubscription();
     }
 
     private doAction(action: EntryAction): void {
@@ -99,7 +130,9 @@ export class ImportManagerComponent implements AfterViewInit{
         this.restService.fetchQueue().subscribe(entries => {
             this.message = null;
             this.dataSource.data = entries;
-            this.dataSource._updateChangeSubscription();
+            this.busy = false;
+        }, error => {
+            this.message = error.message || error;
             this.busy = false;
         });
     }

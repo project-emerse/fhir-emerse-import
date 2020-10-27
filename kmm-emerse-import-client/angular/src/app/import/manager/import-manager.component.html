@@ -50,6 +50,18 @@
     <mat-toolbar>
         <mat-paginator #paginator></mat-paginator>
         <span class="flex-fill"></span>
+        <span class="emerse-import-manager-filters">
+            <button mat-icon-button (click)="clearFilters()">
+                <mat-icon ngbTooltip="Clear all filters">clear</mat-icon>
+            </button>
+            <span></span>
+            <mat-checkbox *ngFor="let status of STATUS_TEXT; let i = index"
+                (change)="updateFilter(i, $event.checked)"
+                [checked]="hasFilter(i)">
+                {{status}}
+            </mat-checkbox>
+        </span>
+        <span class="flex-fill"></span>
         <button *ngIf="supported(EntryAction.DELETE)"
                 class="text-danger"
                 mat-button

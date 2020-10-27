@@ -8,12 +8,14 @@
             <span class="emerse-login-spacing">Username:</span>
             <input #usernameInput type="text"
                     [(ngModel)]="username"
+                    [disabled]="busy"
                     (keyup.enter)="focus(passwordInput)">
         </div>
         <div>
             <span class="emerse-login-spacing">Password:</span>
             <input #passwordInput type="password"
                     [(ngModel)]="password"
+                    [disabled]="busy"
                     (keyup.enter)="submit.disabled ? null : login()">
         </div>
         <div>

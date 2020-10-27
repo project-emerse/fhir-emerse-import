@@ -8,7 +8,7 @@ export enum EntryStatus {
     DELETED = 6
 }
 
-const STATUS_TEXT: string[] = ['queued', 'running', 'suspended', 'completed', 'aborted', 'error', 'deleted'];
+export const STATUS_TEXT: string[] = ['queued', 'running', 'suspended', 'completed', 'aborted', 'error', 'deleted'];
 
 export enum EntryAction {
     DELETE = 0,
@@ -18,7 +18,7 @@ export enum EntryAction {
     RESTART = 4
 }
 
-const ACTION_TEXT: string[] = ['Deleting', 'Resuming', 'Suspending', 'Aborting', 'Restarting'];
+export const ACTION_TEXT: string[] = ['Deleting', 'Resuming', 'Suspending', 'Aborting', 'Restarting'];
 
 const VALID_ACTIONS: {[status: number] : EntryAction[]} = {
     [EntryStatus.QUEUED]: [EntryAction.DELETE, EntryAction.SUSPEND, EntryAction.ABORT],

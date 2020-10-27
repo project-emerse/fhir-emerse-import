@@ -55,3 +55,25 @@ td.emerse-import-manager-error_text {
     color: red;
     font-weight: bold;
 }
+
+.emerse-import-manager-filters {
+    outline: 1px solid lightgray;
+}
+
+.emerse-import-manager-filters .mat-checkbox-layout {
+    margin: 0;
+    padding-right: 10px;
+}
+
+.emerse-import-manager-filters .mat-icon {
+    vertical-align: middle;
+}
+
+.emerse-import-manager-filters .mat-icon-button {
+    outline: none!important;
+}
+
+.emerse-import-manager-filters>span {
+    display: inline-block;
+    width: 10px;
+}

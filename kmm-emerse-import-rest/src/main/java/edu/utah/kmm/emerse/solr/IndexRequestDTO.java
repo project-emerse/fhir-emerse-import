@@ -97,7 +97,7 @@ public class IndexRequestDTO extends BaseDTO implements Closeable {
     }
 
     private List<String> stringToList(String value) {
-        return Arrays.asList(value.split("\n"));
+        return value == null ? Collections.emptyList() : Arrays.asList(value.split("\n"));
     }
 
     private String listToString(List<String> list) {
