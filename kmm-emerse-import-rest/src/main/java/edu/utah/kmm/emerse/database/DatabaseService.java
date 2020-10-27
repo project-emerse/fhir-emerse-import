@@ -32,7 +32,7 @@ public class DatabaseService {
     private static final String QUEUE_TABLE = "INDEXING_QUEUE";
 
     private static final String[] QUEUE_UPDATE_FIELDS = {
-            "ID", "COMPLETED", "PROCESSED", "ERROR_TEXT", "STATUS", "ELAPSED"
+            "ID", "SUBMITTED", "COMPLETED", "PROCESSED", "ERROR_TEXT", "STATUS", "ELAPSED"
     };
 
     private static final String[] QUEUE_INSERT_FIELDS = {

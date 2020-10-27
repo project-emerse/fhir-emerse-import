@@ -109,7 +109,7 @@ public class SolrService {
         boolean hydrated = wrapper.isHydrated();
         IndexRequestDTO request = wrapper.get();
 
-        if (request.performAction(action.action) && hydrated) {
+        if (request.performAction(action.action) && !hydrated) {
             request.close();
             indexRequestQueue.refreshNow();
         }
