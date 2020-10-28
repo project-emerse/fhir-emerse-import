@@ -14,12 +14,13 @@ public class Decryptor {
 
     private final StandardPBEStringEncryptor decryptor;
 
-    public Decryptor(String env, String algorithm) {
+    public Decryptor(String master, String algorithm) {
         if ("none".equalsIgnoreCase(algorithm)) {
             decryptor = null;
         } else {
-            String masterKey = System.getenv(env);
-            Assert.notNull(masterKey, () -> "Could not retrieve master key from environment variable '" + env + "'");
+            String masterKey = System.getProperty(master);
+            masterKey = masterKey != null ? masterKey : System.getenv(master);
+            Assert.notNull(masterKey, () -> "Could not retrieve master key from system property or environment variable '" + master + "'");
             decryptor = new StandardPBEStringEncryptor();
             decryptor.setAlgorithm(algorithm);
             decryptor.setPassword(masterKey);
