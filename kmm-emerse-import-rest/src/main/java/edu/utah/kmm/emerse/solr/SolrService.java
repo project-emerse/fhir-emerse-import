@@ -12,6 +12,12 @@ import edu.utah.kmm.emerse.security.Credentials;
 import edu.utah.kmm.emerse.solr.IndexRequestDTO.IndexRequestStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -46,10 +52,6 @@ public class SolrService {
 
     private final HttpSolrClient solrClient;
 
-    private final String solrUsername;
-
-    private final String solrPassword;
-
     @Autowired
     private DocumentService documentService;
 
@@ -67,10 +69,14 @@ public class SolrService {
 
     public SolrService(
             String solrServerRoot,
-            Credentials solrServiceCredentials) {
-        solrUsername = solrServiceCredentials.getUsername();
-        solrPassword = solrServiceCredentials.getPassword();
+            Credentials credentials) {
+        CredentialsProvider provider = new BasicCredentialsProvider();
+        provider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(credentials.getUsername(), credentials.getPassword()));
+        HttpClient client = HttpClientBuilder.create()
+                .setDefaultCredentialsProvider(provider)
+                .build();
         solrClient = new HttpSolrClient.Builder(solrServerRoot)
+                .withHttpClient(client)
                 .withResponseParser(new XMLResponseParser())
                 .allowCompression(true)
                 .build();
@@ -80,7 +86,7 @@ public class SolrService {
         try {
             SolrParams params = new MapSolrParams(Collections.singletonMap("wt", "xml"));
             GenericSolrRequest request = new GenericSolrRequest(SolrRequest.METHOD.GET, "/admin/info/system", params);
-            NamedList<?> result = solrClient.httpUriRequest(request).future.get();
+            NamedList<?> result = request.process(solrClient).getResponse();
             NamedList<?> versions = (NamedList<?>) result.get("lucene");
             String version = Objects.toString(versions.get("solr-impl-version"));
             return version == null ? null : ("Solr Release " + version);
@@ -251,7 +257,6 @@ public class SolrService {
     private boolean indexDTO(BaseDTO dto, String collection) {
         try {
             UpdateRequest request = new UpdateRequest();
-            request.setBasicAuthCredentials(solrUsername, solrPassword);
             request.add(newSolrDocument(dto.getMap()));
             request.process(solrClient, collection);
             return true;
@@ -264,7 +269,7 @@ public class SolrService {
     private SolrInputDocument newSolrDocument(Map<String, Object> fields) {
         SolrInputDocument solrDoc = new SolrInputDocument();
 
-        for (Map.Entry<String, Object> entry: fields.entrySet()) {
+        for (Map.Entry<String, Object> entry : fields.entrySet()) {
             solrDoc.addField(entry.getKey(), entry.getValue());
         }
 
