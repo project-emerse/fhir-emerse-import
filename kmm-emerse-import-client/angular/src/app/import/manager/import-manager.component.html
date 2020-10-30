@@ -48,63 +48,65 @@
         </table>
     </span>
     <mat-toolbar>
-        <mat-paginator #paginator></mat-paginator>
-        <span class="flex-fill"></span>
+        <span class="border-right">
+            <mat-paginator class="d-inline-block" #paginator></mat-paginator>
+        </span>
         <span class="emerse-import-manager-filters">
             <button mat-icon-button (click)="clearFilters()">
                 <mat-icon ngbTooltip="Clear all filters">clear</mat-icon>
             </button>
             <span></span>
             <mat-checkbox *ngFor="let status of STATUS_TEXT; let i = index"
-                (change)="updateFilter(i, $event.checked)"
-                [checked]="hasFilter(i)">
+                          (change)="updateFilter(i, $event.checked)"
+                          [checked]="hasFilter(i)">
                 {{status}}
             </mat-checkbox>
         </span>
-        <span class="flex-fill"></span>
-        <button *ngIf="supported(EntryAction.DELETE)"
-                class="text-danger"
-                mat-button
-                tabindex="-1"
-                (click)="action(EntryAction.DELETE, 'delete')">
-            Delete
-        </button>
-        <button *ngIf="supported(EntryAction.ABORT)"
-                class="text-danger"
-                mat-button
-                tabindex="-1"
-                (click)="action(EntryAction.ABORT, 'abort')">
-            Abort
-        </button>
-        <button *ngIf="supported(EntryAction.RESUME)"
-                class="text-success"
-                mat-button
-                tabindex="-1"
-                (click)="action(EntryAction.RESUME, 'resume')">
-            Resume
-        </button>
-        <button *ngIf="supported(EntryAction.RESTART)"
-                class="text-success"
-                mat-button
-                tabindex="-1"
-                (click)="action(EntryAction.RESTART, 'restart')">
-            Restart
-        </button>
-        <button *ngIf="supported(EntryAction.SUSPEND)"
-                class="text-warning"
-                mat-button
-                tabindex="-1"
-                (click)="action(EntryAction.SUSPEND, 'suspend')">
-            Suspend
-        </button>
-        <button
-                class="text-warning"
-                mat-icon-button
-                tabindex="-1"
-                ngbTooltip="Refresh"
-                [disabled]="busy"
-                (click)="refresh()">
-            <mat-icon>refresh</mat-icon>
-        </button>
+        <span class="text-right border-left">
+            <button *ngIf="supported(EntryAction.DELETE)"
+                    class="text-danger"
+                    mat-button
+                    tabindex="-1"
+                    (click)="action(EntryAction.DELETE, 'delete')">
+                Delete
+            </button>
+            <button *ngIf="supported(EntryAction.ABORT)"
+                    class="text-danger"
+                    mat-button
+                    tabindex="-1"
+                    (click)="action(EntryAction.ABORT, 'abort')">
+                Abort
+            </button>
+            <button *ngIf="supported(EntryAction.RESUME)"
+                    class="text-success"
+                    mat-button
+                    tabindex="-1"
+                    (click)="action(EntryAction.RESUME, 'resume')">
+                Resume
+            </button>
+            <button *ngIf="supported(EntryAction.RESTART)"
+                    class="text-success"
+                    mat-button
+                    tabindex="-1"
+                    (click)="action(EntryAction.RESTART, 'restart')">
+                Restart
+            </button>
+            <button *ngIf="supported(EntryAction.SUSPEND)"
+                    class="text-warning"
+                    mat-button
+                    tabindex="-1"
+                    (click)="action(EntryAction.SUSPEND, 'suspend')">
+                Suspend
+            </button>
+            <button
+                    class="text-warning"
+                    mat-icon-button
+                    tabindex="-1"
+                    ngbTooltip="Refresh"
+                    [disabled]="busy"
+                    (click)="refresh()">
+                <mat-icon>refresh</mat-icon>
+            </button>
+        </span>
    </mat-toolbar>
 </div>

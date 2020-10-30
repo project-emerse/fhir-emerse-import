@@ -19,7 +19,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.solr.client.solrj.SolrRequest;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.client.solrj.request.GenericSolrRequest;
@@ -34,7 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
-import java.io.IOException;
+import javax.annotation.PreDestroy;
 import java.util.*;
 
 /**
@@ -86,7 +85,7 @@ public class SolrService {
         try {
             SolrParams params = new MapSolrParams(Collections.singletonMap("wt", "xml"));
             GenericSolrRequest request = new GenericSolrRequest(SolrRequest.METHOD.GET, "/admin/info/system", params);
-            NamedList<?> result = request.process(solrClient).getResponse();
+            NamedList<?> result = solrClient.request(request);
             NamedList<?> versions = (NamedList<?>) result.get("lucene");
             String version = Objects.toString(versions.get("solr-impl-version"));
             return version == null ? null : ("Solr Release " + version);
@@ -191,7 +190,13 @@ public class SolrService {
 
         Map<String, Object> map = new HashMap<>(content.getMap());
         map.put("MRN", mrn);
-        return result.success(indexDTO(new DocumentDTO(document, map), COLLECTION_DOCUMENTS));
+
+        try {
+            indexDTO(new DocumentDTO(document, map), COLLECTION_DOCUMENTS);
+            return result.success(true);
+        } catch (Exception e) {
+            return result.success(false);
+        }
     }
 
     public void processRequest(String requestId) {
@@ -226,6 +231,7 @@ public class SolrService {
 
                     if (result.getTotal() % 50 == 0) {
                         databaseService.updateIndexRequest(request);
+                        commit();
                     }
 
                     result.combine(indexDocuments(id, identifierType));
@@ -241,9 +247,11 @@ public class SolrService {
             }
         }
 
+        commit();
         return result;
     }
 
+    @PreDestroy
     public void commit() {
         try {
             solrClient.commit(COLLECTION_DOCUMENTS);
@@ -254,15 +262,16 @@ public class SolrService {
         }
     }
 
-    private boolean indexDTO(BaseDTO dto, String collection) {
+    private void indexDTO(
+            BaseDTO dto,
+            String collection) {
         try {
             UpdateRequest request = new UpdateRequest();
             request.add(newSolrDocument(dto.getMap()));
-            request.process(solrClient, collection);
-            return true;
-        } catch (SolrServerException | IOException e) {
+            solrClient.request(request, collection);
+        } catch (Exception e) {
             log.error("Error indexing entity for collection " + collection, e);
-            return false;
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
@@ -279,6 +288,7 @@ public class SolrService {
     public void indexPatient(PatientDTO patientDTO) {
         indexDTO(patientDTO, COLLECTION_PATIENT);
         indexDTO(patientDTO, COLLECTION_SLAVE);
+        commit();
     }
 
 }

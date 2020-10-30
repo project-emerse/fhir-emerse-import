@@ -20,8 +20,7 @@
             "styles": [
               "src/styles.scss",
               "src/custom-theme.scss",
-              "src/google-fonts-ie.css",
-              "node_modules/bootstrap/dist/css/bootstrap.min.css"
+              "src/google-fonts-ie.css"
             ],
             "scripts": [
               "node_modules/hammerjs/hammer.min.js"

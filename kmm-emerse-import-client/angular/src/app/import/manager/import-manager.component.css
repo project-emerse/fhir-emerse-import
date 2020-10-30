@@ -28,6 +28,11 @@
     margin-bottom: 1px;
 }
 
+.emerse-import-manager .mat-toolbar > span:first-child,
+.emerse-import-manager .mat-toolbar > span:last-child {
+    flex: 1;
+}
+
 .emerse-import-manager .mat-paginator {
     background: transparent;
 }
@@ -54,10 +59,6 @@ td.emerse-import-manager-error_text {
 .emerse-import-manager .mat-footer-cell {
     color: red;
     font-weight: bold;
-}
-
-.emerse-import-manager-filters {
-    outline: 1px solid lightgray;
 }
 
 .emerse-import-manager-filters .mat-checkbox-layout {
