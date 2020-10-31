@@ -7,10 +7,7 @@ import edu.utah.kmm.emerse.document.DocumentService;
 import edu.utah.kmm.emerse.fhir.FhirService;
 import edu.utah.kmm.emerse.fhir.IdentifierType;
 import edu.utah.kmm.emerse.patient.PatientService;
-import edu.utah.kmm.emerse.solr.IndexRequestAction;
-import edu.utah.kmm.emerse.solr.IndexRequestDTO;
-import edu.utah.kmm.emerse.solr.IndexResult;
-import edu.utah.kmm.emerse.solr.SolrService;
+import edu.utah.kmm.emerse.solr.*;
 import edu.utah.kmm.emerse.util.MiscUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -56,6 +53,9 @@ public class RestController {
     @Autowired
     private ClientConfigService clientConfigService;
 
+    @Autowired
+    private DaemonManager daemonManager;
+
     @GetMapping("/login")
     @ResponseBody
     public boolean login(Principal user) {
@@ -99,11 +99,11 @@ public class RestController {
      * @return Status of the operation.
      */
     @PostMapping("/patient")
-    public ResponseEntity updatePatient(
+    public ResponseEntity<?> updatePatient(
             @RequestBody String payload) {
         Patient patient = fhirService.deserialize(payload, Patient.class);
         databaseService.createOrUpdatePatient(patient, true);
-        return new ResponseEntity(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
@@ -161,11 +161,11 @@ public class RestController {
      */
     @PostMapping("/entry-action")
     @ResponseBody
-    public ResponseEntity entryAction(@RequestBody IndexRequestAction action) {
+    public ResponseEntity<?> entryAction(@RequestBody IndexRequestAction action) {
         IndexRequestDTO request = solrService.indexRequestAction(action);
         Map<String, Object> result = new HashMap<>(request.getMap());
         result.remove("IDENTIFIERS");
-        return new ResponseEntity(result, HttpStatus.OK);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     /**
@@ -189,10 +189,10 @@ public class RestController {
      */
     @PostMapping("/batch-bg")
     @ResponseBody
-    public ResponseEntity indexBatchQueued(
+    public ResponseEntity<?> indexBatchQueued(
             @RequestParam MultipartFile file) {
         solrService.batchIndexQueued(file.getResource());
-        return new ResponseEntity(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
@@ -206,8 +206,20 @@ public class RestController {
         return databaseService.fetchQueueEntries();
     }
 
+    /**
+     * Restarts all indexing daemons.
+     *
+     * @return Number of indexing daemons.
+     */
+    @GetMapping("/restart")
+    @ResponseBody
+    public ResponseEntity<Integer> restartDaemons() {
+        return new ResponseEntity<>(daemonManager.restartDaemons(), HttpStatus.OK);
+    }
+
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> onError(Exception ex) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<String> onError(Exception e) {
+        log.error(e);
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 }

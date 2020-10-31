@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -22,7 +23,7 @@ public class DaemonManager {
     private IndexRequestQueue solrQueue;
 
     @Autowired
-    private DaemonThreadPool daemonThreadPool;
+    private ThreadPoolTaskExecutor daemonThreadPool;
 
     @Value("${solr.server.daemons:1}")
     private int maxDaemons;
@@ -30,14 +31,16 @@ public class DaemonManager {
     private final List<IndexDaemon> daemons = new ArrayList<>();
 
     @PostConstruct
-    public int startBackgroundProcessors() {
+    private int startDaemons() {
         log.info("Starting indexing daemon(s).");
 
         int count = 0;
 
         for (int i = daemons.size(); i < maxDaemons; i++) {
             count++;
-            daemonThreadPool.execute(new IndexDaemon(i + 1, solrQueue, solrService));
+            IndexDaemon daemon = new IndexDaemon(i + 1, solrQueue, solrService);
+            daemons.add(daemon);
+            daemonThreadPool.execute(daemon);
         }
 
         log.info("Started " + count + " indexing daemon(s).");
@@ -45,7 +48,7 @@ public class DaemonManager {
     }
 
     @PreDestroy
-    public int stopBackgroundProcessors() {
+    private int stopDaemons() {
         Iterator<IndexDaemon> daemons = this.daemons.iterator();
         int count = 0;
 
@@ -57,4 +60,10 @@ public class DaemonManager {
 
         return count;
     }
+
+    public int restartDaemons() {
+        stopDaemons();
+        return startDaemons();
+    }
+
 }

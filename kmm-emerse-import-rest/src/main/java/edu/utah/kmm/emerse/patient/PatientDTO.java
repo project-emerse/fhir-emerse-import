@@ -1,9 +1,10 @@
 package edu.utah.kmm.emerse.patient;
 
-import edu.utah.kmm.emerse.database.BaseDTO;
+import edu.utah.kmm.emerse.solr.BaseSolrDTO;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Patient;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.truncate;
@@ -11,10 +12,24 @@ import static org.apache.commons.lang3.StringUtils.truncate;
 /**
  * DTO encapsulating patient attributes.
  */
-public class PatientDTO extends BaseDTO {
+public class PatientDTO extends BaseSolrDTO {
 
-    public PatientDTO(Patient patient, Map<String, Object> additionalParams) {
-        super(additionalParams);
+    private static final Map<String, String> solrKeyMap = new HashMap<>();
+
+    static {
+        solrKeyMap.put("EXTERNAL_ID", "MRN");
+        solrKeyMap.put("BIRTH_DATE", "BIRTHDATE");
+        solrKeyMap.put("FIRST_NAME", "FIRSTNAME");
+        solrKeyMap.put("LAST_NAME", "LASTNAME");
+        solrKeyMap.put("CREATED_BY", null);
+        solrKeyMap.put("UPDATED_BY", null);
+        solrKeyMap.put("MIDDLE_NAME", null);
+    }
+
+    public PatientDTO(
+            Patient patient,
+            Map<String, Object> additionalParams) {
+        super(additionalParams, solrKeyMap);
         HumanName name = patient.getNameFirstRep();
 
         if (!name.hasFamily()) {
@@ -35,4 +50,5 @@ public class PatientDTO extends BaseDTO {
         map.put("RELIGION_CD", null);
         map.put("ZIP_CD", truncate(patient.hasAddress() ? patient.getAddressFirstRep().getPostalCode() : null, 10));
     }
+
 }

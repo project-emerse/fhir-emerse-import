@@ -1,6 +1,5 @@
 package edu.utah.kmm.emerse.solr;
 
-import edu.utah.kmm.emerse.database.BaseDTO;
 import edu.utah.kmm.emerse.database.DatabaseService;
 import edu.utah.kmm.emerse.document.ContentDTO;
 import edu.utah.kmm.emerse.document.DocumentDTO;
@@ -12,11 +11,9 @@ import edu.utah.kmm.emerse.security.Credentials;
 import edu.utah.kmm.emerse.solr.IndexRequestDTO.IndexRequestStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -34,6 +31,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
 import javax.annotation.PreDestroy;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -69,10 +67,11 @@ public class SolrService {
     public SolrService(
             String solrServerRoot,
             Credentials credentials) {
-        CredentialsProvider provider = new BasicCredentialsProvider();
-        provider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(credentials.getUsername(), credentials.getPassword()));
+        String auth = String.format("%s:%s", credentials.getUsername(), credentials.getPassword());
+        String header = "Basic " + Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.ISO_8859_1));
         HttpClient client = HttpClientBuilder.create()
-                .setDefaultCredentialsProvider(provider)
+                .addInterceptorFirst((HttpRequestInterceptor) (httpRequest, httpContext) ->
+                        httpRequest.setHeader(HttpHeaders.AUTHORIZATION, header))
                 .build();
         solrClient = new HttpSolrClient.Builder(solrServerRoot)
                 .withHttpClient(client)
@@ -263,11 +262,11 @@ public class SolrService {
     }
 
     private void indexDTO(
-            BaseDTO dto,
+            BaseSolrDTO dto,
             String collection) {
         try {
             UpdateRequest request = new UpdateRequest();
-            request.add(newSolrDocument(dto.getMap()));
+            request.add(newSolrDocument(dto.getSolrMap()));
             solrClient.request(request, collection);
         } catch (Exception e) {
             log.error("Error indexing entity for collection " + collection, e);

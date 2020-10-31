@@ -21,6 +21,6 @@ public abstract class BaseDTO {
     }
 
     public Map<String, Object> getMap() {
-        return Collections.unmodifiableMap(map);
+        return map;
     }
 }

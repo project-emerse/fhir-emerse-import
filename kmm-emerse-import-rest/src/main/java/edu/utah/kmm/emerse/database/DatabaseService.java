@@ -167,6 +167,12 @@ public class DatabaseService {
 
         try {
             jdbcTemplate.update(SQL, patientDTO.getMap());
+
+            if (recno == null) {
+                recno = getPatientRecNum(mrn);
+                patientDTO.getMap().put("ID", recno);
+            }
+
             solrService.indexPatient(patientDTO);
         } catch (DataAccessException e) {
             throw new RuntimeException(e.getMessage(), e);
