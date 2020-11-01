@@ -1,5 +1,5 @@
 import {AfterViewInit, Component, ViewChild, ViewEncapsulation} from "@angular/core";
-import {RestService} from "../../rest/rest.service";
+import {RestService} from "../rest/rest.service";
 import {MatTableDataSource} from '@angular/material/table';
 import {MatPaginator} from '@angular/material/paginator';
 import {PromptDialogService} from '@uukmm/ng-widget-toolkit';
@@ -10,16 +10,16 @@ import {
     isValidAction,
     QueueEntry,
     STATUS_TEXT
-} from '../../model/queue-entry.model';
+} from '../model/queue-entry.model';
 import {noop, timer} from 'rxjs';
 
 @Component({
-    selector: 'emerse-import-manager',
-    templateUrl: './import-manager.component.html',
-    styleUrls: ['./import-manager.component.css'],
+    selector: 'emerse-queue-manager',
+    templateUrl: './queue-manager.component.html',
+    styleUrls: ['./queue-manager.component.css'],
     encapsulation: ViewEncapsulation.None
 })
-export class ImportManagerComponent implements AfterViewInit{
+export class QueueManagerComponent implements AfterViewInit{
 
     readonly STATUS_TEXT = STATUS_TEXT.slice(0, EntryStatus.DELETED);
 

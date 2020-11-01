@@ -1,13 +1,13 @@
 import {Component, ViewEncapsulation} from "@angular/core";
-import {ConfigService} from "../../config/config.service";
+import {ConfigService} from "../config/config.service";
 
 @Component({
-    selector: 'emerse-import-about',
-    templateUrl: './import-about.component.html',
-    styleUrls: ['./import-about.component.css'],
+    selector: 'emerse-about',
+    templateUrl: './about.component.html',
+    styleUrls: ['./about.component.css'],
     encapsulation: ViewEncapsulation.None
 })
-export class ImportAboutComponent {
+export class AboutComponent {
 
     constructor(private readonly configService: ConfigService) {
     }

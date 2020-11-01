@@ -1,0 +1,8 @@
+.emerse-batch-import {
+    padding: 20px;
+}
+
+.emerse-batch-import input,
+.emerse-batch-import button {
+    margin-left: 15px
+}

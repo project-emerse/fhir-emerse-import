@@ -1,0 +1,25 @@
+.emerse-about th,
+.emerse-about td {
+    font-size: 1.5em;
+    vertical-align: middle;
+}
+
+.emerse-about td:first-child {
+    font-weight: bold;
+}
+
+.emerse-about a {
+    font-size: 1.1em;
+}
+
+.emerse-about th:first-child {
+    width: 25%;
+}
+
+.emerse-about th {
+    border-bottom: 2px solid black!important;
+}
+
+.emerse-about thead > tr {
+    background: lightyellow;
+}

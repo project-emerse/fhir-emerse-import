@@ -1,40 +1,40 @@
-<div class="emerse-import-manager">
+<div class="emerse-queue-manager">
     <span>
         <table mat-table class="table-striped"
                [dataSource]="dataSource"
                [trackBy]="trackBy">
            <ng-container matColumnDef="submitted">
-            <th mat-header-cell class="emerse-import-manager-submitted" *matHeaderCellDef>Submitted</th>
-            <td mat-cell class="emerse-import-manager-submitted" *matCellDef="let item"> {{item.submitted_date?.toLocaleString()}} </td>
+            <th mat-header-cell class="emerse-queue-manager-submitted" *matHeaderCellDef>Submitted</th>
+            <td mat-cell class="emerse-queue-manager-submitted" *matCellDef="let item"> {{item.submitted_date?.toLocaleString()}} </td>
             <td mat-footer-cell [attr.colspan]="columns.length" *matFooterCellDef>{{message}}</td>
           </ng-container>
            <ng-container matColumnDef="completed">
-            <th mat-header-cell class="emerse-import-manager-completed" *matHeaderCellDef>Completed</th>
-            <td mat-cell class="emerse-import-manager-completed" *matCellDef="let item"> {{item.completed_date?.toLocaleString()}} </td>
+            <th mat-header-cell class="emerse-queue-manager-completed" *matHeaderCellDef>Completed</th>
+            <td mat-cell class="emerse-queue-manager-completed" *matCellDef="let item"> {{item.completed_date?.toLocaleString()}} </td>
           </ng-container>
            <ng-container matColumnDef="elapsed">
-            <th mat-header-cell class="emerse-import-manager-elapsed" *matHeaderCellDef>Elapsed</th>
-            <td mat-cell class="emerse-import-manager-elapsed" *matCellDef="let item"> {{item.elapsed_text}} </td>
+            <th mat-header-cell class="emerse-queue-manager-elapsed" *matHeaderCellDef>Elapsed</th>
+            <td mat-cell class="emerse-queue-manager-elapsed" *matCellDef="let item"> {{item.elapsed_text}} </td>
           </ng-container>
            <ng-container matColumnDef="total">
-            <th mat-header-cell class="emerse-import-manager-total" *matHeaderCellDef>Total</th>
-            <td mat-cell class="emerse-import-manager-total" *matCellDef="let item"> {{item.total}} </td>
+            <th mat-header-cell class="emerse-queue-manager-total" *matHeaderCellDef>Total</th>
+            <td mat-cell class="emerse-queue-manager-total" *matCellDef="let item"> {{item.total}} </td>
           </ng-container>
            <ng-container matColumnDef="processed">
-            <th mat-header-cell class="emerse-import-manager-processed" *matHeaderCellDef>Processed</th>
-            <td mat-cell class="emerse-import-manager-processed" *matCellDef="let item"> {{item.processed}} </td>
+            <th mat-header-cell class="emerse-queue-manager-processed" *matHeaderCellDef>Processed</th>
+            <td mat-cell class="emerse-queue-manager-processed" *matCellDef="let item"> {{item.processed}} </td>
           </ng-container>
            <ng-container matColumnDef="status">
-            <th mat-header-cell class="emerse-import-manager-status" *matHeaderCellDef>Status</th>
-            <td mat-cell class="emerse-import-manager-status" *matCellDef="let item"> {{item.status_text}} </td>
+            <th mat-header-cell class="emerse-queue-manager-status" *matHeaderCellDef>Status</th>
+            <td mat-cell class="emerse-queue-manager-status" *matCellDef="let item"> {{item.status_text}} </td>
           </ng-container>
            <ng-container matColumnDef="identifier_type">
-            <th mat-header-cell class="emerse-import-manager-identifier_type" *matHeaderCellDef>IdType</th>
-            <td mat-cell class="emerse-import-manager-identifier_type" *matCellDef="let item"> {{item.identifier_type}} </td>
+            <th mat-header-cell class="emerse-queue-manager-identifier_type" *matHeaderCellDef>IdType</th>
+            <td mat-cell class="emerse-queue-manager-identifier_type" *matCellDef="let item"> {{item.identifier_type}} </td>
           </ng-container>
            <ng-container matColumnDef="error_text">
-            <th mat-header-cell class="emerse-import-manager-error_text" *matHeaderCellDef>Error</th>
-            <td mat-cell class="emerse-import-manager-error_text" *matCellDef="let item"> {{item.error_text}} </td>
+            <th mat-header-cell class="emerse-queue-manager-error_text" *matHeaderCellDef>Error</th>
+            <td mat-cell class="emerse-queue-manager-error_text" *matCellDef="let item"> {{item.error_text}} </td>
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
@@ -51,7 +51,7 @@
         <span class="border-right">
             <mat-paginator class="d-inline-block" #paginator></mat-paginator>
         </span>
-        <span class="emerse-import-manager-filters">
+        <span class="emerse-queue-manager-filters">
             <button mat-icon-button (click)="clearFilters()">
                 <mat-icon ngbTooltip="Clear all filters">clear</mat-icon>
             </button>

@@ -1,0 +1,80 @@
+.emerse-queue-manager {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.emerse-queue-manager > span {
+    width: 100%;
+    flex: 1;
+}
+
+.emerse-queue-manager table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.emerse-queue-manager .mat-row.hovered {
+    outline: 1px dotted gray;
+}
+
+.emerse-queue-manager .mat-row.highlighted {
+    background: lightblue;
+}
+
+.emerse-queue-manager .mat-toolbar {
+    border-top: 1px solid gray;
+    height: 40px;
+    margin-bottom: 1px;
+}
+
+.emerse-queue-manager .mat-toolbar > span:first-child,
+.emerse-queue-manager .mat-toolbar > span:last-child {
+    flex: 1;
+}
+
+.emerse-queue-manager .mat-paginator {
+    background: transparent;
+}
+
+.emerse-queue-manager .mat-paginator-container {
+    min-height: 0;
+}
+
+td.emerse-queue-manager-total,
+th.emerse-queue-manager-total,
+td.emerse-queue-manager-processed,
+th.emerse-queue-manager-processed,
+td.emerse-queue-manager-status,
+th.emerse-queue-manager-status,
+td.emerse-queue-manager-identifier_type,
+th.emerse-queue-manager-identifier_type {
+    text-align: center !important;
+}
+
+td.emerse-queue-manager-error_text {
+    overflow: auto;
+}
+
+.emerse-queue-manager .mat-footer-cell {
+    color: red;
+    font-weight: bold;
+}
+
+.emerse-queue-manager-filters .mat-checkbox-layout {
+    margin: 0;
+    padding-right: 10px;
+}
+
+.emerse-queue-manager-filters .mat-icon {
+    vertical-align: middle;
+}
+
+.emerse-queue-manager-filters .mat-icon-button {
+    outline: none!important;
+}
+
+.emerse-queue-manager-filters>span {
+    display: inline-block;
+    width: 10px;
+}

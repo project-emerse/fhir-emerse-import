@@ -1,0 +1,12 @@
+emerse-main {
+    display: flex;
+    flex-direction: column;
+}
+
+emerse-main > .mat-tab-group {
+    flex: 1;
+}
+
+emerse-main .mat-tab-body-wrapper {
+    flex: 1;
+}

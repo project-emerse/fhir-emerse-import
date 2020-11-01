@@ -9,18 +9,18 @@ import {routing} from './app.routing';
 import {environment} from "../environments/environment";
 import {HomeComponent} from "./home/home.component";
 import {LoginComponent} from "./login/login.component";
-import {ImportComponent} from "./import/import.component";
-import {ImportSingleComponent} from "./import/single/import-single.component";
-import {ImportBatchComponent} from "./import/batch/import-batch.component";
 import {AngularSplitModule} from 'angular-split';
 import {RestService} from "./rest/rest.service";
 import {MockRestService} from "./rest/rest.service.mock";
-import {ImportManagerComponent} from "./import/manager/import-manager.component";
 import {MaterialModule} from '@uukmm/ng-widget-toolkit';
 import {LoggerModule} from "@uukmm/ng-logger";
 import {APP_BASE_HREF} from "@angular/common";
 import {NgbTooltipModule} from '@ng-bootstrap/ng-bootstrap';
-import {ImportAboutComponent} from './import/about/import-about.component';
+import {MainComponent} from './main/main.component';
+import {SingleImportComponent} from './single-import/single-import.component';
+import {AboutComponent} from './about/about.component';
+import {QueueManagerComponent} from './queue-manager/queue-manager.component';
+import {BatchImportComponent} from './batch-import/batch-import.component';
 
 // Import plugin modules here:
 
@@ -29,20 +29,20 @@ import {ImportAboutComponent} from './import/about/import-about.component';
         AppComponent,
         HomeComponent,
         LoginComponent,
-        ImportComponent,
-        ImportAboutComponent,
-        ImportSingleComponent,
-        ImportBatchComponent,
-        ImportManagerComponent
+        MainComponent,
+        AboutComponent,
+        SingleImportComponent,
+        BatchImportComponent,
+        QueueManagerComponent
     ],
     entryComponents: [
         HomeComponent,
         LoginComponent,
-        ImportComponent,
-        ImportAboutComponent,
-        ImportSingleComponent,
-        ImportBatchComponent,
-        ImportManagerComponent
+        MainComponent,
+        AboutComponent,
+        SingleImportComponent,
+        BatchImportComponent,
+        QueueManagerComponent
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
     imports: [

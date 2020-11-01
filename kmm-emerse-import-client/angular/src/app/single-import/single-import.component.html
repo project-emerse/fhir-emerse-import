@@ -1,5 +1,5 @@
-<div class="emerse-import-single">
-    <div class="emerse-import-single-search">
+<div class="emerse-single-import">
+    <div class="emerse-single-import-search">
         <input type="text" [(ngModel)]="mrn" autofocus
                placeholder="Enter a patient's MRN"
                [disabled]="busy"
@@ -15,7 +15,7 @@
                 (click)="index()">Index</button>
         <span class="text-danger">{{message}}</span>
     </div>
-    <div class="emerse-import-single-demographics">
+    <div class="emerse-single-import-demographics">
         <span *ngIf="!demographics">
             <span>Search for a patient to index.</span>
         </span>
@@ -26,13 +26,13 @@
             <span>{{demographics.gender}}</span>
         </span>
     </div>
-    <div class="emerse-import-single-documents">
+    <div class="emerse-single-import-documents">
         <as-split direction="horizontal">
             <as-split-area>
                 <mat-action-list>
                     <button mat-list-item *ngFor="let document of documents"
                         (click)="documentSelected($event, document)">
-                        <div class="emerse-import-single-document">
+                        <div class="emerse-single-import-document">
                             <span>{{document.dateStr}}</span>
                             <span>{{document.title}}</span>
                         </div>

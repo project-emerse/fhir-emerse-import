@@ -1,4 +1,4 @@
-.emerse-import-single {
+.emerse-single-import {
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -10,35 +10,35 @@
     overflow: hidden;
 }
 
-.emerse-import-single-documents {
+.emerse-single-import-documents {
     display: flex;
     flex-direction: row;
     flex: 1;
 }
 
-.emerse-import-single-documents > * {
+.emerse-single-import-documents > * {
     flex: 1;
     border-top: 1px solid gray;
 }
 
-.emerse-import-single-documents > * {
+.emerse-single-import-documents > * {
     max-height: 100%;
     overflow: auto;
 }
 
-.emerse-import-single-documents button[selected] {
+.emerse-single-import-documents button[selected] {
     background: lightblue!important;
 }
 
-.emerse-import-single-documents > as-split > as-split-area {
+.emerse-single-import-documents > as-split > as-split-area {
     position: relative;
 }
 
-.emerse-import-single-documents > as-split > as-split-area:last-child {
+.emerse-single-import-documents > as-split > as-split-area:last-child {
     margin: 5px;
 }
 
-.emerse-import-single-documents > as-split > as-split-area > * {
+.emerse-single-import-documents > as-split > as-split-area > * {
     position: absolute;
     top: 0;
     bottom: 0;
@@ -47,20 +47,20 @@
 }
 
 
-.emerse-import-single-document {
+.emerse-single-import-document {
     display: flex;
     flex-direction: row;
 }
 
-.emerse-import-single-document > *:first-child {
+.emerse-single-import-document > *:first-child {
     width: 11em;
 }
 
-.emerse-import-single-document > *:last-child {
+.emerse-single-import-document > *:last-child {
     flex: 1;
 }
 
-.emerse-import-single-demographics {
+.emerse-single-import-demographics {
     min-height: 50px;
     display: flex;
     flex-direction: row;
@@ -70,21 +70,21 @@
     border-top: 1px solid gray;
 }
 
-.emerse-import-single-demographics > span > span {
+.emerse-single-import-demographics > span > span {
     padding-left: 10px;
 }
 
-.emerse-import-single-demographics > span > span:first-child {
+.emerse-single-import-demographics > span > span:first-child {
     font-weight: bold;
 }
 
-.emerse-import-single-search {
+.emerse-single-import-search {
     display: flex;
     align-items: center;
     padding: 5px;
 }
 
-.emerse-import-single-search > * {
+.emerse-single-import-search > * {
     margin-right: 10px;
 }
 

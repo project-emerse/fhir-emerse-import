@@ -1,20 +1,20 @@
 import {Component, ViewEncapsulation} from "@angular/core";
 import {FhirStu3Util, HumanName, Identifier, Patient} from "@uukmm/ng-fhir-model/stu3";
-import {RestService} from "../../rest/rest.service";
+import {RestService} from "../rest/rest.service";
 import {filter, switchMap, tap} from "rxjs/operators";
-import {Document} from "../../model/document.model";
-import {PatientDemographics} from "../../model/patient-demographics.model";
-import {ConfigService} from "../../config/config.service";
-import {IndexResultUtil} from "../../model/index-result.model";
-import {IdentifierType} from '../../model/queue-entry.model';
+import {Document} from "../model/document.model";
+import {PatientDemographics} from "../model/patient-demographics.model";
+import {ConfigService} from "../config/config.service";
+import {IndexResultUtil} from "../model/index-result.model";
+import {IdentifierType} from '../model/queue-entry.model';
 
 @Component({
-    selector: 'emerse-import-single',
-    templateUrl: './import-single.component.html',
-    styleUrls: ['./import-single.component.css'],
+    selector: 'emerse-single-import',
+    templateUrl: './single-import.component.html',
+    styleUrls: ['./single-import.component.css'],
     encapsulation: ViewEncapsulation.None
 })
-export class ImportSingleComponent {
+export class SingleImportComponent {
 
     documents: Document[];
 
@@ -64,11 +64,11 @@ export class ImportSingleComponent {
 
     private extractDemographics(patient: Patient): PatientDemographics {
         const mrn: Identifier = FhirStu3Util.getIdentifier(patient, this.configService.getSetting("fhir.mrn.system"));
-        const name: HumanName[] = patient.name;
+        const name: HumanName = patient.name?.[0];
         const dob: string = patient.birthDate;
         return this.demographics = {
-            name: name ? FhirStu3Util.formatName(patient.name[0]): null,
-            mrn: mrn ? mrn.value : null,
+            name: name ? FhirStu3Util.formatName(name): null,
+            mrn: mrn?.value,
             dob: dob,
             gender: patient.gender
         }

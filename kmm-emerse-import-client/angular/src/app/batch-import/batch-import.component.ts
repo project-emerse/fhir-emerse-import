@@ -1,16 +1,15 @@
 import {Component, ViewEncapsulation} from "@angular/core";
 import {HttpErrorResponse} from "@angular/common/http";
-import {RestService} from "../../rest/rest.service";
-import {MatRadioChange} from "@angular/material/radio";
-import {IndexResultUtil} from "../../model/index-result.model";
+import {RestService} from "../rest/rest.service";
+import {IndexResultUtil} from "../model/index-result.model";
 
 @Component({
-    selector: 'emerse-import-batch',
-    templateUrl: './import-batch.component.html',
-    styleUrls: ['./import-batch.component.css'],
+    selector: 'emerse-batch-import',
+    templateUrl: './batch-import.component.html',
+    styleUrls: ['./batch-import.component.css'],
     encapsulation: ViewEncapsulation.None
 })
-export class ImportBatchComponent {
+export class BatchImportComponent {
 
     file: File;
 

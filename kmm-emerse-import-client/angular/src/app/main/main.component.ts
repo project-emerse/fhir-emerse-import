@@ -2,12 +2,12 @@ import {Component, HostListener, ViewEncapsulation} from "@angular/core";
 import {LoginService} from "../login/login.service";
 
 @Component({
-    selector: 'emerse-import',
-    templateUrl: './import.component.html',
-    styleUrls: ['./import.component.css'],
+    selector: 'emerse-main',
+    templateUrl: './main.component.html',
+    styleUrls: ['./main.component.css'],
     encapsulation: ViewEncapsulation.None
 })
-export class ImportComponent {
+export class MainComponent {
     constructor(private readonly loginService: LoginService){}
 
     @HostListener('document:keyup')

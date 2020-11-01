@@ -1,8 +1,7 @@
 import {Component, ViewChild, ViewEncapsulation} from "@angular/core";
 import {LoginService} from "../login/login.service";
 import {ConfigService} from "../config/config.service";
-import { MatTooltip } from "@angular/material/tooltip";
-import {LogMonitorDialogService} from "@uukmm/ng-logger";
+import {MatTooltip} from "@angular/material/tooltip";
 
 @Component({
     selector: 'emerse-home',
