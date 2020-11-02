@@ -33,7 +33,8 @@ import java.util.function.Supplier;
 public class JwtService {
 
     private static final String RSA = "RSA";
-    @Value("${user.home}")
+
+    @Value("${EMERSE_HOME:${user.home}/.emerse}")
     private String home;
 
     @Value("${app.jwt.pk}")
@@ -48,7 +49,7 @@ public class JwtService {
     @Autowired
     private Decryptor decryptor;
 
-    private Function<PemObject, Supplier<RSAPublicKey>> rsaPublicKey = pem -> () -> {
+    private final Function<PemObject, Supplier<RSAPublicKey>> rsaPublicKey = pem -> () -> {
         try {
             X509EncodedKeySpec spec = new X509EncodedKeySpec(pem.getContent());
             KeyFactory kf = KeyFactory.getInstance(RSA);
@@ -58,7 +59,7 @@ public class JwtService {
         }
     };
 
-    private Function<PemObject, Supplier<RSAPrivateKey>> rsaPrivateKey = pem -> () -> {
+    private final Function<PemObject, Supplier<RSAPrivateKey>> rsaPrivateKey = pem -> () -> {
         try  {
             PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(pem.getContent());
             KeyFactory kf = KeyFactory.getInstance(RSA);
@@ -68,18 +69,18 @@ public class JwtService {
         }
     };
 
-    private BiFunction<Supplier<RSAPublicKey>, Supplier<RSAPrivateKey>, Algorithm> algorithm = (pub, priv) ->
+    private final BiFunction<Supplier<RSAPublicKey>, Supplier<RSAPrivateKey>, Algorithm> algorithm = (pub, priv) ->
             Algorithm.RSA384(pub.get(), priv.get());
 
     public File getFile(String name) {
-        return Paths.get(home, ".emerse", name).toFile();
+        return Paths.get(home, name).toFile();
     }
 
     public Algorithm getAlgorithm() {
         try (PemReader pubReader = new PemReader(
-                new FileReader(Paths.get(home, ".emerse", publicKeyFile).toFile()));
+                new FileReader(Paths.get(home, publicKeyFile).toFile()));
              PemReader privReader = new PemReader(
-                     new FileReader(Paths.get(home, ".emerse", privateKeyFile).toFile()))
+                     new FileReader(Paths.get(home, privateKeyFile).toFile()))
         ){
             return algorithm.apply(
                     rsaPublicKey.apply(pubReader.readPemObject()),

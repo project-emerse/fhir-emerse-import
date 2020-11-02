@@ -15,7 +15,8 @@ class JwtServiceFunctionalSpec extends Specification {
 
         and:
         service = new JwtService()
-        service.home = System.getProperty('user.home')
+        service.home = System.getenv('EMERSE_HOME')
+        service.home = service.home ? service.home : (System.getProperty('user.home') + '/.emerse')
         service.privateKeyFile = 'emerse-it-cde.pkcs8.pem'
         service.publicKeyFile = 'emerse-it-cde-pub.pem'
         service.privateKeyPass = 'W2DGjR1U3iaxmZ6ASzcC/H0rcQ3jkfgTb3zBRF7QdR3WKVBi3aHIBu0BRWMKenW6'
