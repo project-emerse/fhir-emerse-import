@@ -144,7 +144,7 @@ export class RestService {
 
     private catchError(error): Observable<any> {
         console.log(error);
-        return throwError(error);
+        return throwError(error.error || error.message || error);
     }
 
 }
