@@ -13,8 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.Assert;
 
-import javax.annotation.PostConstruct;
-
 /**
  * FHIR-related services.
  */
@@ -54,7 +52,7 @@ public class FhirService {
                 AdditionalRequestHeadersInterceptor interceptor = new AdditionalRequestHeadersInterceptor();
 
                 for (String header : extraHeaders.split("\\n")) {
-                    String[] pcs = header.split("\\:", 2);
+                    String[] pcs = header.split(":", 2);
                     interceptor.addHeaderValue(pcs[0].trim(), pcs.length == 2 ? pcs[1].trim() : "");
                 }
 
@@ -84,14 +82,10 @@ public class FhirService {
     }
 
     public <T extends IBaseResource> T readResource(Class<T> type, String fhirId) {
-        try {
-            return getGenericClient().read()
-                    .resource(type)
-                    .withId(fhirId)
-                    .execute();
-        } catch (Exception e) {
-            return null;
-        }
+        return getGenericClient().read()
+                .resource(type)
+                .withId(fhirId)
+                .execute();
     }
 
     public String serialize(IBaseResource resource) {

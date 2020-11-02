@@ -3,7 +3,6 @@ package edu.utah.kmm.emerse.epic;
 import edu.utah.kmm.emerse.security.Credentials;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.ProtocolException;
 import org.apache.http.client.RedirectStrategy;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -62,7 +61,10 @@ public class EpicService {
                     }
 
                     @Override
-                    public HttpUriRequest getRedirect(HttpRequest request, HttpResponse response, HttpContext context) throws ProtocolException {
+                    public HttpUriRequest getRedirect(
+                            HttpRequest request,
+                            HttpResponse response,
+                            HttpContext context) {
                         return null;
                     }
                 })
@@ -72,7 +74,7 @@ public class EpicService {
     }
 
     public <T> ResponseEntity<T> getResponse(String uri, MultiValueMap<String, String> params, Class<T> returnType, boolean authenticate) {
-        RequestEntity request = addHeaders(RequestEntity
+        RequestEntity<?> request = addHeaders(RequestEntity
                 .get(createURI(uri, params)))
                 .build();
 
@@ -86,7 +88,7 @@ public class EpicService {
     public <T> ResponseEntity<T> postResponse(String uri, Object body, boolean asJSON, Class<T> returnType, boolean authenticate) {
         body = body instanceof MultiValueMap ? ((MultiValueMap<?, ?>) body).toSingleValueMap() : body;
 
-        RequestEntity request = addHeaders(RequestEntity
+        RequestEntity<?> request = addHeaders(RequestEntity
                 .post(createURI(uri, null)))
                 .contentType(asJSON ? MediaType.APPLICATION_JSON : MediaType.APPLICATION_FORM_URLENCODED)
                 .body(body);
