@@ -25,19 +25,19 @@ public class IndexRequestQueue implements RowMapper<String> {
     @Autowired
     private IndexRequestFactory indexRequestFactory;
 
-    @Value("${solr.queue.refresh.interval:60000}")
-    private int refreshInterval;
+    @Value("${solr.queue.polling.interval:60000}")
+    private int pollingInterval;
 
-    private volatile long nextRefresh;
+    private volatile long nextPoll;
 
     public IndexRequestQueue() {
     }
 
     @PostConstruct
     private void postConstruct() {
-        if (refreshInterval < 10000) {
-            log.warn("Solr queue refresh interval (" + refreshInterval + " ms) was set to minimum threshold of 10000 ms.");
-            refreshInterval = 10000;
+        if (pollingInterval < 10000) {
+            log.warn("Solr queue polling interval (" + pollingInterval + " ms) was set to minimum threshold of 10000 ms.");
+            pollingInterval = 10000;
         }
     }
 
@@ -45,8 +45,8 @@ public class IndexRequestQueue implements RowMapper<String> {
         synchronized (queue) {
             long currentTime = System.currentTimeMillis();
 
-            if (queue.isEmpty() && currentTime > nextRefresh) {
-                nextRefresh = currentTime + refreshInterval;
+            if (queue.isEmpty() && currentTime > nextPoll) {
+                nextPoll = currentTime + pollingInterval;
                 databaseService.refreshQueue(this);
             }
 
@@ -55,7 +55,7 @@ public class IndexRequestQueue implements RowMapper<String> {
     }
 
     public void refreshNow() {
-        this.nextRefresh = 0;
+        this.nextPoll = 0;
     }
 
     @Override
