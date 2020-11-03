@@ -49,7 +49,12 @@ public class ClientConfigService {
     private String databaseVersion;
 
     private ClientConfigService(String serverVersion) {
-        this._serverVersion = serverVersion;
+        this._serverVersion = formatServerVersion(serverVersion);
+    }
+
+    private String formatServerVersion(String serverVersion) {
+        String[] pcs = serverVersion.split(",", 2);
+        return pcs[0] + " - " + pcs[1].replace("Z", "").replace("T", " ");
     }
 
     public Map<String, String> getConfig() {

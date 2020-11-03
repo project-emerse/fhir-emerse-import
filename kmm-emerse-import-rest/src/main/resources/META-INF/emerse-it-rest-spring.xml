@@ -71,7 +71,7 @@
     <!-- Client Configuration -->
 
     <bean id="configService" class="edu.utah.kmm.emerse.config.ClientConfigService">
-        <constructor-arg value="@project.version@" />
+        <constructor-arg value="@project.version@,@build.timestamp@" />
     </bean>
 
     <!-- SOLR Configuration -->
