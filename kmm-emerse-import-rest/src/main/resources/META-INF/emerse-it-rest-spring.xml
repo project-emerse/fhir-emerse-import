@@ -118,7 +118,7 @@
         <constructor-arg value="${datasource.password}" />
     </bean>
 
-    <bean id="dataSourceFactory" class="${datasource.factory:edu.utah.kmm.emerse.database.DataSourceFactory5}">
+    <bean id="dataSourceFactory" class="edu.utah.kmm.emerse.database.DataSourceFactory5">
         <constructor-arg value="${datasource.driver.class}" />
         <constructor-arg value="${datasource.url}" />
         <constructor-arg ref="dataSourceCredentials" />
