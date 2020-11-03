@@ -6,7 +6,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import javax.annotation.PostConstruct;
 
 /**
- * Subclass Spring's ThreadPoolTaskExecutor to make it easier to inject settings.
+ * Thread pool for indexing daemons. Subclasses Spring's ThreadPoolTaskExecutor to make it easier to inject settings.
  */
 public class DaemonThreadPool extends ThreadPoolTaskExecutor {
 

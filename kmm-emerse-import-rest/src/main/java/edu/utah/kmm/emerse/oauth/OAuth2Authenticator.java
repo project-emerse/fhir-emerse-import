@@ -13,6 +13,9 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 
+/**
+ * Authenticator for simple OAuth2-based authentication.
+ */
 public class OAuth2Authenticator extends BaseOAuth2Authenticator {
 
     private static final String SCOPES = "patient/*.read";

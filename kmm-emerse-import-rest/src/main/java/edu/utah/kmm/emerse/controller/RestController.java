@@ -56,18 +56,32 @@ public class RestController {
     @Autowired
     private DaemonManager daemonManager;
 
+    /**
+     * Forces login if not already authenticated.
+     *
+     * @param user The authenticated user (possibly null).
+     * @return True if the user is not null (i.e., the session has been authenticated).
+     */
     @GetMapping("/login")
     @ResponseBody
     public boolean login(Principal user) {
         return user != null;
     }
 
+    /**
+     * Returns configuration parameters for the client.
+     */
     @GetMapping("/config")
     @ResponseBody
     public Map<String, String> getConfiguration() {
         return clientConfigService.getConfig();
     }
 
+    /**
+     * Ping the server to see if it is alive.
+
+     * @return Confirmation message.
+     */
     @RequestMapping(
             path = "/ping",
             method = RequestMethod.GET,
@@ -196,9 +210,9 @@ public class RestController {
     }
 
     /**
-     * Fetches entries from the queue table.
+     * Fetches entries from the index request table.
      *
-     * @return Entries from the queue table.
+     * @return Entries from the index request table.
      */
     @GetMapping("/queue")
     @ResponseBody
@@ -217,6 +231,12 @@ public class RestController {
         return new ResponseEntity<>(daemonManager.restartDaemons(), HttpStatus.OK);
     }
 
+    /**
+     * Global exception handler for all REST endpoints.
+     *
+     * @param e The thrown exception.
+     * @return Response entity containing the exception text.
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> onError(Exception e) {
         log.error(e);

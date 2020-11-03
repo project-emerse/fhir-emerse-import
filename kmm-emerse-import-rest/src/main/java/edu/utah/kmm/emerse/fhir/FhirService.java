@@ -43,6 +43,11 @@ public class FhirService {
     public FhirService() {
     }
 
+    /**
+     * Returns the generic client, initializing it if necessary.
+     *
+     * @return The generic client.
+     */
     private synchronized IGenericClient initGenericClient() {
         if (genericClient == null) {
             genericClient = fhirContext.newRestfulGenericClient(fhirRoot);
@@ -68,19 +73,36 @@ public class FhirService {
         return genericClient;
     }
 
+    /**
+     * Returns the generic client.
+     */
     public IGenericClient getGenericClient() {
         return genericClient == null ? initGenericClient() : genericClient;
     }
 
+    /**
+     * Returns the FHIR server credentials.
+     */
     public Credentials getCredentials() {
         return fhirServiceCredentials;
     }
 
+    /**
+     * Returns the FHIR server's metadata.
+     */
     public CapabilityStatement getCapabilityStatement() {
         getGenericClient();
         return capabilityStatement;
     }
 
+    /**
+     * Reads a FHIR resource of the specified type using the specified FHIR id.
+     *
+     * @param type The type of resource to retrieve.
+     * @param fhirId The FHIR id of the resource.
+     * @param <T> The resource type.
+     * @return The resource that was fetched.
+     */
     public <T extends IBaseResource> T readResource(Class<T> type, String fhirId) {
         return getGenericClient().read()
                 .resource(type)
@@ -88,10 +110,24 @@ public class FhirService {
                 .execute();
     }
 
+    /**
+     * Serialize a resource.
+     *
+     * @param resource The resource to serialize.
+     * @return The serialized form of the resource.
+     */
     public String serialize(IBaseResource resource) {
         return resource == null ? null : getGenericClient().getFhirContext().newJsonParser().encodeResourceToString(resource);
     }
 
+    /**
+     * Deserialize a resource.
+     *
+     * @param data The serialized resource.
+     * @param resourceType The type of the resource.
+     * @param <T> The type of the resource.
+     * @return The deserialized resource.
+     */
     public <T extends IBaseResource> T deserialize(String data, Class<T> resourceType) {
         return data == null ? null : (T) getGenericClient().getFhirContext().newJsonParser().parseResource(data);
     }

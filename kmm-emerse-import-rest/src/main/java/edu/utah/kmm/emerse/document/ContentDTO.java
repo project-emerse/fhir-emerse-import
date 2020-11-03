@@ -1,6 +1,7 @@
 package edu.utah.kmm.emerse.document;
 
 import edu.utah.kmm.emerse.database.BaseDTO;
+import edu.utah.kmm.emerse.util.MiscUtil;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.solr.common.StringUtils;
 
@@ -18,9 +19,9 @@ public class ContentDTO extends BaseDTO {
     public ContentDTO(String base64Content, String contentType) {
         super();
         try {
-            content = base64Content == null ? null : new String((byte[]) decoder.decode(base64Content));
+            content = base64Content == null ? null : new String(decoder.decode(base64Content));
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), e);
+            throw MiscUtil.toUnchecked(e);
         }
         map.put("RPT_TEXT", content);
         this.contentType = StringUtils.isEmpty(contentType) ? "text/plain" : contentType;

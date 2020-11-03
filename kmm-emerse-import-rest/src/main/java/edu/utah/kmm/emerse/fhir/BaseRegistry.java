@@ -6,6 +6,11 @@ import org.springframework.util.Assert;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Base class for automated registration beans of a specified type.
+ *
+ * @param <T> The bean type to register.
+ */
 public abstract class BaseRegistry<T> implements BeanPostProcessor {
 
     private final Map<String, T> registry = new HashMap<>();

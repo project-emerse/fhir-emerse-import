@@ -6,6 +6,9 @@ import org.apache.commons.dbcp2.datasources.SharedPoolDataSource;
 
 import javax.sql.DataSource;
 
+/**
+ * Data source factory using CPDS connection pool.
+ */
 public class DataSourceFactory3 extends AbstractDataSourceFactory {
 
     private DataSource dataSource;

@@ -7,6 +7,9 @@ import ca.uhn.fhir.rest.client.api.IHttpResponse;
 
 import java.io.IOException;
 
+/**
+ * Client interceptor to add OAuth2 access token to requests.
+ */
 public abstract class OAuthInterceptor implements IClientInterceptor {
 
     private volatile AccessToken accessToken;

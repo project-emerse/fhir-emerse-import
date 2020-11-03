@@ -4,6 +4,9 @@ import edu.utah.kmm.emerse.solr.IndexRequestDTO.ICloseCallback;
 import org.codehaus.janino.util.Producer;
 import org.springframework.core.io.Resource;
 
+/**
+ * A wrapper for an index request, allowing lazy instantiation of an index request.
+ */
 public class IndexRequestWrapper {
 
     private final String indexRequestId;

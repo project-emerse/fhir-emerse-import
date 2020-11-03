@@ -6,6 +6,9 @@ import org.springframework.util.Assert;
 
 import java.security.Security;
 
+/**
+ * Decrypts credentials using the encryption key and algorithm configured for the application.
+ */
 public class Decryptor {
 
     static {

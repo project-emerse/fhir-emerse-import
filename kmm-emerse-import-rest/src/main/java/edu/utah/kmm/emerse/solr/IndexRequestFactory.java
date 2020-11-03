@@ -8,6 +8,9 @@ import org.springframework.core.io.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Factory for creating and caching index requests.
+ */
 public class IndexRequestFactory {
 
     private final Map<String, IndexRequestWrapper> cache = new HashMap<>();
@@ -39,7 +42,7 @@ public class IndexRequestFactory {
 
         if (wrapper == null && autoFetch) {
             cache.put(indexRequestId, wrapper = new IndexRequestWrapper(indexRequestId, teardown,
-                    () -> databaseService.fetchRequest(indexRequestId)));
+                    () -> databaseService.fetchIndexRequest(indexRequestId)));
         }
 
         return wrapper;

@@ -2,6 +2,7 @@ package edu.utah.kmm.emerse.oauth;
 
 import edu.utah.kmm.emerse.auth.IAuthenticator;
 import edu.utah.kmm.emerse.fhir.FhirService;
+import edu.utah.kmm.emerse.util.MiscUtil;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.UriType;
@@ -10,6 +11,9 @@ import org.springframework.util.Assert;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
+/**
+ * Base authenticator for OAuth2-based authenticators.
+ */
 public abstract class BaseOAuth2Authenticator implements IAuthenticator {
 
     private static final String OAUTH_EXTENSION = "http://fhir-registry.smarthealthit.org/StructureDefinition/oauth-uris";
@@ -60,7 +64,7 @@ public abstract class BaseOAuth2Authenticator implements IAuthenticator {
         try {
             return URLEncoder.encode(value, "ASCII");
         } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            return MiscUtil.rethrow(e);
         }
     }
 

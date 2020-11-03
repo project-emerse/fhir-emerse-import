@@ -1,5 +1,8 @@
 package edu.utah.kmm.emerse.oauth;
 
+/**
+ * An OAUTH access token.
+ */
 public class AccessToken {
 
     public String access_token;

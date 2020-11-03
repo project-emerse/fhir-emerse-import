@@ -9,6 +9,7 @@ import edu.utah.kmm.emerse.patient.PatientDTO;
 import edu.utah.kmm.emerse.patient.PatientService;
 import edu.utah.kmm.emerse.security.Credentials;
 import edu.utah.kmm.emerse.solr.IndexRequestDTO.IndexRequestStatus;
+import edu.utah.kmm.emerse.util.MiscUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
@@ -257,7 +258,7 @@ public class SolrService {
             solrClient.commit(COLLECTION_PATIENT);
             solrClient.commit(COLLECTION_SLAVE);
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), e);
+            MiscUtil.rethrow(e);
         }
     }
 
@@ -270,7 +271,7 @@ public class SolrService {
             solrClient.request(request, collection);
         } catch (Exception e) {
             log.error("Error indexing entity for collection " + collection, e);
-            throw new RuntimeException(e.getMessage(), e);
+            MiscUtil.rethrow(e);
         }
     }
 

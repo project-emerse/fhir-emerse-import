@@ -9,6 +9,9 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 
+/**
+ * HTML utility methods.
+ */
 public class HTMLUtil {
 
     private static final Log log = LogFactory.getLog(HTMLUtil.class);

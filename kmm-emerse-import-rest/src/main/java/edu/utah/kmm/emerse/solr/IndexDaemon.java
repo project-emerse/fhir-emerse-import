@@ -3,6 +3,10 @@ package edu.utah.kmm.emerse.solr;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+/**
+ * Represents a worker thread for handling index requests.  Simply pulls entries from the index request queue and
+ * submits them for indexing.
+ */
 public class IndexDaemon implements Runnable {
 
     private static Log log = LogFactory.getLog(IndexDaemon.class);

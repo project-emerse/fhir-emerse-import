@@ -5,6 +5,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import edu.utah.kmm.emerse.security.Decryptor;
+import edu.utah.kmm.emerse.util.MiscUtil;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,11 +31,14 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * Service supporting JWT-based authentication.
+ */
 public class JwtService {
 
     private static final String RSA = "RSA";
 
-    @Value("${EMERSE_HOME:${user.home}/.emerse}")
+    @Value("${EMERSE_HOME}")
     private String home;
 
     @Value("${app.jwt.pk}")
@@ -55,7 +59,7 @@ public class JwtService {
             KeyFactory kf = KeyFactory.getInstance(RSA);
             return (RSAPublicKey) kf.generatePublic(spec);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            return MiscUtil.rethrow(e);
         }
     };
 
@@ -65,7 +69,7 @@ public class JwtService {
             KeyFactory kf = KeyFactory.getInstance(RSA);
             return (RSAPrivateKey) kf.generatePrivate(spec);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            return MiscUtil.rethrow(e);
         }
     };
 
@@ -86,7 +90,7 @@ public class JwtService {
                     rsaPublicKey.apply(pubReader.readPemObject()),
                     rsaPrivateKey.apply(privReader.readPemObject()));
         } catch(IOException e){
-            throw new RuntimeException(e.getMessage(), e);
+            return MiscUtil.rethrow(e);
         }
     }
 

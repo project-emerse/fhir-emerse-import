@@ -2,6 +2,7 @@ package edu.utah.kmm.emerse.solr;
 
 import edu.utah.kmm.emerse.database.BaseDTO;
 import edu.utah.kmm.emerse.fhir.IdentifierType;
+import edu.utah.kmm.emerse.util.MiscUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.Resource;
@@ -15,6 +16,9 @@ import java.util.*;
 
 import static edu.utah.kmm.emerse.util.MiscUtil.toIdentifierType;
 
+/**
+ * DTO representing an index request.
+ */
 public class IndexRequestDTO extends BaseDTO implements Closeable {
 
     public interface ICloseCallback {
@@ -78,7 +82,7 @@ public class IndexRequestDTO extends BaseDTO implements Closeable {
             put(FieldType.IDENTIFIER_TYPE, identifierType.name());
             put(FieldType.IDENTIFIERS, listToString(identifiers));
         } catch (IOException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            throw MiscUtil.toUnchecked(e);
         }
     }
 
@@ -99,22 +103,47 @@ public class IndexRequestDTO extends BaseDTO implements Closeable {
         changed = false;
     }
 
+    /**
+     * Converts a newline-delimited string to a list.
+     *
+     * @param value The string to convert.
+     * @return The list of delimited values (never null).
+     */
     private List<String> stringToList(String value) {
         return value == null ? Collections.emptyList() : Arrays.asList(value.split("\n"));
     }
 
+    /**
+     * Converts a list to a newline-delimited string.
+     *
+     * @param list The list to convert.
+     * @return The newline-delimited string.
+     */
     private String listToString(List<String> list) {
         return StringUtils.join(list, "\n");
     }
 
+    /**
+     * Extracts a field from a result set and stores it in the DTO map.
+     *
+     * @param type The field type to extract.
+     * @param rs The result set.
+     * @param clazz The data type of the field.
+     */
     private void put(FieldType type, ResultSet rs, Class<?> clazz) {
         try {
             put(type, rs.getObject(type.name(), clazz));
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            MiscUtil.rethrow(e);
         }
     }
 
+    /**
+     * Puts a field value into the DTO map.  Updates the changed status as appropriate.
+     *
+     * @param field The field type.
+     * @param value The value to store.
+     */
     private void put(
             FieldType field,
             Object value) {
@@ -126,28 +155,54 @@ public class IndexRequestDTO extends BaseDTO implements Closeable {
         }
     }
 
+    /**
+     * Returns a field value from the DTO map.
+     *
+     * @param field The field type.
+     * @param clazz The expected data type.
+     * @param <T> The expected data type.
+     * @return The field's value.
+     */
     private <T> T get(
             FieldType field,
             Class<T> clazz) {
         return (T) map.get(field.name());
     }
 
+    /**
+     * Returns today's date/time.
+     */
     private Date now() {
         return new Date();
     }
 
+    /**
+     * Returns the number of processed entries.
+     */
     public int getProcessed() {
         return get(FieldType.PROCESSED, Integer.class);
     }
 
+    /**
+     * Increments the number of processed entries.
+     */
     public void processed() {
         put(FieldType.PROCESSED, getProcessed() + 1);
     }
 
+    /**
+     * Returns the unique ID for this request.
+     */
     public String getId() {
         return get(FieldType.ID, String.class);
     }
 
+    /**
+     * Returns the list of identifiers for this request.
+     *
+     * @param unprocessed If true, return only unprocessed entries.
+     * @return The list of identifiers.
+     */
     public List<String> getIdentifiers(boolean unprocessed) {
         List<String> list = unprocessed
                 ? identifiers.subList(getProcessed(), identifiers.size())
@@ -155,6 +210,11 @@ public class IndexRequestDTO extends BaseDTO implements Closeable {
         return Collections.unmodifiableList(list);
     }
 
+    /**
+     * Sets the error text for this request.
+     *
+     * @param errorText The error text.
+     */
     public void error(String errorText) {
         errorText = StringUtils.truncate(StringUtils.trimToNull(errorText), 200);
         put(FieldType.ERROR_TEXT, errorText);
@@ -164,6 +224,11 @@ public class IndexRequestDTO extends BaseDTO implements Closeable {
         }
     }
 
+    /**
+     * Sets the request state to started.
+     *
+     * @return This request (for chaining).
+     */
     public IndexRequestDTO start() {
         assertNotClosed();
         started = System.currentTimeMillis();
@@ -173,30 +238,60 @@ public class IndexRequestDTO extends BaseDTO implements Closeable {
         return this;
     }
 
+    /**
+     * Sets the request state to completed.
+     *
+     * @return True if the operation was successfully performed.
+     */
     public boolean completed() {
         return hasStatus(IndexRequestStatus.RUNNING) && stop(IndexRequestStatus.COMPLETED);
     }
 
+    /**
+     * Sets the request state to aborted.
+     *
+     * @return True if the operation was successfully performed.
+     */
     public boolean abort() {
         return !hasStatus(IndexRequestStatus.COMPLETED)
                 && stop(IndexRequestStatus.ABORTED);
     }
 
+    /**
+     * Sets the request state to suspended.
+     *
+     * @return True if the operation was successfully performed.
+     */
     public boolean suspend() {
         return hasStatus(IndexRequestStatus.RUNNING, IndexRequestStatus.QUEUED)
                 && stop(IndexRequestStatus.SUSPENDED);
     }
 
+    /**
+     * Sets the request state to resumed.
+     *
+     * @return True if the operation was successfully performed.
+     */
     public boolean resume() {
         return !hasStatus(IndexRequestStatus.RUNNING, IndexRequestStatus.COMPLETED)
                 && requeue(false);
    }
 
+    /**
+     * Sets the request state to restarted.
+     *
+     * @return True if the operation was successfully performed.
+     */
     public boolean restart() {
         return !hasStatus(IndexRequestStatus.RUNNING)
                 && requeue(true);
     }
 
+    /**
+     * Performs the specified action on this request.
+     *
+     * @return True if the operation was successfully performed.
+     */
     public boolean performAction(IndexRequestAction.Action action) {
         switch (action) {
             case ABORT:
@@ -214,6 +309,12 @@ public class IndexRequestDTO extends BaseDTO implements Closeable {
         }
     }
 
+    /**
+     * Requeues this request for execution.
+     *
+     * @param resetCount If true, reset the processed and elapsed values.
+     * @return Always true.
+     */
     private boolean requeue(boolean resetCount) {
         assertNotClosed();
         error(null);
@@ -229,10 +330,21 @@ public class IndexRequestDTO extends BaseDTO implements Closeable {
         return true;
     }
 
+    /**
+     * Deletes this request from the database.
+     *
+     * @return Always true.
+     */
     public boolean delete() {
         return stop(IndexRequestStatus.DELETED);
     }
 
+    /**
+     * Updates the status for this request and then closes it.
+     *
+     * @param status The new request status.
+     * @return Always true.
+     */
     private boolean stop(IndexRequestStatus status) {
         assertNotClosed();
         put(FieldType.COMPLETED, status == IndexRequestStatus.SUSPENDED ? null : now());
@@ -241,11 +353,20 @@ public class IndexRequestDTO extends BaseDTO implements Closeable {
         return true;
     }
 
+    /**
+     * Returns the status of this request.
+     */
     public IndexRequestStatus getStatus() {
         Integer status = get(FieldType.STATUS, Integer.class);
         return status == null ? null : IndexRequestStatus.values()[status];
     }
 
+    /**
+     * Returns true if this request's status is one of the specified types.
+     *
+     * @param statuses List of statuses to check.
+     * @return True if this request's status is one of the specified types.
+     */
     public boolean hasStatus(IndexRequestStatus... statuses) {
         return Arrays.stream(statuses)
                 .filter(status -> getStatus() == status)
@@ -254,35 +375,63 @@ public class IndexRequestDTO extends BaseDTO implements Closeable {
                 .orElse(false);
     }
 
+    /**
+     * Updates the request's status.
+     *
+     * @param status The new status.
+     */
     private void setStatus(IndexRequestStatus status) {
         put(FieldType.STATUS, status.ordinal());
     }
 
+    /**
+     * Returns true if the request has not yet been persisted.
+     */
     public boolean initial() {
         return initial;
     }
 
+    /**
+     * Returns true if the state of this request has changed.
+     */
     public boolean changed() {
         return changed;
     }
 
+    /**
+     * Clears the changed flag.
+     */
     public void clearChanged() {
         this.changed = false;
         this.initial = false;
     }
 
+    /**
+     * Returns the identifier type for this request.
+     */
     public IdentifierType getIdentifierType() {
         return identifierType;
     }
 
+    /**
+     * Registers a close callback.
+     *
+     * @param callback The callback to be executed when this request is closed.
+     */
     public void registerCloseCallback(ICloseCallback callback) {
         closeCallbacks.add(callback);
     }
 
+    /**
+     * Asserts that the request is not closed, throwing an exception if it is.
+     */
     private void assertNotClosed() {
         Assert.state(!closed, () -> "Index request '" + getId() + "' has already been closed");
     }
 
+    /**
+     * Close the DTO, invoking all registered close callbacks.
+     */
     @Override
     public void close() {
         if (closed) {

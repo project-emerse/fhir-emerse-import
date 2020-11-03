@@ -5,6 +5,9 @@ import edu.utah.kmm.emerse.security.Credentials;
 
 import javax.sql.DataSource;
 
+/**
+ * Data source factory using C3P0 library.
+ */
 public class DataSourceFactory5 extends AbstractDataSourceFactory {
 
     private DataSource datasource;

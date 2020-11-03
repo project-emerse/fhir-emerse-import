@@ -11,6 +11,9 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
 import javax.sql.DataSource;
 
+/**
+ * Data source factory using DBCP poolable connection factory.
+ */
 public class DataSourceFactory2 extends AbstractDataSourceFactory {
 
     private ObjectPool<PoolableConnection> connectionPool;

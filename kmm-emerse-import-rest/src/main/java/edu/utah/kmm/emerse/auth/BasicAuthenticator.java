@@ -5,6 +5,9 @@ import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import edu.utah.kmm.emerse.fhir.FhirService;
 import edu.utah.kmm.emerse.security.Credentials;
 
+/**
+ * Authenticator for basic authentication.
+ */
 public class BasicAuthenticator implements IAuthenticator {
     @Override
     public String getName() {

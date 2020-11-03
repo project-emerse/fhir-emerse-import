@@ -5,6 +5,9 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import javax.sql.DataSource;
 
+/**
+ * Simple data source factory using non-pooled data source.  Not recommended for production use.
+ */
 public class DataSourceFactory extends AbstractDataSourceFactory {
 
     private DataSource datasource;

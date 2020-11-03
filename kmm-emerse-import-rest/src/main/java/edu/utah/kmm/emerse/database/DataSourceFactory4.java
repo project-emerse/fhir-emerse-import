@@ -5,6 +5,9 @@ import org.apache.commons.dbcp2.BasicDataSource;
 
 import javax.sql.DataSource;
 
+/**
+ * Data source factory using DBCP basic data source.
+ */
 public class DataSourceFactory4 extends AbstractDataSourceFactory {
 
     private DataSource datasource;

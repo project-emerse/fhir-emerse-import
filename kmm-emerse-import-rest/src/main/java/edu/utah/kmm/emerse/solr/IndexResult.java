@@ -1,7 +1,7 @@
 package edu.utah.kmm.emerse.solr;
 
 /**
- * Tracks index successes and failures.
+ * Tracks indexing successes and failures.
  */
 public class IndexResult {
 

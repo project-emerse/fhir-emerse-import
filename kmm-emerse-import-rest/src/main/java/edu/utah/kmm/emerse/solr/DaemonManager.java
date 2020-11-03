@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Manages indexing daemons.
+ */
 public class DaemonManager {
 
     private static final Log log = LogFactory.getLog(DaemonManager.class);

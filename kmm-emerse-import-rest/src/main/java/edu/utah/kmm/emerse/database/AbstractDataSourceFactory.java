@@ -6,6 +6,10 @@ import org.springframework.beans.factory.annotation.Value;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
+/**
+ * Abstract base class for all data source factories.  Only one data source factory can be used, but several options
+ * are provided.
+ */
 public abstract class AbstractDataSourceFactory {
 
     protected final String driverClass;

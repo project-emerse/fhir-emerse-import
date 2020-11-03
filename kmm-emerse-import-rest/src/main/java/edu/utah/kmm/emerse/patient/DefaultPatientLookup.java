@@ -6,6 +6,10 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+/**
+ * Default service for performing patient lookup by MRN.  Since some FHIR implementations may not support this
+ * query logic, alternate lookup algorithms can be configured.
+ */
 public class DefaultPatientLookup implements IPatientLookup {
 
     @Value("${fhir.mrn.system}")

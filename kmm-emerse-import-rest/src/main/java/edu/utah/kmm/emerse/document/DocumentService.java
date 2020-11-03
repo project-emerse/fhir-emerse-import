@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Value;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Service for document-related operations.
+ */
 public class DocumentService {
 
     @Autowired
@@ -23,10 +26,23 @@ public class DocumentService {
     @Value("${fhir.document.classes:clinical-notes}")
     private String documentClasses;
 
+    /**
+     * Returns a document given its FHIR id.
+     *
+     * @param docid The document's FHIR id.
+     * @return The requested document.
+     */
     public DocumentReference getDocumentById(String docid) {
         return fhirService.readResource(DocumentReference.class, docid);
     }
 
+    /**
+     * Returns all documents for the specified patient.
+     *
+     * @param id The patient identifier.
+     * @param type The identifier type.
+     * @return A list of documents for the specified patient (never null).
+     */
     public List<DocumentReference> getDocumentsForPatient(
             String id,
             IdentifierType type) {
@@ -101,6 +117,12 @@ public class DocumentService {
         return null;
     }
 
+    /**
+     * Fetches the content associated with a document.
+     *
+     * @param document The document.
+     * @return A DTO containing the document content (null if no content).
+     */
     public ContentDTO getDocumentContent(DocumentReference document) {
         if (!document.getContent().isEmpty()) {
             DocumentReference.DocumentReferenceContentComponent content = document.getContentFirstRep();
