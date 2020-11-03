@@ -22,6 +22,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * JWT-based authentication as used by Epic.
+ */
 public class EpicAuthenticator extends BaseOAuth2Authenticator {
 
     private class EpicAuthInterceptor extends OAuthInterceptor {
