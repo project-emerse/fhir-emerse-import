@@ -35,7 +35,7 @@ export class RestService {
     }
 
     getClientInfo(): Observable<any> {
-        return this.httpClient.get("assets/about.json", {responseType: "json"}).pipe(shareReplay(1));
+        return this.get("assets/about.json").pipe(shareReplay(1));
     }
 
     login(username: string, password: string): Observable<boolean> {
@@ -109,10 +109,13 @@ export class RestService {
         }
     }
 
-    private get<T>(url: string, headers?: HttpHeaders): Observable<T> {
-        headers = this.addHeaders(headers);
+    private getEndpoint(url: string): string {
+        return (url.startsWith("api") ? this.serverEndpoint : "") + url;
+    }
+
+    private get<T>(url: string): Observable<T> {
         const sw = new LoggerStopwatch(`GET operation: ${url}`, this.loggerService);
-        return this.httpClient.get<T>(this.serverEndpoint + url, {headers, responseType: "json"})
+        return this.httpClient.get<T>(this.getEndpoint(url), {headers: this.createHeaders(true), responseType: "json"})
             .pipe(
                 tap(sw),
                 catchError(error => this.catchError(error)),
@@ -120,10 +123,9 @@ export class RestService {
             );
     }
 
-    private post<T>(url: string, body: any, headers?: HttpHeaders): Observable<T> {
-        headers = this.addHeaders(headers);
+    private post<T>(url: string, body: any): Observable<T> {
         const sw = new LoggerStopwatch(`POST operation: ${url}`, this.loggerService);
-        return this.httpClient.post<T>(this.serverEndpoint + url, body, {headers, responseType: "json"})
+        return this.httpClient.post<T>(this.getEndpoint(url), body, {headers: this.createHeaders(false), responseType: "json"})
             .pipe(
                 tap(sw),
                 catchError(error => this.catchError(error)),
@@ -131,9 +133,14 @@ export class RestService {
             );
     }
 
-    private addHeaders(headers?: HttpHeaders): HttpHeaders {
-        headers = headers || new HttpHeaders();
-        headers = headers.set("emerse_id", this.emerseId);
+    private createHeaders(nocache: boolean): HttpHeaders {
+        let headers: HttpHeaders = new HttpHeaders({emerse_id: this.emerseId});
+
+        if (nocache) {
+            headers = headers.set("Cache-Control", ["no-store", "must-revalidate"]);
+            headers = headers.set("Pragma", "no-cache");
+            headers = headers.set("Expires", "0");
+        }
 
         if (this.authorization) {
             headers = headers.set("authorization", this.authorization);

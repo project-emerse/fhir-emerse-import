@@ -5,5 +5,5 @@
   "app.author": "ReImagineEHR Team, University of Utah",
   "app.url": "https://reimagineehr.utah.edu",
   "app.email": "ReImagineEHR@utah.edu",
-  "client.version": "@project.version@"
+  "client.version": "@project.version@,@build.timestamp@"
 }

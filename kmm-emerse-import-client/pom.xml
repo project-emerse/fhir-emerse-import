@@ -18,6 +18,7 @@
 
   <properties>
     <build.profile> </build.profile>
+    <build.timestamp>${maven.build.timestamp}</build.timestamp>
     <maven.deploy.skip>true</maven.deploy.skip>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>

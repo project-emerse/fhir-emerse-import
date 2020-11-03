@@ -24,13 +24,19 @@ export class ConfigService {
         restService: RestService,
         alertDialogService: AlertDialogService) {
         this.config$ = combineLatest([restService.getServerConfig(), restService.getClientInfo()]).pipe(
-            map(([serverConfig, clientInfo]) => Object.assign({}, clientInfo, serverConfig)),
+            map(([serverConfig, clientInfo]) => this.mergeConfigs(serverConfig, clientInfo)),
             take(1));
         this.config$.subscribe(
-                config => this.config = config,
-                () => {
-                    alertDialogService.show({title: ERROR_TITLE, message: ERROR_TEXT, severity: AlertSeverity.FATAL});
-                });
+            config => this.config = config,
+            () => {
+                alertDialogService.show({title: ERROR_TITLE, message: ERROR_TEXT, severity: AlertSeverity.FATAL});
+            });
+    }
+
+    private mergeConfigs(serverConfig: any, clientInfo: any): any {
+        const pcs: string[] = clientInfo["client.version"].split(",", 2);
+        const clientVersion: string = pcs[0] + " - " + pcs[1]?.replace("Z", "").replace("T", " ");
+        return Object.assign({}, clientInfo, serverConfig, {"client.version": clientVersion});
     }
 
     isLoaded(): boolean {
