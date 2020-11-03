@@ -31,11 +31,11 @@ export class RestService {
     }
 
     getServerConfig(): Observable<any> {
-        return this.get("api/config").pipe(shareReplay(1));
+        return this.get("api/config");
     }
 
     getClientInfo(): Observable<any> {
-        return this.get("assets/about.json").pipe(shareReplay(1));
+        return this.get("assets/about.json");
     }
 
     login(username: string, password: string): Observable<boolean> {
