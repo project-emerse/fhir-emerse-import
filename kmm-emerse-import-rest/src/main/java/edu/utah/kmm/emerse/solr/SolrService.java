@@ -281,6 +281,9 @@ public class SolrService {
         return result;
     }
 
+    /**
+     * Commit all outstanding index transactions.
+     */
     @PreDestroy
     public void commit() {
         try {
@@ -368,6 +371,9 @@ public class SolrService {
         deleteCollection(COLLECTION_DOCUMENTS);
     }
 
+    /**
+     * Returns status information for patient and documents indexes.
+     */
     public Map<String, Object>[] getIndexStatus() {
         try {
             Map<String, String> params = new HashMap<>();
@@ -384,6 +390,13 @@ public class SolrService {
         }
     }
 
+    /**
+     * Extract status information for the specified collection.
+     *
+     * @param collection The collection whose status is to be retrieved.
+     * @param response The response containing the status information.
+     * @return The status of the specified collection.
+     */
     private Map<String, Object> getIndexStatus(
             String collection,
             NamedList<?> response) {
