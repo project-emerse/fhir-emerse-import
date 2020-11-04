@@ -12,6 +12,10 @@
     margin-left: 50px;
 }
 
+.emerse-index-manager .mat-toolbar {
+    border-top: 1px solid gray;
+}
+
 .emerse-index-manager-message {
     color: red;
     font-weight: bold;
