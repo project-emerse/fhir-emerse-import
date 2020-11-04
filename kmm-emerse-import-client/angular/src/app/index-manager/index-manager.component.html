@@ -1,0 +1,49 @@
+<div class="emerse-index-manager">
+    <span>
+        <table mat-table class="table-striped"
+               [dataSource]="dataSource">
+           <ng-container matColumnDef="collection">
+            <th mat-header-cell class="emerse-index-manager-collection" *matHeaderCellDef>Index</th>
+            <td mat-cell class="emerse-index-manager-collection" *matCellDef="let item"> {{item.collection}} </td>
+          </ng-container>
+           <ng-container matColumnDef="numdocs">
+            <th mat-header-cell class="emerse-index-manager-numdocs" *matHeaderCellDef>Entries</th>
+            <td mat-cell class="emerse-index-manager-numdocs" *matCellDef="let item"> {{item.numDocs}} </td>
+          </ng-container>
+           <ng-container matColumnDef="size">
+            <th mat-header-cell class="emerse-index-manager-size" *matHeaderCellDef>Size</th>
+            <td mat-cell class="emerse-index-manager-size" *matCellDef="let item"> {{item.size}} </td>
+          </ng-container>
+           <ng-container matColumnDef="lastmodified">
+            <th mat-header-cell class="emerse-index-manager-lastmodified" *matHeaderCellDef>Modified</th>
+            <td mat-cell class="emerse-index-manager-lastmodified" *matCellDef="let item"> {{formatDate(item.lastModified)}} </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
+          <tr mat-row *matRowDef="let row; columns: columns"></tr>
+        </table>
+    </span>
+    <mat-toolbar>
+        <span class="flex-fill emerse-index-manager-message">{{message}}</span>
+        <button color="warn"
+                mat-raised-button
+                tabindex="-1"
+                (click)="reset(true)">
+            Reset Documents Index Only
+        </button>
+        <button color="warn"
+                mat-raised-button
+                tabindex="-1"
+                (click)="reset(false)">
+            Reset Patient and Documents Index
+        </button>
+        <button
+                class="text-warning"
+                mat-icon-button
+                tabindex="-1"
+                ngbTooltip="Refresh"
+                (click)="refresh()">
+            <mat-icon>refresh</mat-icon>
+        </button>
+    </mat-toolbar>
+</div>

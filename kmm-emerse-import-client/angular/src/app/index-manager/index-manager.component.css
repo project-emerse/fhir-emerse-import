@@ -1,0 +1,18 @@
+.emerse-index-manager table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.emerse-index-manager .mat-raised-button {
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.emerse-index-manager .mat-icon-button {
+    margin-left: 50px;
+}
+
+.emerse-index-manager-message {
+    color: red;
+    font-weight: bold;
+}

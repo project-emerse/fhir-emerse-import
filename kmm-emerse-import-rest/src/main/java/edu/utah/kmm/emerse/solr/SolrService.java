@@ -18,7 +18,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
-import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.client.solrj.request.GenericSolrRequest;
 import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.common.SolrInputDocument;
@@ -29,6 +28,7 @@ import org.hl7.fhir.dstu3.model.DocumentReference;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 
 import javax.annotation.PreDestroy;
@@ -76,22 +76,36 @@ public class SolrService {
                 .build();
         solrClient = new HttpSolrClient.Builder(solrServerRoot)
                 .withHttpClient(client)
-                .withResponseParser(new XMLResponseParser())
                 .allowCompression(true)
                 .build();
     }
 
     public String getSolrVersion() {
         try {
-            SolrParams params = new MapSolrParams(Collections.singletonMap("wt", "xml"));
-            GenericSolrRequest request = new GenericSolrRequest(SolrRequest.METHOD.GET, "/admin/info/system", params);
-            NamedList<?> result = solrClient.request(request);
-            NamedList<?> versions = (NamedList<?>) result.get("lucene");
-            String version = Objects.toString(versions.get("solr-impl-version"));
+            SolrParams solrParams = new MapSolrParams(Collections.emptyMap());
+            GenericSolrRequest request = new GenericSolrRequest(SolrRequest.METHOD.GET, "/admin/info/system", solrParams);
+            String version = extractValue("lucene/solr-impl-version", solrClient.request(request), String.class);
             return version == null ? null : ("Solr Release " + version);
         } catch (Exception e) {
             return null;
         }
+    }
+
+    /**
+     * Extracts a value from a named list following the specified path.
+     *
+     * @param path A "/"-delimited path.
+     * @param list The named list to search.
+     * @param type The expected return type.
+     * @param <T>  The expected return type.
+     * @return The value at the specified path (possibly null).
+     */
+    private <T> T extractValue(
+            String path,
+            NamedList<?> list,
+            Class<T> type) {
+        Object value = list.findRecursive(path.split("/"));
+        return type.isInstance(value) ? (T) value : null;
     }
 
     /**
@@ -322,6 +336,61 @@ public class SolrService {
         indexDTO(patientDTO, COLLECTION_PATIENT);
         indexDTO(patientDTO, COLLECTION_SLAVE);
         commit();
+    }
+
+    /**
+     * Deletes all indexes within a collection.
+     *
+     * @param collection The collection containing the indexes to delete.
+     */
+    private void deleteCollection(String collection) {
+        try {
+            UpdateRequest request = new UpdateRequest();
+            request.deleteByQuery("*:*");
+            request.commit(solrClient, collection);
+        } catch (Exception e) {
+            MiscUtil.rethrow(e);
+        }
+    }
+
+    /**
+     * Delete indexes for both patient collections.
+     */
+    public void deletePatientCollections() {
+        deleteCollection(COLLECTION_PATIENT);
+        deleteCollection(COLLECTION_SLAVE);
+    }
+
+    /**
+     * Delete indexes for the document collection.
+     */
+    public void deleteDocumentCollection() {
+        deleteCollection(COLLECTION_DOCUMENTS);
+    }
+
+    public Map<String, Object>[] getIndexStatus() {
+        try {
+            Map<String, String> params = new HashMap<>();
+            params.put("action", "STATUS");
+            SolrParams solrParams = new MapSolrParams(params);
+            GenericSolrRequest request = new GenericSolrRequest(SolrRequest.METHOD.GET, "/admin/cores", solrParams);
+            NamedList<?> response = solrClient.request(request);
+            return new Map[]{
+                    getIndexStatus(COLLECTION_PATIENT, response),
+                    getIndexStatus(COLLECTION_DOCUMENTS, response)
+            };
+        } catch (Exception e) {
+            return MiscUtil.rethrow(e);
+        }
+    }
+
+    private Map<String, Object> getIndexStatus(
+            String collection,
+            NamedList<?> response) {
+        NamedList<?> status = extractValue("status/" + collection + "/index", response, NamedList.class);
+        Map<String, Object> map = status == null ? new HashMap<>() : status.asMap(2);
+        map.put("collection", collection);
+        return map;
     }
 
 }

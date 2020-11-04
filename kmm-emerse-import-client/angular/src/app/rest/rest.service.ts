@@ -10,6 +10,7 @@ import {IndexResult} from "../model/index-result.model";
 import {EntryAction, IdentifierType, isValidAction, QueueEntry, statusText} from "../model/queue-entry.model";
 import {LoggerService, LoggerStopwatch} from "@uukmm/ng-logger";
 import {formatDuration, intervalToDuration} from 'date-fns';
+import {IndexStatus} from '../model/index-status.model';
 
 @Injectable({
     providedIn: "root"
@@ -113,6 +114,14 @@ export class RestService {
         return (url.startsWith("api") ? this.serverEndpoint : "") + url;
     }
 
+    getIndexStatus(): Observable<any> {
+        return this.get("api/status");
+    }
+
+    resetIndexes(documentsOnly: boolean): Observable<any> {
+        return this.get("api/reset?documentsOnly=" + documentsOnly);
+    }
+
     private get<T>(url: string): Observable<T> {
         const sw = new LoggerStopwatch(`GET operation: ${url}`, this.loggerService);
         return this.httpClient.get<T>(this.getEndpoint(url), {headers: this.createHeaders(true), responseType: "json"})
@@ -134,19 +143,27 @@ export class RestService {
     }
 
     private createHeaders(nocache: boolean): HttpHeaders {
-        let headers: HttpHeaders = new HttpHeaders({emerse_id: this.emerseId});
+        let headers: any = {
+            emerse_id: this.emerseId
+        }
 
         if (nocache) {
-            headers = headers.set("Cache-Control", ["no-store", "must-revalidate"]);
-            headers = headers.set("Pragma", "no-cache");
-            headers = headers.set("Expires", "0");
+            headers = {
+                ...headers,
+                "Cache-Control": ["no-store", "must-revalidate"],
+                "Pragma": "no-cache",
+                "Expires": "0"
+            }
         }
 
         if (this.authorization) {
-            headers = headers.set("authorization", this.authorization);
+            headers = {
+                ...headers,
+                "authorization": this.authorization
+            }
         }
 
-        return headers;
+        return new HttpHeaders(headers);
     }
 
     private catchError(error): Observable<any> {

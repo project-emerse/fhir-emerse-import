@@ -66,6 +66,8 @@ public class DatabaseService {
             "CREATE_DATE", "CREATED_BY", "DELETED_FLAG"
     };
 
+    private static final String PATIENT_LIST_TABLE = "PATIENT_LIST";
+
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -295,4 +297,12 @@ public class DatabaseService {
         return jdbcTemplate.queryForList(sql, Collections.singletonMap("SERVER_ID", serverId));
     }
 
+    private void deleteAllRows(String table) {
+        jdbcTemplate.update("DELETE FROM " + table, Collections.emptyMap());
+    }
+
+    public void deleteAllPatients() {
+        deleteAllRows(PATIENT_LIST_TABLE);
+        deleteAllRows(PATIENT_TABLE);
+    }
 }

@@ -231,6 +231,24 @@ public class RestController {
         return new ResponseEntity<>(daemonManager.restartDaemons(), HttpStatus.OK);
     }
 
+    @GetMapping("/reset")
+    @ResponseBody
+    public ResponseEntity<?> resetIndexes(@RequestParam boolean documentsOnly) {
+        if (!documentsOnly) {
+            databaseService.deleteAllPatients();
+            solrService.deletePatientCollections();
+        }
+
+        solrService.deleteDocumentCollection();
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/status")
+    @ResponseBody
+    public ResponseEntity<?> status() {
+        return new ResponseEntity<>(solrService.getIndexStatus(), HttpStatus.OK);
+    }
+
     /**
      * Global exception handler for all REST endpoints.
      *

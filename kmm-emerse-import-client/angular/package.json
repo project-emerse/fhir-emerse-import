@@ -1,6 +1,6 @@
 {
   "name": "@uukmm/emerse-it",
-  "version": "1.0.0-SNAPSHOT.1604425504605",
+  "version": "1.0.0-SNAPSHOT.1604513874116",
   "license": "UUKMM",
   "keywords": [
     "angular",
@@ -88,8 +88,8 @@
     "setupTestFrameworkScriptFile": "<rootDir>/src/setupJest.ts"
   },
   "git": {
-    "short": "88aa756",
-    "long": "88aa756d9dabf6fe1f9cd652c5322281d92aeda3",
+    "short": "286fe9b",
+    "long": "286fe9b76ca3026962e802d1c231506abd4758b5",
     "branch": "master"
   }
 }
