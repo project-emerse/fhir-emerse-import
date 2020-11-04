@@ -104,11 +104,22 @@ public class SolrService {
         return processRequest(indexRequestFactory.create(resource).get());
     }
 
+    /**
+     * Creates an index request from a resource, then queues it.
+     *
+     * @param resource Resource containing the index request.
+     */
     public void batchIndexQueued(Resource resource) {
         indexRequestFactory.create(resource).get().close();
         indexRequestQueue.refreshNow();
     }
 
+    /**
+     * Performs an action on an index request.
+     *
+     * @param action The action to perform.
+     * @return The index request upon which the action was performed.
+     */
     public IndexRequestDTO indexRequestAction(IndexRequestAction action) {
         IndexRequestWrapper wrapper = indexRequestFactory.create(action.id, true);
         boolean hydrated = wrapper.isHydrated();
@@ -199,6 +210,11 @@ public class SolrService {
         }
     }
 
+    /**
+     * Processes the index request associated with the given ID.
+     *
+     * @param requestId The ID of the index request.
+     */
     public void processRequest(String requestId) {
         IndexRequestWrapper wrapper = indexRequestFactory.create(requestId, true);
 
@@ -229,7 +245,7 @@ public class SolrService {
                         break;
                     }
 
-                    if (result.getTotal() % 50 == 0) {
+                    if (result.getTotal() % 20 == 0) {
                         databaseService.updateIndexRequest(request);
                         commit();
                     }
@@ -262,6 +278,12 @@ public class SolrService {
         }
     }
 
+    /**
+     * Index the object (patient or document) represented by the DTO.
+     *
+     * @param dto The DTO (patient or document).
+     * @param collection The document collection for the index.
+     */
     private void indexDTO(
             BaseSolrDTO dto,
             String collection) {
@@ -275,6 +297,12 @@ public class SolrService {
         }
     }
 
+    /**
+     * Creates a SOLR input document for indexing.
+     *
+     * @param fields The fields' names and values.
+     * @return The newly created SOLR input document.
+     */
     private SolrInputDocument newSolrDocument(Map<String, Object> fields) {
         SolrInputDocument solrDoc = new SolrInputDocument();
 
@@ -285,6 +313,11 @@ public class SolrService {
         return solrDoc;
     }
 
+    /**
+     * Indexes a patient.
+     *
+     * @param patientDTO The patient to index.
+     */
     public void indexPatient(PatientDTO patientDTO) {
         indexDTO(patientDTO, COLLECTION_PATIENT);
         indexDTO(patientDTO, COLLECTION_SLAVE);
