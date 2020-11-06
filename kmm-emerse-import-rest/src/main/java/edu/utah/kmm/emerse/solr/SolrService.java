@@ -215,6 +215,7 @@ public class SolrService {
 
         Map<String, Object> map = new HashMap<>(content.getMap());
         map.put("MRN", mrn);
+        map.put("SOURCE", "source4");
 
         try {
             indexDTO(new DocumentDTO(document, map), COLLECTION_DOCUMENTS);

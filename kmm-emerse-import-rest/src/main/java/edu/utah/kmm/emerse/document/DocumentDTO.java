@@ -18,7 +18,7 @@ public class DocumentDTO extends BaseSolrDTO {
         map.put("ID", id);
         map.put("RPT_ID", id);
         map.put("RPT_DATE", document.getCreated());
-        map.put("SOURCE", "source1");
+        map.put("DOC_TYPE", document.getType().getText());
     }
 
 }
