@@ -19,8 +19,8 @@ public class HTMLUtil {
     /**
      * Strip HTML tags from a string value.
      *
-     * @param value
-     * @return
+     * @param value The HTML text.
+     * @return The text stripped of tags.
      */
     public static String stripTags(String value) {
         return value == null ? null : readerToStr(new StringReader(value), true);

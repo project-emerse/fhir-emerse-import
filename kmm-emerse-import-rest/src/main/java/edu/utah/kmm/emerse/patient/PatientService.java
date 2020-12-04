@@ -85,13 +85,11 @@ public class PatientService {
      * @return The MRN, or null if none found.
      */
     public String extractMRN(Patient patient) {
-        for (Identifier identifier : patient.getIdentifier()) {
-            if (mrnSystem.equals(identifier.getSystem())) {
-                return identifier.getValue();
-            }
-        }
-
-        return null;
+        return patient.getIdentifier().stream()
+                .filter(identifier -> mrnSystem.equals(identifier.getSystem()))
+                .map(Identifier::getValue)
+                .findFirst()
+                .orElse(null);
     }
 
     /**

@@ -3,6 +3,8 @@ package edu.utah.kmm.emerse.util;
 import edu.utah.kmm.emerse.fhir.IdentifierType;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 
 import java.text.SimpleDateFormat;
@@ -11,6 +13,8 @@ import java.text.SimpleDateFormat;
  * Miscellaneous utility methods.
  */
 public class MiscUtil {
+
+    private static final Log log = LogFactory.getLog(MiscUtil.class);
 
     public static final SimpleDateFormat dateTimeParser = new SimpleDateFormat("yyyy-MM-dd hh:mm a");
 
@@ -50,6 +54,7 @@ public class MiscUtil {
      * @return An unchecked exception.
      */
     public static RuntimeException toUnchecked(Exception e) {
+        log.error(e.getMessage(), e);
         return e instanceof RuntimeException ? (RuntimeException) e : new RuntimeException(e.getMessage(), e);
     }
 

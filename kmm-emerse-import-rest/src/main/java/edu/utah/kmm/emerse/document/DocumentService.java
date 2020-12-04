@@ -9,8 +9,8 @@ import org.hl7.fhir.dstu3.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Service for document-related operations.
@@ -52,7 +52,6 @@ public class DocumentService {
             id = patientService.getPatientByMrn(id).getId();
         }
 
-        List<DocumentReference> documents = new ArrayList<>();
         Bundle bundle = fhirService.getGenericClient().search()
                 .forResource(DocumentReference.class)
                 .where(DocumentReference.PATIENT.hasId(id))
@@ -60,15 +59,10 @@ public class DocumentService {
                 .returnBundle(Bundle.class)
                 .execute();
 
-        for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
-            Resource resource = entry.getResource();
-
-            if (resource instanceof DocumentReference) {
-                documents.add((DocumentReference) resource);
-            }
-        }
-
-        return documents;
+        return bundle.getEntry().stream()
+                .filter(entry -> entry.getResource() instanceof DocumentReference)
+                .map(entry -> (DocumentReference) entry.getResource())
+                .collect(Collectors.toList());
     }
 
     /**

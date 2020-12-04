@@ -163,6 +163,7 @@ public class IndexRequestDTO extends BaseDTO implements Closeable {
      * @param <T> The expected data type.
      * @return The field's value.
      */
+    @SuppressWarnings("unchecked")
     private <T> T get(
             FieldType field,
             Class<T> clazz) {
@@ -369,10 +370,7 @@ public class IndexRequestDTO extends BaseDTO implements Closeable {
      */
     public boolean hasStatus(IndexRequestStatus... statuses) {
         return Arrays.stream(statuses)
-                .filter(status -> getStatus() == status)
-                .findFirst()
-                .map(status -> true)
-                .orElse(false);
+                .anyMatch(status -> getStatus() == status);
     }
 
     /**

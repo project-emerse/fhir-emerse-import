@@ -28,7 +28,6 @@ import org.hl7.fhir.dstu3.model.DocumentReference;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 
 import javax.annotation.PreDestroy;
@@ -269,6 +268,7 @@ public class SolrService {
                     request.processed();
 
                 } catch (Exception e) {
+                    log.error(e.getMessage(), e);
                     request.error(e.getMessage());
                 }
             }
