@@ -3,6 +3,7 @@ package edu.utah.kmm.emerse.fhir;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import edu.utah.kmm.emerse.auth.AuthenticatorRegistry;
 import edu.utah.kmm.emerse.auth.IAuthenticator;
@@ -27,6 +28,9 @@ public class FhirService {
     @Value("${fhir.server.headers:}")
     private String extraHeaders;
 
+    @Value("${fhir.server.timeout:20000}")
+    private int timeout;
+
     @Autowired
     private FhirContext fhirContext;
 
@@ -50,7 +54,11 @@ public class FhirService {
      */
     private synchronized IGenericClient initGenericClient() {
         if (genericClient == null) {
-            genericClient = fhirContext.newRestfulGenericClient(fhirRoot);
+            IRestfulClientFactory clientFactory = fhirContext.getRestfulClientFactory();
+            clientFactory.setSocketTimeout(timeout);
+            clientFactory.setConnectTimeout(timeout);
+            clientFactory.setConnectionRequestTimeout(timeout);
+            genericClient = clientFactory.newGenericClient(fhirRoot);
             genericClient.setEncoding(EncodingEnum.JSON);
 
             if (!extraHeaders.isEmpty()) {
