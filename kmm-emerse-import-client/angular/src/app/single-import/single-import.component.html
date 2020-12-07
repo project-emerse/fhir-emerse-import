@@ -24,6 +24,7 @@
             <span>{{demographics.mrn ? '#' + demographics.mrn : null}}</span>
             <span>{{demographics.dob}}</span>
             <span>{{demographics.gender}}</span>
+            <span *ngIf="documents" class="ml-5">{{documents.length}} document(s)</span>
         </span>
     </div>
     <div class="emerse-single-import-documents">
