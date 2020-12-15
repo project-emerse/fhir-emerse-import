@@ -1,0 +1,19 @@
+<ng-container>
+    <mat-checkbox
+            tabindex="-1"
+            ngbTooltip="Auto-refresh"
+            labelPosition="before"
+            [disabled]="busy"
+            (change)="autoRefresh = $event.checked"
+            [checked]="autoRefresh">
+    </mat-checkbox>
+    <button
+            [ngClass]="{'text-warning': busy, 'text-primary': !busy}"
+            mat-icon-button
+            tabindex="-1"
+            ngbTooltip="Refresh"
+            [disabled]="busy"
+            (click)="refresh()">
+        <mat-icon>refresh</mat-icon>
+    </button>
+</ng-container>

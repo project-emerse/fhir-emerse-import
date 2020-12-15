@@ -14,6 +14,7 @@ import java.util.Map;
 /**
  * Returns selected configuration data to send to client.
  */
+@SuppressWarnings("unused")
 public class ClientConfigService {
 
     private final String _serverVersion;
@@ -33,11 +34,14 @@ public class ClientConfigService {
     @Value("${app.timeout.seconds}")
     private String s3;
 
-    @Value("${solr.server.daemons:1}")
+    @Value("${app.refresh.seconds:10")
     private String s4;
 
-    @Value("${server.uuid}")
+    @Value("${solr.server.daemons:1}")
     private String s5;
+
+    @Value("${server.uuid}")
+    private String s6;
 
     @Value("${server.version:}")
     private String serverVersion;

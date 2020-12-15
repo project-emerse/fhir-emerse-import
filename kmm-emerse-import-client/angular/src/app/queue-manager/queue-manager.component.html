@@ -98,15 +98,10 @@
                     (click)="action(EntryAction.SUSPEND, 'suspend')">
                 Suspend
             </button>
-            <button
-                    class="text-warning"
-                    mat-icon-button
-                    tabindex="-1"
-                    ngbTooltip="Refresh"
-                    [disabled]="busy"
-                    (click)="refresh()">
-                <mat-icon>refresh</mat-icon>
-            </button>
+            <emerse-refresh
+                    [busy]="busy"
+                    (onRefresh)="refresh()">
+            </emerse-refresh>
         </span>
    </mat-toolbar>
 </div>

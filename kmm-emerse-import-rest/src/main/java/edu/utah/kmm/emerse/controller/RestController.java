@@ -240,6 +240,7 @@ public class RestController {
         }
 
         solrService.deleteDocumentCollection();
+        solrService.updateIndexSummary();
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

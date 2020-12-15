@@ -16,10 +16,12 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.request.GenericSolrRequest;
 import org.apache.solr.client.solrj.request.UpdateRequest;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.MapSolrParams;
 import org.apache.solr.common.params.SolrParams;
@@ -46,6 +48,8 @@ public class SolrService {
     private static final String COLLECTION_PATIENT = "patient";
 
     private static final String COLLECTION_SLAVE = "patient-slave";
+
+    private static final String RPT_DATE = "RPT_DATE";
 
     private final HttpSolrClient solrClient;
 
@@ -291,6 +295,7 @@ public class SolrService {
             solrClient.commit(COLLECTION_DOCUMENTS);
             solrClient.commit(COLLECTION_PATIENT);
             solrClient.commit(COLLECTION_SLAVE);
+            updateIndexSummary();
         } catch (Exception e) {
             MiscUtil.rethrow(e);
         }
@@ -370,6 +375,52 @@ public class SolrService {
      */
     public void deleteDocumentCollection() {
         deleteCollection(COLLECTION_DOCUMENTS);
+    }
+
+    /**
+     * Update the SOLR index summary.
+     */
+    public void updateIndexSummary() {
+        try {
+            SolrQuery query = new SolrQuery();
+            query.setRows(0);
+            query.setQuery("*:*");
+            SolrDocumentList results = solrClient.query(COLLECTION_PATIENT, query).getResults();
+            long patientCount = results.getNumFound();
+            Date start = getDateBound(true);
+            Date end = getDateBound(false);
+            databaseService.updateSolrIndexSummary(start, end, patientCount);
+        } catch (Exception e) {
+            MiscUtil.rethrow(e);
+        }
+    }
+
+    /**
+     * Returns the earliest or latest document date.
+     *
+     * @param earliest If true, return earliest, otherwise latest.
+     * @return The requested date (possibly null).
+     */
+    private Date getDateBound(boolean earliest) {
+        try {
+            SolrQuery query = new SolrQuery();
+            query.setQuery("*:*");
+            query.setFields(RPT_DATE);
+            query.setSort(RPT_DATE, earliest ? SolrQuery.ORDER.asc : SolrQuery.ORDER.desc);
+            query.setRows(1);
+            SolrDocumentList results = solrClient.query(COLLECTION_DOCUMENTS, query).getResults();
+            return results.isEmpty() ? null : (Date) results.get(0).getFieldValue(RPT_DATE);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    /**
+     * Reset the SOLR index summary.
+     */
+    public void resetIndexSummary() {
+        databaseService.updateSolrIndexSummary(null, null, 0);
     }
 
     /**

@@ -23,6 +23,8 @@ export class IndexManagerComponent implements AfterViewInit {
 
     message: string;
 
+    busy: boolean;
+
     constructor(
         private readonly restService: RestService,
         private readonly promptDialogService: PromptDialogService) {
@@ -38,7 +40,11 @@ export class IndexManagerComponent implements AfterViewInit {
 
     refresh(): void {
         this.message = null;
-        this.restService.getIndexStatus().subscribe(status => this.dataSource = status);
+        this.busy = true;
+        this.restService.getIndexStatus().subscribe(status => {
+            this.dataSource = status;
+            this.busy = false;
+        });
     }
 
     reset(documentsOnly: boolean): void {

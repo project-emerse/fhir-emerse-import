@@ -68,6 +68,12 @@ public class DatabaseService {
 
     private static final String PATIENT_LIST_TABLE = "PATIENT_LIST";
 
+    private static final String SOLR_INDEX_TABLE = "SOLR_INDEX";
+
+    private static final String[] SOLR_UPDATE_FIELDS = {
+            "START_DATETIME", "END_DATETIME", "PATIENT_COUNT"
+    };
+
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -162,6 +168,39 @@ public class DatabaseService {
 
         sb.append(" WHERE ID=:ID");
         return sb.toString();
+    }
+
+    /**
+     * Returns the SQL to update the SOLR index table.
+     */
+    private String getSolrIndexUpdateSQL() {
+        return getUpdateSQL(SOLR_INDEX_TABLE, SOLR_UPDATE_FIELDS);
+    }
+
+    /**
+     * Updates the SOLR index table.
+     *
+     * @param start The start date.
+     * @param end The end date.
+     * @param patientCount The count of patients.
+     */
+    public void updateSolrIndexSummary(
+            Date start,
+            Date end,
+            long patientCount) {
+        String SQL = getSolrIndexUpdateSQL();
+        Map<String, Object> params = new HashMap<>();
+        params.put("ID", "documents");
+        params.put("START_DATETIME", start == null ? new Date() : start);
+        params.put("END_DATETIME", end == null ? new Date() : end);
+        params.put("PATIENT_COUNT", patientCount);
+
+        try {
+            jdbcTemplate.update(SQL, params);
+        } catch (DataAccessException e) {
+            MiscUtil.rethrow(e);
+        }
+
     }
 
     /**

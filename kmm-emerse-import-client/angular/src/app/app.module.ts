@@ -22,6 +22,7 @@ import {AboutComponent} from './about/about.component';
 import {QueueManagerComponent} from './queue-manager/queue-manager.component';
 import {BatchImportComponent} from './batch-import/batch-import.component';
 import {IndexManagerComponent} from './index-manager/index-manager.component';
+import {RefreshComponent} from './refresh/refresh.component';
 
 // Import plugin modules here:
 
@@ -35,7 +36,8 @@ import {IndexManagerComponent} from './index-manager/index-manager.component';
         SingleImportComponent,
         BatchImportComponent,
         QueueManagerComponent,
-        IndexManagerComponent
+        IndexManagerComponent,
+        RefreshComponent
     ],
     entryComponents: [
         HomeComponent,
@@ -45,7 +47,8 @@ import {IndexManagerComponent} from './index-manager/index-manager.component';
         SingleImportComponent,
         BatchImportComponent,
         QueueManagerComponent,
-        IndexManagerComponent
+        IndexManagerComponent,
+        RefreshComponent
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
     imports: [

@@ -1,0 +1,13 @@
+emerse-refresh {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid lightgray;
+    border-radius: 10px;
+    height: 32px;
+}
+
+emerse-refresh .mat-checkbox-inner-container {
+    height: 12px!important;
+    width: 12px!important;
+    margin-top: 5px;
+}

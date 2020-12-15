@@ -37,13 +37,9 @@
                 (click)="reset(false)">
             Reset Patient and Documents Index
         </button>
-        <button
-                class="text-warning"
-                mat-icon-button
-                tabindex="-1"
-                ngbTooltip="Refresh"
-                (click)="refresh()">
-            <mat-icon>refresh</mat-icon>
-        </button>
+        <emerse-refresh
+                [busy]="busy"
+                (onRefresh)="refresh()">
+        </emerse-refresh>
     </mat-toolbar>
 </div>
