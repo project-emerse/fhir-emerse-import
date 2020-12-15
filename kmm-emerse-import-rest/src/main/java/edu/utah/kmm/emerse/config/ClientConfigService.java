@@ -34,7 +34,7 @@ public class ClientConfigService {
     @Value("${app.timeout.seconds}")
     private String s3;
 
-    @Value("${app.refresh.seconds:10")
+    @Value("${app.refresh.seconds:10}")
     private String s4;
 
     @Value("${solr.server.daemons:1}")
