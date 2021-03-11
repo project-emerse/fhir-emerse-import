@@ -8,6 +8,8 @@ import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import edu.utah.kmm.emerse.auth.AuthenticatorRegistry;
 import edu.utah.kmm.emerse.auth.IAuthenticator;
 import edu.utah.kmm.emerse.security.Credentials;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,8 @@ import org.springframework.util.Assert;
  * FHIR-related services.
  */
 public class FhirService {
+
+    private static final Log log = LogFactory.getLog(FhirService.class);
 
     @Value("${fhir.server.root}")
     private String fhirRoot;
@@ -75,6 +79,7 @@ public class FhirService {
             capabilityStatement = genericClient.capabilities().ofType(CapabilityStatement.class).execute();
             IAuthenticator authenticator = authenticatorRegistry.get(authenticationType);
             Assert.notNull(authenticator, () -> "Unrecognized authentication scheme: " + authenticationType);
+            log.info(("Using authentication scheme: " + authenticationType));
             authenticator.initialize(this);
         }
 

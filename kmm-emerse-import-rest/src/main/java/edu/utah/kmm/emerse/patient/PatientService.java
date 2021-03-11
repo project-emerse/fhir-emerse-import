@@ -3,6 +3,8 @@ package edu.utah.kmm.emerse.patient;
 import edu.utah.kmm.emerse.fhir.FhirService;
 import edu.utah.kmm.emerse.fhir.IdentifierType;
 import edu.utah.kmm.emerse.util.MiscUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,8 @@ import org.springframework.util.Assert;
  * Service for patient-related operations.
  */
 public class PatientService {
+
+    private static final Log log = LogFactory.getLog(PatientService.class);
 
     @Autowired
     private FhirService fhirService;
@@ -37,6 +41,7 @@ public class PatientService {
                 if (patientLookup == null) {
                     patientLookup = patientLookupRegistry.get(patientLookupType);
                     Assert.notNull(patientLookup, () -> "Unknown patient lookup plugin: " + patientLookupType);
+                    log.info("Using patient lookup plugin: " + patientLookupType);
                 }
             }
         }
