@@ -43,6 +43,12 @@ public class ClientConfigService {
     @Value("${server.uuid}")
     private String s6;
 
+    @Value("${fhir.server.authtype}")
+    private String s7;
+
+    @Value("${fhir.server.patientlookup:DEFAULT}")
+    private String s8;
+
     @Value("${server.version:}")
     private String serverVersion;
 
