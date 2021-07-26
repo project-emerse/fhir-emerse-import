@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>edu.utah.kmm</groupId>
+    <artifactId>kmm-bom</artifactId>
+    <version>1.4.0</version>
+    <packaging>pom</packaging>
+
+    <properties>
+        <!-- Spring Framework -->
+        <spring.version>5.2.3.RELEASE</spring.version>
+
+        <!-- Testing libraries -->
+        <json.unit.version>2.13.0</json.unit.version>
+
+        <!-- Apache commons -->
+        <hikari.version>3.4.2</hikari.version>
+
+        <!-- ehcache version -->
+        <ehcache.version>3.8.1</ehcache.version>
+
+        <!-- org.json -->
+        <org.json.version>20190722</org.json.version>
+
+        <!-- data sources -->
+
+        <!-- HSQLDB -->
+        <hsqldb.version>2.5.0</hsqldb.version>
+
+        <!-- MySQL -->
+        <mysql.connector.version>8.0.19</mysql.connector.version>
+
+        <!-- OpenCDS -->
+        <opencds.version>3.1.0</opencds.version>
+
+        <!-- Groovy HTTP Builder module -->
+        <http.builder.version>0.7.1</http.builder.version>
+
+        <groovy.version>2.5.9</groovy.version>
+    </properties>
+
+    <dependencyManagement>
+
+        <dependencies>
+
+            <dependency>
+                <groupId>org.opencds</groupId>
+                <artifactId>opencds-bom</artifactId>
+                <version>${opencds.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-websocket</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-webmvc</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.json</groupId>
+                <artifactId>json</artifactId>
+                <version>${org.json.version}</version>
+            </dependency>
+
+            <!-- Datasource and related libraries -->
+
+            <dependency>
+                <groupId>org.hsqldb</groupId>
+                <artifactId>hsqldb</artifactId>
+                <version>${hsqldb.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql.connector.version}</version>
+            </dependency>
+
+            <!-- Hikari Connection Pooling -->
+
+            <dependency>
+                <groupId>com.zaxxer</groupId>
+                <artifactId>HikariCP</artifactId>
+                <version>${hikari.version}</version>
+            </dependency>
+
+            <!-- Caching libraries -->
+
+            <dependency>
+                <groupId>org.ehcache</groupId>
+                <artifactId>ehcache</artifactId>
+                <version>${ehcache.version}</version>
+            </dependency>
+
+            <!-- OpenCDS -->
+
+            <dependency>
+                <groupId>org.opencds</groupId>
+                <artifactId>opencds-hooks-services</artifactId>
+                <version>${opencds.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opencds</groupId>
+                <artifactId>opencds-hooks-evaluation-dstu2</artifactId>
+                <version>${opencds.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opencds</groupId>
+                <artifactId>opencds-hooks-evaluation-stu3</artifactId>
+                <version>${opencds.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opencds</groupId>
+                <artifactId>opencds-hooks-evaluation-r4</artifactId>
+                <version>${opencds.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opencds</groupId>
+                <artifactId>opencds-common</artifactId>
+                <version>${opencds.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opencds</groupId>
+                <artifactId>opencds-config-api</artifactId>
+                <version>${opencds.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opencds</groupId>
+                <artifactId>opencds-config-file</artifactId>
+                <version>${opencds.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opencds</groupId>
+                <artifactId>opencds-config-rest</artifactId>
+                <version>${opencds.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opencds</groupId>
+                <artifactId>opencds-config-service</artifactId>
+                <version>${opencds.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opencds</groupId>
+                <artifactId>opencds-hooks-adapter</artifactId>
+                <version>${opencds.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opencds</groupId>
+                <artifactId>opencds-hooks-engine-api</artifactId>
+                <version>${opencds.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opencds</groupId>
+                <artifactId>opencds-hooks-model-dstu2</artifactId>
+                <version>${opencds.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opencds</groupId>
+                <artifactId>opencds-hooks-model-stu3</artifactId>
+                <version>${opencds.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opencds</groupId>
+                <artifactId>opencds-hooks-model-r4</artifactId>
+                <version>${opencds.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.opencds</groupId>
+                <artifactId>opencds-plugin-api</artifactId>
+                <version>${opencds.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.codehaus.groovy</groupId>
+                <artifactId>groovy-json</artifactId>
+                <version>${groovy.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.codehaus.groovy</groupId>
+                <artifactId>groovy-templates</artifactId>
+                <version>${groovy.version}</version>
+            </dependency>
+
+            <!-- Testing support -->
+
+            <!-- JSON UNIT -->
+            <dependency>
+                <groupId>net.javacrumbs.json-unit</groupId>
+                <artifactId>json-unit</artifactId>
+                <version>${json.unit.version}</version>
+                <scope>compile</scope>
+            </dependency>
+
+            <!-- Groovy HTTP Builder - used in testing -->
+            <dependency>
+                <groupId>org.codehaus.groovy.modules.http-builder</groupId>
+                <artifactId>http-builder</artifactId>
+                <version>${http.builder.version}</version>
+                <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>xerces</groupId>
+                        <artifactId>xercesImpl</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-lang</groupId>
+                        <artifactId>commons-lang</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+        </dependencies>
+
+    </dependencyManagement>
+
+    <distributionManagement>
+        <repository>
+            <id>uukmm-releases</id>
+            <name>UUKMM Java Releases Repository</name>
+            <url>${uukmm.deploy.releases.url}</url>
+        </repository>
+        <snapshotRepository>
+            <id>uukmm-snapshots</id>
+            <name>UUKMM Nexus Snapshots Repository</name>
+            <url>${uukmm.deploy.snapshots.url}</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+</project>

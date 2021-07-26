@@ -40,6 +40,14 @@
     <java-jwt.version>3.10.3</java-jwt.version>
   </properties>
 
+  <repositories>
+    <repository>
+      <id>local-repo</id>
+      <name>local filesystem</name>
+      <url>file://${maven.multiModuleProjectDirectory}/repo</url>
+    </repository>
+  </repositories>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
